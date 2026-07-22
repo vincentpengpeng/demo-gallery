@@ -255,7 +255,9 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: top 0;
     transition: transform 0.4s ease;
+    font-family: 'object-fit: cover; object-position: top;';
   }
   .demo-card:hover .card-media img { transform: scale(1.04); }
   .media-placeholder {
@@ -514,6 +516,17 @@
     return '<div class="media-placeholder"><div class="icon">' + icon + '</div><span class="hint">截图待添加</span></div>';
   };
 
+  // ----- Adaptive screenshot -----
+  function handleScreenshot(img) {
+    img.addEventListener('load', function() {
+      // If image is taller than wide (portrait), use contain to show full image
+      if (this.naturalHeight > this.naturalWidth * 1.2) {
+        this.style.objectFit = 'contain';
+        this.style.background = '#e8eaf0';
+      }
+    });
+  }
+
   // ----- Load & render -----
   fetch(DEMOS_JSON + '?t=' + Date.now())
     .then(function(r) {
@@ -588,7 +601,7 @@
         var hasShot = demo.screenshot && demo.screenshot.length > 0;
         var shotHtml;
         if (hasShot) {
-          shotHtml = '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" onerror="this.parentElement.innerHTML=placeholderHTML(\'' + cat.icon + '\')">';
+          shotHtml = '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" onerror="this.parentElement.innerHTML=placeholderHTML(\'' + cat.icon + '\')" onload="handleScreenshot(this)">';
         } else {
           shotHtml = '<div class="media-placeholder"><div class="icon">' + cat.icon + '</div><span class="hint">截图待添加</span></div>';
         }
