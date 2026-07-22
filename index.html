@@ -326,7 +326,7 @@
     return '<div class="media-placeholder"><div class="icon">' + icon + '</div><span class="hint">截图待添加</span></div>';
   };
 
-  function handleScreenshot(img) {
+  window.handleScreenshot = function(img) {
     // Add blur placeholder
     var placeholder = document.createElement('div');
     placeholder.className = 'img-placeholder';
