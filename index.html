@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>旌越科技 · 售前 Demo 展厅</title>
 <meta name="description" content="旌越科技 — 一站式预览所有产品能力演示，涵盖教育、文旅及基础能力场景。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* ========== Reset & Base ========== */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 16px; scroll-behavior: smooth; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: #1e1e2f;
-    background: #f4f5fa;
+    font-family: "Noto Sans SC", "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Helvetica Neue", sans-serif;
+    color: #1a1a2e;
+    background: #f6f7fb;
     line-height: 1.6;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -20,443 +21,284 @@
   a { color: inherit; text-decoration: none; }
   img { max-width: 100%; display: block; }
 
-  /* ========== Top Navigation ========== */
+  /* ========== Navigation ========== */
   .top-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.5rem;
-    z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: rgba(10,10,30,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; z-index: 100;
   }
-  .top-nav .brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .top-nav .brand img {
-    height: 28px;
-    width: auto;
-  }
-  .top-nav .brand-divider {
-    width: 1px;
-    height: 20px;
-    background: #d0d3de;
-  }
+  .top-nav .brand { display: flex; align-items: center; gap: 12px; }
+  .top-nav .brand img { height: 26px; width: auto; }
+  .top-nav .brand-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
   .top-nav .brand-text {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #3d3f50;
-  }
-  .top-nav .badge {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.7rem;
-    border-radius: 100px;
-    background: #4f46e5;
-    color: #fff;
-    font-weight: 500;
+    font-family: "Outfit", sans-serif;
+    font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.8);
     letter-spacing: 0.02em;
   }
-  body { padding-top: 56px; }
+  .top-nav .badge {
+    font-family: "Outfit", sans-serif;
+    font-size: 0.65rem; padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  body { padding-top: 60px; }
 
-  /* ========== Header Hero ========== */
+  /* ========== Hero ========== */
   .hero {
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    background: #0a0a1e;
     color: #fff;
-    padding: 3.5rem 1.5rem 3rem;
+    padding: 4rem 2rem 3.5rem;
     text-align: center;
     position: relative;
     overflow: hidden;
   }
   .hero::before {
-    content: '';
-    position: absolute;
-    top: -40%;
-    left: -20%;
-    width: 140%;
-    height: 140%;
-    background:
-      radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.18) 0%, transparent 55%),
-      radial-gradient(ellipse at 80% 50%, rgba(168,85,247,0.12) 0%, transparent 55%);
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 70%);
     pointer-events: none;
   }
-  .hero-inner {
-    position: relative;
-    z-index: 1;
-    max-width: 800px;
-    margin: 0 auto;
+  .hero::after {
+    content: ''; position: absolute;
+    top: -30%; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%);
+    pointer-events: none;
   }
-  .hero-logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border-radius: 12px;
-    padding: 0.6rem 1.2rem;
-  }
-  .hero-logo img {
-    height: 32px;
-    width: auto;
-  }
-  .hero-logo .sep {
-    width: 1px;
-    height: 24px;
-    background: rgba(255,255,255,0.25);
+  .hero-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    font-family: "Outfit", sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.08em;
+    padding: 0.3rem 1rem; border-radius: 100px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase; margin-bottom: 1.5rem;
   }
   .hero h1 {
-    font-size: 2.6rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.6rem;
-    background: linear-gradient(135deg, #fff 55%, #a5b4fc 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-family: "Outfit", sans-serif;
+    font-size: 3rem; font-weight: 700;
+    letter-spacing: -0.03em; line-height: 1.15;
+    margin-bottom: 0.8rem;
+    background: linear-gradient(135deg, #fff 50%, #818cf8 90%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .hero p {
-    font-size: 1.05rem;
-    color: rgba(255,255,255,0.65);
-    font-weight: 400;
-    max-width: 560px;
-    margin: 0 auto;
+    font-size: 1rem; color: rgba(255,255,255,0.5);
+    font-weight: 400; max-width: 480px; margin: 0 auto;
+    line-height: 1.7;
   }
 
   /* ========== Stats Bar ========== */
   .stats-bar {
-    display: flex;
-    justify-content: center;
-    gap: 2.5rem;
-    padding: 1.25rem 1.5rem;
+    display: flex; justify-content: center; gap: 3rem;
+    padding: 1.5rem 2rem;
     background: #fff;
-    border-bottom: 1px solid #eef0f5;
+    border-bottom: 1px solid #eaebf2;
     flex-wrap: wrap;
   }
   .stat-item { text-align: center; }
   .stat-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #302b63;
-    line-height: 1.2;
+    font-family: "Outfit", sans-serif;
+    font-size: 1.6rem; font-weight: 700;
+    color: #0a0a1e; line-height: 1.2;
   }
   .stat-label {
-    font-size: 0.8rem;
-    color: #9498ad;
-    margin-top: 0.1rem;
+    font-size: 0.75rem; color: #9498ad;
+    margin-top: 0.1rem; font-weight: 500;
   }
-  .stat-divider {
-    width: 1px;
-    background: #eef0f5;
-    align-self: stretch;
-  }
+  .stat-divider { width: 1px; background: #eaebf2; align-self: stretch; }
 
   /* ========== Workspace ========== */
-  .workspace {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem 1.5rem 0;
-  }
+  .workspace { max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 0; }
 
   /* ========== Filter Tabs ========== */
   .filter-bar {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    display: flex; justify-content: center; gap: 0.5rem;
+    flex-wrap: wrap; margin-bottom: 0.5rem;
   }
   .filter-btn {
-    padding: 0.5rem 1.2rem;
-    border-radius: 100px;
+    padding: 0.5rem 1.2rem; border-radius: 100px;
     border: 1.5px solid #e2e5ed;
-    background: #fff;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #5a5d72;
-    cursor: pointer;
+    background: #fff; font-size: 0.85rem; font-weight: 500;
+    color: #5a5d72; cursor: pointer;
+    font-family: inherit; white-space: nowrap; user-select: none;
     transition: all 0.2s ease;
-    font-family: inherit;
-    white-space: nowrap;
-    user-select: none;
   }
   .filter-btn:hover { border-color: #818cf8; color: #4f46e5; background: #f8f8ff; }
   .filter-btn.active {
-    background: #4f46e5;
-    border-color: #4f46e5;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+    background: #0a0a1e; border-color: #0a0a1e; color: #fff;
+    box-shadow: 0 2px 12px rgba(10,10,30,0.2);
   }
   .filter-count {
-    display: inline-block;
-    background: rgba(0,0,0,0.08);
-    border-radius: 100px;
-    padding: 0 0.45rem;
-    font-size: 0.7rem;
-    margin-left: 0.3rem;
-    min-width: 1.2rem;
-    text-align: center;
-    line-height: 1.4;
+    display: inline-block; background: rgba(0,0,0,0.08);
+    border-radius: 100px; padding: 0 0.45rem;
+    font-size: 0.7rem; margin-left: 0.3rem;
+    min-width: 1.2rem; text-align: center; line-height: 1.4;
   }
-  .filter-btn.active .filter-count { background: rgba(255,255,255,0.22); color: #fff; }
+  .filter-btn.active .filter-count { background: rgba(255,255,255,0.15); color: #fff; }
 
   /* ========== Demo Grid ========== */
   .demo-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-    gap: 1.5rem;
-    padding: 1.5rem 0;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem; padding: 1.5rem 0;
   }
-  @media (max-width: 640px) {
-    .demo-grid { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 640px) { .demo-grid { grid-template-columns: 1fr; } }
 
   /* ========== Demo Card ========== */
   .demo-card {
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    display: flex;
-    flex-direction: column;
-    opacity: 0;
-    transform: translateY(14px);
-    animation: cardIn 0.45s ease forwards;
+    background: #fff; border-radius: 16px; overflow: hidden;
+    border: 1px solid #eaebf2;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    display: flex; flex-direction: column;
+    opacity: 0; transform: translateY(20px);
+    animation: cardIn 0.5s ease forwards;
     cursor: pointer;
   }
   .demo-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06), 0 8px 16px rgba(0,0,0,0.03);
+    border-color: #d0d3de;
   }
-  @keyframes cardIn {
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
 
-  /* Screenshot area */
+  /* Screenshot */
   .card-media {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    background: #f0f1f5;
-    overflow: hidden;
+    position: relative; width: 100%; aspect-ratio: 16 / 10;
+    background: #f0f1f5; overflow: hidden;
+  }
+  .card-media::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 70%, rgba(0,0,0,0.02));
+    pointer-events: none;
   }
   .card-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top 0;
-    transition: transform 0.4s ease;
-    font-family: 'object-fit: cover; object-position: top;';
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top 0;
+    transition: transform 0.5s ease;
   }
-  .demo-card:hover .card-media img { transform: scale(1.04); }
+  .demo-card:hover .card-media img { transform: scale(1.05); }
   .media-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #b0b4c7;
-    font-size: 0.85rem;
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #b0b4c7; font-size: 0.85rem;
     background: linear-gradient(145deg, #f0f1f5 0%, #e8eaf0 100%);
   }
-  .media-placeholder .icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.4rem;
-    opacity: 0.45;
-  }
-  .media-placeholder .hint {
-    font-size: 0.75rem;
-    color: #b8bccf;
-  }
+  .media-placeholder .icon { font-size: 2.5rem; margin-bottom: 0.4rem; opacity: 0.35; }
+  .media-placeholder .hint { font-size: 0.75rem; color: #b8bccf; }
 
-  /* Badges on screenshot */
   .card-cat-badge {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    color: #fff;
-    padding: 0.2rem 0.7rem;
-    border-radius: 100px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    position: absolute; top: 0.75rem; left: 0.75rem;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    color: #fff; padding: 0.2rem 0.7rem; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.02em;
   }
   .card-status-badge {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    color: #fff;
-    padding: 0.2rem 0.65rem;
-    border-radius: 100px;
+    position: absolute; top: 0.75rem; right: 0.75rem;
+    display: flex; align-items: center; gap: 0.35rem;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    color: #fff; padding: 0.2rem 0.65rem; border-radius: 100px;
     font-size: 0.7rem;
   }
   .card-status-badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #34d399;
-    box-shadow: 0 0 4px rgba(52,211,153,0.5);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #34d399; box-shadow: 0 0 4px rgba(52,211,153,0.5);
   }
 
   /* Card body */
-  .card-body {
-    padding: 1.15rem 1.25rem 1.2rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
+  .card-body { padding: 1.2rem 1.25rem 1.25rem; flex: 1; display: flex; flex-direction: column; }
   .card-body h3 {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #1a1a2e;
-    margin-bottom: 0.35rem;
-    line-height: 1.4;
+    font-size: 1.05rem; font-weight: 600;
+    color: #1a1a2e; margin-bottom: 0.35rem; line-height: 1.4;
   }
   .card-body p {
-    font-size: 0.85rem;
-    color: #6b6f84;
-    line-height: 1.65;
-    flex: 1;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-size: 0.85rem; color: #6b6f84; line-height: 1.65;
+    flex: 1; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
   }
-
-  /* Tags */
   .card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
     margin: 0.7rem 0 0.9rem;
   }
   .card-tags span {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.55rem;
-    border-radius: 100px;
-    background: #f0f1f5;
-    color: #5a5d72;
-    font-weight: 450;
+    font-size: 0.7rem; padding: 0.15rem 0.55rem; border-radius: 100px;
+    background: #f0f1f5; color: #5a5d72; font-weight: 450;
   }
-
-  /* Card footer */
   .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 0.7rem;
-    border-top: 1px solid #f0f1f5;
-    margin-top: auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 0.7rem; border-top: 1px solid #eaebf2; margin-top: auto;
   }
   .card-date {
-    font-size: 0.75rem;
-    color: #9ca0b4;
+    font-family: "Outfit", sans-serif;
+    font-size: 0.75rem; color: #9ca0b4;
   }
   .card-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
-    background: #4f46e5;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 1rem; border-radius: 8px;
+    background: #0a0a1e; color: #fff;
+    font-family: "Outfit", sans-serif;
+    font-size: 0.8rem; font-weight: 500;
     transition: background 0.2s ease, transform 0.2s ease;
-    font-family: inherit;
-    border: none;
-    cursor: pointer;
+    border: none; cursor: pointer;
   }
-  .card-btn:hover { background: #4338ca; }
+  .card-btn:hover { background: #1a1a3e; }
   .card-btn .arrow { display: inline-block; transition: transform 0.2s ease; }
-  .demo-card:hover .card-btn .arrow { transform: translateX(3px); }
+  .demo-card:hover .card-btn .arrow { transform: translateX(4px); }
 
   /* ========== Empty State ========== */
   .empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #8b8fa3;
+    grid-column: 1 / -1; text-align: center;
+    padding: 4rem 2rem; color: #8b8fa3;
   }
-  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.35; }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
   .empty-state h3 { font-size: 1.1rem; color: #5a5d72; margin-bottom: 0.3rem; font-weight: 500; }
-  .empty-state p { font-size: 0.9rem; }
 
   /* ========== Footer ========== */
   .footer {
-    border-top: 1px solid #eef0f5;
-    margin-top: 2rem;
-    padding: 2rem 1.5rem;
-    text-align: center;
+    border-top: 1px solid #eaebf2; margin-top: 3rem;
+    padding: 2rem 2rem; text-align: center;
   }
-  .footer-brand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    margin-bottom: 0.6rem;
-    flex-wrap: wrap;
-  }
-  .footer-brand img {
-    height: 22px;
-    width: auto;
-    opacity: 0.5;
-  }
-  .footer-brand .sep {
-    width: 1px;
-    height: 16px;
-    background: #d0d3de;
-  }
-  .footer p {
-    font-size: 0.8rem;
-    color: #9ca0b4;
-  }
+  .footer-brand { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+  .footer-brand img { height: 20px; width: auto; opacity: 0.35; }
+  .footer p { font-size: 0.75rem; color: #9ca0b4; font-weight: 450; }
 
   /* ========== Responsive ========== */
   @media (max-width: 768px) {
     .hero { padding: 2.5rem 1rem 2rem; }
-    .hero h1 { font-size: 1.8rem; }
-    .hero-logo img { height: 28px; }
-    .stats-bar { gap: 1.2rem; padding: 1rem; }
-    .stat-number { font-size: 1.2rem; }
-    .workspace { padding: 1rem 1rem 0; }
-    .filter-bar { gap: 0.35rem; }
-    .filter-btn { font-size: 0.8rem; padding: 0.4rem 0.9rem; }
-    .demo-grid { gap: 1rem; }
+    .hero h1 { font-size: 2rem; }
+    .stats-bar { gap: 1.5rem; padding: 1rem; }
+    .stat-number { font-size: 1.3rem; }
+    .workspace { padding: 1rem; }
+    .demo-grid { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .top-nav { padding: 0 1rem; }
   }
   @media (max-width: 480px) {
-    .top-nav { padding: 0 0.75rem; }
     .top-nav .brand-text { display: none; }
+    .hero h1 { font-size: 1.6rem; }
   }
 </style>
 </head>
 <body>
 
-<!-- ===== Top Navigation ===== -->
+<!-- ===== Navigation ===== -->
 <nav class="top-nav">
   <div class="brand">
     <img src="assets/logo.png" alt="旌越科技">
+    <span class="brand-divider"></span>
     <span class="brand-text">旌越科技</span>
   </div>
   <span class="badge">Pre-Sales Demo Gallery</span>
@@ -465,15 +307,13 @@
 <!-- ===== Hero ===== -->
 <header class="hero">
   <div class="hero-inner">
-    <div class="hero-logo">
-      <img src="assets/logo.png" alt="旌越科技">
-    </div>
+    <div class="hero-badge">✦ Showcase</div>
     <h1>售前 Demo 展厅</h1>
-    <p>一站式预览所有产品能力演示，快速定位适合客户场景的解决方案</p>
+    <p>一站式预览旌越科技所有产品能力演示，快速定位适合客户场景的解决方案</p>
   </div>
 </header>
 
-<!-- ===== Stats Bar ===== -->
+<!-- ===== Stats ===== -->
 <div class="stats-bar">
   <div class="stat-item">
     <div class="stat-number" id="totalDemos">0</div>
@@ -491,35 +331,28 @@
   </div>
 </div>
 
-<!-- ===== Main Content ===== -->
+<!-- ===== Main ===== -->
 <div class="workspace">
-  <!-- Filter Tabs -->
   <div class="filter-bar" id="filterBar"></div>
-  <!-- Demo Grid -->
   <div class="demo-grid" id="demoGrid"></div>
 </div>
 
 <!-- ===== Footer ===== -->
 <footer class="footer">
-  <div class="footer-brand">
-    <img src="assets/logo.png" alt="旌越科技">
-  </div>
+  <div class="footer-brand"><img src="assets/logo.png" alt="旌越科技"></div>
   <p id="footerText"></p>
 </footer>
 
 <script>
 (function() {
-  const DEMOS_JSON = 'demos.json';
+  var DEMOS_JSON = 'demos.json';
 
-  // ----- Placeholder helper -----
   window.placeholderHTML = function(icon) {
     return '<div class="media-placeholder"><div class="icon">' + icon + '</div><span class="hint">截图待添加</span></div>';
   };
 
-  // ----- Adaptive screenshot -----
   function handleScreenshot(img) {
     img.addEventListener('load', function() {
-      // If image is taller than wide (portrait), use contain to show full image
       if (this.naturalHeight > this.naturalWidth * 1.2) {
         this.style.objectFit = 'contain';
         this.style.background = '#e8eaf0';
@@ -527,37 +360,29 @@
     });
   }
 
-  // ----- Load & render -----
   fetch(DEMOS_JSON + '?t=' + Date.now())
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     })
-    .then(function(data) {
-      render(data);
-    })
+    .then(function(data) { render(data); })
     .catch(function(e) {
       document.getElementById('demoGrid').innerHTML =
         '<div class="empty-state"><div class="icon">📁</div><h3>无法加载 Demo 数据</h3><p>请确保 demos.json 文件存在且格式正确。</p><p style="font-size:0.8rem;margin-top:0.5rem;color:#b0b4c7;">' + e.message + '</p></div>';
     });
 
   function render(data) {
-    var site = data.site;
-    var categories = data.categories;
-    var demos = data.demos;
+    var site = data.site, categories = data.categories, demos = data.demos;
     var activeDemos = demos.filter(function(d) { return d.status === 'online'; });
 
-    // Stats
     document.getElementById('totalDemos').textContent = demos.length;
     document.getElementById('totalCategories').textContent = categories.length;
     document.getElementById('onlineCount').textContent = activeDemos.length;
     document.getElementById('footerText').textContent = (site.footer || '') + ' · ' + new Date().getFullYear();
 
-    // Category map
     var catMap = {};
     categories.forEach(function(c) { catMap[c.id] = c; });
 
-    // Filter bar
     var filterBar = document.getElementById('filterBar');
     var allBtn = document.createElement('button');
     allBtn.className = 'filter-btn active';
@@ -575,21 +400,15 @@
       filterBar.appendChild(btn);
     });
 
-    // Grid
     var grid = document.getElementById('demoGrid');
 
     function renderCards(categoryId) {
-      var filtered = categoryId === 'all'
-        ? demos
-        : demos.filter(function(d) { return d.category === categoryId; });
-
+      var filtered = categoryId === 'all' ? demos : demos.filter(function(d) { return d.category === categoryId; });
       grid.innerHTML = '';
-
       if (filtered.length === 0) {
         grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>暂无 Demo</h3><p>该分类下暂无可展示的 Demo。</p></div>';
         return;
       }
-
       for (var i = 0; i < filtered.length; i++) {
         var demo = filtered[i];
         var cat = catMap[demo.category] || { name: demo.category, icon: '📦' };
@@ -597,51 +416,39 @@
         card.className = 'demo-card';
         card.style.animationDelay = (i * 0.05) + 's';
 
-        // Screenshot
         var hasShot = demo.screenshot && demo.screenshot.length > 0;
-        var shotHtml;
-        if (hasShot) {
-          shotHtml = '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" onerror="this.parentElement.innerHTML=placeholderHTML(\'' + cat.icon + '\')" onload="handleScreenshot(this)">';
-        } else {
-          shotHtml = '<div class="media-placeholder"><div class="icon">' + cat.icon + '</div><span class="hint">截图待添加</span></div>';
-        }
+        var shotHtml = hasShot
+          ? '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" onerror="this.parentElement.innerHTML=placeholderHTML(\'' + cat.icon + '\')" onload="handleScreenshot(this)">'
+          : '<div class="media-placeholder"><div class="icon">' + cat.icon + '</div><span class="hint">截图待添加</span></div>';
 
         var statusHtml = demo.status === 'online'
-          ? '<span class="card-status-badge"><span class="dot"></span>可体验</span>'
-          : '';
+          ? '<span class="card-status-badge"><span class="dot"></span>可体验</span>' : '';
 
         var tagsHtml = '';
         if (demo.tags && demo.tags.length) {
           tagsHtml = '<div class="card-tags">';
-          for (var t = 0; t < demo.tags.length; t++) {
-            tagsHtml += '<span>' + demo.tags[t] + '</span>';
-          }
+          for (var t = 0; t < demo.tags.length; t++) tagsHtml += '<span>' + demo.tags[t] + '</span>';
           tagsHtml += '</div>';
         }
 
         card.innerHTML =
-          '<div class="card-media">' +
-            shotHtml +
-            '<span class="card-cat-badge">' + cat.icon + ' ' + cat.name + '</span>' +
-            statusHtml +
+          '<div class="card-media">' + shotHtml +
+            '<span class="card-cat-badge">' + cat.icon + ' ' + cat.name + '</span>' + statusHtml +
           '</div>' +
           '<div class="card-body">' +
             '<h3>' + demo.title + '</h3>' +
-            '<p>' + demo.description + '</p>' +
-            tagsHtml +
+            '<p>' + demo.description + '</p>' + tagsHtml +
             '<div class="card-footer">' +
               '<span class="card-date">' + (demo.created || '') + '</span>' +
               '<a href="' + demo.url + '" class="card-btn" target="_blank" rel="noopener">查看 Demo <span class="arrow">→</span></a>' +
             '</div>' +
           '</div>';
-
         grid.appendChild(card);
       }
     }
 
     renderCards('all');
 
-    // Filter click
     filterBar.addEventListener('click', function(e) {
       var btn = e.target.closest('.filter-btn');
       if (!btn) return;
