@@ -53,7 +53,8 @@
     pointer-events: none;
   }
   .hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
-  .hero-top { display: flex; align-items: flex-end; gap: 2rem; margin-bottom: 1rem; }
+  .hero-top { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
+  .hero-title-group { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
   .hero-badge {
     font-family: "Outfit", sans-serif; font-size: 0.6rem; letter-spacing: 0.08em;
     padding: 0.25rem 0.8rem; border-radius: 100px; display: inline-block;
@@ -86,6 +87,7 @@
   @media (max-width: 768px) {
     .hero { padding: 1.5rem 1rem 1.2rem; }
     .hero-top { flex-direction: column; align-items: flex-start; }
+    .hero-title-group { flex-direction: column; align-items: flex-start; }
     .hero-stats { width: 100%; justify-content: flex-start; gap: 1.2rem; }
     .hero h1 { font-size: 1.5rem; }
     .hero-stat-num { font-size: 1.1rem; }
@@ -264,24 +266,26 @@
 <header class="hero">
   <div class="hero-inner">
     <div class="hero-top">
-      <div>
-        <div class="hero-badge">✦ Product Showcase</div>
-        <h1>产品能力展示</h1>
-      </div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-num" id="totalDemos">0</div>
-          <div class="hero-stat-label">解决方案</div>
+      <div class="hero-title-group">
+        <div>
+          <div class="hero-badge">✦ Product Showcase</div>
+          <h1>产品能力展示</h1>
         </div>
-        <div class="hero-stat-divider"></div>
-        <div class="hero-stat">
-          <div class="hero-stat-num" id="totalCategories">0</div>
-          <div class="hero-stat-label">行业场景</div>
-        </div>
-        <div class="hero-stat-divider"></div>
-        <div class="hero-stat">
-          <div class="hero-stat-num" id="onlineCount">0</div>
-          <div class="hero-stat-label">可体验</div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="totalDemos">0</div>
+            <div class="hero-stat-label">解决方案</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="totalCategories">0</div>
+            <div class="hero-stat-label">行业场景</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="onlineCount">0</div>
+            <div class="hero-stat-label">可体验</div>
+          </div>
         </div>
       </div>
     </div>
