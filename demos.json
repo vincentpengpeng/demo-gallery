@@ -48,61 +48,6 @@
       "created": "2026-07"
     },
     {
-      "id": "edu-ai-tutor",
-      "title": "AI 智能辅导系统",
-      "category": "education",
-      "description": "基于大语言模型的个性化学习辅导 Demo，支持多轮对话、知识点溯源、学情分析，适配 K12 及高等教育场景。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/edu-ai-tutor.png",
-      "tags": ["大模型", "个性化学习", "多轮对话"],
-      "status": "online",
-      "created": "2026-06"
-    },
-    {
-      "id": "edu-exam-assistant",
-      "title": "智能排考场系统",
-      "category": "education",
-      "description": "AI 驱动的考场编排与教务管理 Demo，支持复杂约束自动排考、冲突检测、智能调优，大幅提升教务效率。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/edu-exam-assistant.png",
-      "tags": ["排考", "教务管理", "约束求解"],
-      "status": "online",
-      "created": "2026-06"
-    },
-    {
-      "id": "edu-knowledge-graph",
-      "title": "学科知识图谱",
-      "category": "education",
-      "description": "基于教材体系构建的学科知识图谱 Demo，支持知识点关联可视化、学情薄弱点追溯、智能推荐学习路径。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/edu-knowledge-graph.png",
-      "tags": ["知识图谱", "可视化", "学情分析"],
-      "status": "online",
-      "created": "2026-05"
-    },
-    {
-      "id": "culture-ai-guide",
-      "title": "AI 多语种导览系统",
-      "category": "culture-tourism",
-      "description": "面向博物馆/景区的 AI 多语种智能导览 Demo，支持语音交互、AR 导航、多语种实时翻译与讲解。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/culture-ai-guide.png",
-      "tags": ["多语种", "语音交互", "AR导览"],
-      "status": "online",
-      "created": "2026-06"
-    },
-    {
-      "id": "culture-digital-human",
-      "title": "AI 数字人交互",
-      "category": "culture-tourism",
-      "description": "3D 虚拟数字人 Demo，支持自然语言对话、表情驱动、手势交互，可应用于文旅接待、政务咨询等场景。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/culture-digital-human.png",
-      "tags": ["数字人", "3D", "虚拟交互"],
-      "status": "online",
-      "created": "2026-05"
-    },
-    {
       "id": "culture-expo-digital-human",
       "title": "AI 展会数字人",
       "category": "culture-tourism",
@@ -112,50 +57,6 @@
       "tags": ["数字人", "展会", "多语种"],
       "status": "online",
       "created": "2026-07"
-    },
-    {
-      "id": "culture-smart-ioc",
-      "title": "智慧文旅 IOC 大屏",
-      "category": "culture-tourism",
-      "description": "文旅态势感知与指挥调度大屏 Demo，实时展示客流热力、舆情监控、应急调度等核心指标。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/culture-smart-ioc.png",
-      "tags": ["IOC大屏", "数据可视化", "实时监控"],
-      "status": "online",
-      "created": "2026-04"
-    },
-    {
-      "id": "foundation-llm-chat",
-      "title": "大模型对话引擎",
-      "category": "foundation",
-      "description": "讯飞星火大模型对话能力 Demo，展示多轮对话、上下文理解、知识问答、文档问答等基础能力。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/foundation-llm-chat.png",
-      "tags": ["大模型", "对话", "知识问答"],
-      "status": "online",
-      "created": "2026-06"
-    },
-    {
-      "id": "foundation-voice",
-      "title": "语音合成与识别",
-      "category": "foundation",
-      "description": "多语种语音合成（TTS）与语音识别（ASR）能力 Demo，支持中英及东南亚语种，演示实时转写与语音交互。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/foundation-voice.png",
-      "tags": ["语音合成", "语音识别", "多语种"],
-      "status": "online",
-      "created": "2026-05"
-    },
-    {
-      "id": "foundation-rag",
-      "title": "RAG 知识库问答",
-      "category": "foundation",
-      "description": "基于检索增强生成（RAG）的企业知识库问答 Demo，支持文档上传、智能分段、向量检索与生成式回答。",
-      "url": "https://",
-      "screenshot": "assets/screenshots/foundation-rag.png",
-      "tags": ["RAG", "知识库", "向量检索"],
-      "status": "online",
-      "created": "2026-04"
     }
   ]
 }
