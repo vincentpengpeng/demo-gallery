@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>旌越科技 · 售前 Demo 展厅</title>
-<meta name="description" content="旌越科技 — 一站式预览所有产品能力演示，涵盖教育、文旅及基础能力场景。">
+<title>旌越科技 · 产品能力展示</title>
+<meta name="description" content="旌越科技 — 一站式预览旌越科技 AI 产品能力，涵盖教育、文旅及基础能力场景。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -270,10 +270,16 @@
   /* ========== Footer ========== */
   .footer {
     border-top: 1px solid #eaebf2; margin-top: 3rem;
-    padding: 2rem 2rem; text-align: center;
+    padding: 2.5rem 2rem; text-align: center;
   }
-  .footer-brand { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 0.6rem; }
-  .footer-brand img { height: 20px; width: auto; opacity: 0.35; }
+  .footer-brand { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 1rem; }
+  .footer-brand img { height: 22px; width: auto; opacity: 0.4; }
+  .footer-info { font-size: 0.8rem; color: #8b8fa3; line-height: 1.8; margin-bottom: 1rem; }
+  .footer-info span { display: inline-block; margin: 0 0.3rem; }
+  .footer-info .sep { color: #d0d3de; margin: 0 0.5rem; }
+  .footer-qr { margin: 1.2rem 0 0.8rem; }
+  .footer-qr img { width: 100px; height: 100px; border-radius: 8px; border: 1px solid #eaebf2; margin: 0 auto; }
+  .footer-qr-label { font-size: 0.7rem; color: #b0b4c7; margin-top: 0.4rem; }
   .footer p { font-size: 0.75rem; color: #9ca0b4; font-weight: 450; }
 
   /* ========== Responsive ========== */
@@ -301,15 +307,15 @@
     <span class="brand-divider"></span>
     <span class="brand-text">旌越科技</span>
   </div>
-  <span class="badge">Pre-Sales Demo Gallery</span>
+  <span class="badge">✦ Product Showcase</span>
 </nav>
 
 <!-- ===== Hero ===== -->
 <header class="hero">
   <div class="hero-inner">
-    <div class="hero-badge">✦ Showcase</div>
-    <h1>售前 Demo 展厅</h1>
-    <p>一站式预览旌越科技所有产品能力演示，快速定位适合客户场景的解决方案</p>
+    <div class="hero-badge">✦ Product Showcase</div>
+    <h1>产品能力展示</h1>
+    <p>一站式预览旌越科技 AI 产品能力，快速定位适合客户场景的解决方案</p>
   </div>
 </header>
 
@@ -340,6 +346,14 @@
 <!-- ===== Footer ===== -->
 <footer class="footer">
   <div class="footer-brand"><img src="assets/logo.png" alt="旌越科技"></div>
+  <div class="footer-info">
+    广州旌越科技有限公司<br>
+    地址：广州市海珠区阅江西路218号 广州国际媒体港西港10层
+  </div>
+  <div class="footer-qr">
+    <img src="assets/qrcode.jpg" alt="旌越科技公众号">
+    <div class="footer-qr-label">扫码关注公众号</div>
+  </div>
   <p id="footerText"></p>
 </footer>
 
