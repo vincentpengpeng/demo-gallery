@@ -43,43 +43,53 @@
 
   /* ========== Compact Hero ========== */
   .hero {
-    background: #0a0a1e; color: #fff; padding: 2.5rem 2rem;
+    background: #0a0a1e; color: #fff; padding: 2.5rem 2rem 2rem;
     position: relative; overflow: hidden;
   }
   .hero::after {
     content: ''; position: absolute;
-    top: -50%; right: -10%; width: 500px; height: 500px;
+    top: -40%; right: -5%; width: 500px; height: 500px;
     background: radial-gradient(circle, rgba(79,70,229,0.06) 0%, transparent 70%);
     pointer-events: none;
   }
-  .hero-inner { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; gap: 2rem; }
-  .hero-left { flex: 1; }
+  .hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+  .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin-bottom: 1rem; }
   .hero-badge {
     font-family: "Outfit", sans-serif; font-size: 0.6rem; letter-spacing: 0.08em;
     padding: 0.25rem 0.8rem; border-radius: 100px; display: inline-block;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.45); text-transform: uppercase; margin-bottom: 0.6rem;
+    color: rgba(255,255,255,0.45); text-transform: uppercase; margin-bottom: 0.4rem;
   }
   .hero h1 {
-    font-family: "Outfit", sans-serif; font-size: 2.4rem; font-weight: 700;
-    letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 0.5rem;
+    font-family: "Outfit", sans-serif; font-size: 2.2rem; font-weight: 700;
+    letter-spacing: -0.03em; line-height: 1.15;
     background: linear-gradient(135deg, #fff 50%, #818cf8 90%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .hero-right { text-align: right; flex-shrink: 0; }
-  .hero-stats { display: flex; gap: 2rem; }
+  .hero-stats { display: flex; gap: 1.5rem; flex-shrink: 0; }
   .hero-stat { text-align: center; }
-  .hero-stat-num { font-family: "Outfit", sans-serif; font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1; }
-  .hero-stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 0.2rem; }
+  .hero-stat-num { font-family: "Outfit", sans-serif; font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
+  .hero-stat-label { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-top: 0.15rem; }
   .hero-stat-divider { width: 1px; background: rgba(255,255,255,0.08); }
+  .hero-intro {
+    display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .hero-intro .tagline {
+    font-size: 0.75rem; color: #818cf8; font-weight: 600; letter-spacing: 0.02em;
+    white-space: nowrap; padding: 0.2rem 0.7rem; border-radius: 100px;
+    background: rgba(129,140,248,0.1); border: 1px solid rgba(129,140,248,0.15);
+  }
+  .hero-intro .mission { font-size: 0.75rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+  .hero-intro .vision { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
 
   @media (max-width: 768px) {
-    .hero { padding: 1.5rem 1rem; }
-    .hero-inner { flex-direction: column; align-items: flex-start; }
-    .hero-right { text-align: left; width: 100%; margin-top: 0.5rem; }
-    .hero-stats { justify-content: flex-start; gap: 1.5rem; }
-    .hero h1 { font-size: 1.6rem; }
-    .hero-stat-num { font-size: 1.2rem; }
+    .hero { padding: 1.5rem 1rem 1.2rem; }
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .hero-stats { width: 100%; justify-content: flex-start; gap: 1.2rem; }
+    .hero h1 { font-size: 1.5rem; }
+    .hero-stat-num { font-size: 1.1rem; }
+    .hero-intro { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
   }
 
   /* ========== Company Intro Bar ========== */
@@ -108,46 +118,28 @@
     .intro-bar .vision { text-align: left; max-width: none; }
   }
 
-  /* ========== Main Layout ========== */
-  .main-layout {
-    max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem;
-    display: flex; gap: 2rem; align-items: flex-start;
-  }
-  .main-sidebar {
-    width: 200px; flex-shrink: 0; position: sticky; top: 72px;
-  }
-  .main-content { flex: 1; min-width: 0; }
+  /* ========== Content ========== */
+  .content { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem 0; }
 
-  @media (max-width: 768px) {
-    .main-layout { flex-direction: column; padding: 1rem; }
-    .main-sidebar { width: 100%; position: static; }
+  /* ========== Filter Tabs ========== */
+  .filter-bar {
+    display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap;
+    margin-bottom: 1.5rem;
   }
-
-  /* ========== Sidebar ========== */
-  .sidebar-title {
-    font-family: "Outfit", sans-serif;
-    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em;
-    color: #9ca0b4; font-weight: 600; margin-bottom: 0.8rem;
-  }
-  .filter-bar { display: flex; flex-direction: column; gap: 0.35rem; }
   .filter-btn {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.5rem 0.8rem; border-radius: 8px; border: none;
-    background: transparent; font-size: 0.8rem; font-weight: 500;
+    padding: 0.4rem 1rem; border-radius: 100px; border: 1.5px solid #e2e5ed;
+    background: #fff; font-size: 0.8rem; font-weight: 500;
     color: #5a5d72; cursor: pointer; font-family: inherit;
-    transition: all 0.15s; text-align: left; width: 100%;
+    white-space: nowrap; transition: all 0.2s;
   }
-  .filter-btn:hover { background: #f0f1f5; color: #1a1a2e; }
-  .filter-btn.active { background: #0a0a1e; color: #fff; }
+  .filter-btn:hover { border-color: #818cf8; color: #4f46e5; background: #f8f8ff; }
+  .filter-btn.active { background: #0a0a1e; border-color: #0a0a1e; color: #fff; box-shadow: 0 2px 12px rgba(10,10,30,0.15); }
   .filter-count {
-    margin-left: auto; font-family: "Outfit", sans-serif;
-    font-size: 0.7rem; opacity: 0.5;
+    display: inline-block; background: rgba(0,0,0,0.08); border-radius: 100px;
+    padding: 0 0.4rem; font-size: 0.65rem; margin-left: 0.25rem;
+    min-width: 1.1rem; text-align: center; line-height: 1.4;
   }
-
-  @media (max-width: 768px) {
-    .filter-bar { flex-direction: row; flex-wrap: wrap; }
-    .filter-btn { width: auto; }
-  }
+  .filter-btn.active .filter-count { background: rgba(255,255,255,0.15); color: #fff; }
 
   /* ========== Demo Grid ========== */
   .demo-grid {
@@ -271,11 +263,11 @@
 <!-- ===== Hero ===== -->
 <header class="hero">
   <div class="hero-inner">
-    <div class="hero-left">
-      <div class="hero-badge">✦ Product Showcase</div>
-      <h1>产品能力展示</h1>
-    </div>
-    <div class="hero-right">
+    <div class="hero-top">
+      <div>
+        <div class="hero-badge">✦ Product Showcase</div>
+        <h1>产品能力展示</h1>
+      </div>
       <div class="hero-stats">
         <div class="hero-stat">
           <div class="hero-stat-num" id="totalDemos">0</div>
@@ -293,27 +285,18 @@
         </div>
       </div>
     </div>
+    <div class="hero-intro">
+      <span class="tagline">科大讯飞集团旗下子公司</span>
+      <span class="mission">专注文旅、教育产业 AI 赋能 · 用技术守护文化，推动人工智能向善</span>
+      <span class="vision">以 AI 大模型为引擎，打造「AI + 行业」全景式解决方案</span>
+    </div>
   </div>
 </header>
 
-<!-- ===== Intro Bar ===== -->
-<div class="intro-bar">
-  <div class="intro-bar-inner">
-    <span class="tagline">科大讯飞集团旗下子公司</span>
-    <span class="mission">专注文旅、教育产业 AI 赋能 · 用技术守护文化，推动人工智能向善</span>
-    <span class="vision">以 AI 大模型为引擎，打造「AI + 行业」全景式解决方案</span>
-  </div>
-</div>
-
-<!-- ===== Main ===== -->
-<div class="main-layout">
-  <aside class="main-sidebar">
-    <div class="sidebar-title">筛选分类</div>
-    <div class="filter-bar" id="filterBar"></div>
-  </aside>
-  <main class="main-content">
-    <div class="demo-grid" id="demoGrid"></div>
-  </main>
+<!-- ===== Content ===== -->
+<div class="content">
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="demo-grid" id="demoGrid"></div>
 </div>
 
 <!-- ===== Footer ===== -->
