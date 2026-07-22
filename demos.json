@@ -31,7 +31,7 @@
       "category": "education",
       "description": "AI 驱动的智能招生咨询系统，支持招生政策问答、专业推荐、录取分数线查询、报考指导等一站式服务。",
       "url": "https://gdut.aiadtech.com/",
-      "screenshot": "",
+      "screenshot": "assets/screenshots/edu-admission-assistant.png",
       "tags": ["招生咨询", "智能问答", "报考指导"],
       "status": "online",
       "created": "2026-07"
