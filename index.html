@@ -53,7 +53,7 @@
     pointer-events: none;
   }
   .hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
-  .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin-bottom: 1rem; }
+  .hero-top { display: flex; align-items: flex-end; gap: 2rem; margin-bottom: 1rem; }
   .hero-badge {
     font-family: "Outfit", sans-serif; font-size: 0.6rem; letter-spacing: 0.08em;
     padding: 0.25rem 0.8rem; border-radius: 100px; display: inline-block;
@@ -66,7 +66,7 @@
     background: linear-gradient(135deg, #fff 50%, #818cf8 90%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .hero-stats { display: flex; gap: 1.5rem; flex-shrink: 0; }
+  .hero-stats { display: flex; gap: 1.5rem; flex-shrink: 0; margin-left: auto; }
   .hero-stat { text-align: center; }
   .hero-stat-num { font-family: "Outfit", sans-serif; font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
   .hero-stat-label { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-top: 0.15rem; }
@@ -401,6 +401,7 @@
         }
 
         card.innerHTML =
+          '<a href="' + demo.url + '" target="_blank" rel="noopener" style="display:flex;flex-direction:column;height:100%;color:inherit;text-decoration:none">' +
           '<div class="card-media">' + shotHtml +
             '<span class="card-cat-badge">' + cat.icon + ' ' + cat.name + '</span>' + statusHtml +
           '</div>' +
@@ -409,9 +410,10 @@
             '<p>' + demo.description + '</p>' + tagsHtml +
             '<div class="card-footer">' +
               '<span class="card-date">' + (demo.created || '') + '</span>' +
-              '<a href="' + demo.url + '" class="card-btn" target="_blank" rel="noopener">查看 Demo <span class="arrow">→</span></a>' +
+              '<span class="card-btn">查看 <span class="arrow">→</span></span>' +
             '</div>' +
-          '</div>';
+          '</div>' +
+          '</a>';
         grid.appendChild(card);
       }
     }
