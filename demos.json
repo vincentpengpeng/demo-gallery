@@ -97,7 +97,7 @@
       "category": "foundation",
       "description": "将文本转化为语音，提供众多特色的发音人（音库）供选择，合成音在音色、自然度等方面接近甚至超过人声，可提供公有云接口及私有化部署方案。",
       "url": "https://www.xfyun.cn/services/online_tts",
-      "screenshot": "",
+      "screenshot": "assets/screenshots/foundation-online-tts.png",
       "tags": ["语音合成", "TTS", "音库"],
       "status": "online",
       "created": "2026-07"
