@@ -37,6 +37,17 @@
       "created": "2026-07"
     },
     {
+      "id": "edu-ai-party-school",
+      "title": "AI 党校",
+      "category": "education",
+      "description": "面向党校干部培训的 AI 智能助手 Demo，涵盖干部培训、科研咨政、数字化党建、涉外交流、教务管理等场景。",
+      "url": "demos/ai-party-school/",
+      "screenshot": "",
+      "tags": ["党校培训", "AI助手", "干部教育"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "edu-ai-tutor",
       "title": "AI 智能辅导系统",
       "category": "education",
