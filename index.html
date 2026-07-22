@@ -405,7 +405,7 @@
 
         var hasShot = demo.screenshot && demo.screenshot.length > 0;
         var shotHtml = hasShot
-          ? '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=placeholderHTML(\'' + cat.icon + '\')" onload="handleScreenshot(this)">'
+          ? '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=window.placeholderHTML(\'' + cat.icon + '\')" onload="window.handleScreenshot(this)">'
           : '<div class="media-placeholder"><div class="icon">' + cat.icon + '</div><span class="hint">截图待添加</span></div>';
 
         var statusHtml = demo.status === 'online'
