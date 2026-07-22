@@ -48,6 +48,17 @@
       "created": "2026-07"
     },
     {
+      "id": "edu-social-science-report",
+      "title": "AI 社科年报统计",
+      "category": "education",
+      "description": "AI 驱动的社科年报统计平台，支持学术交流、科研成果、项目经费、非项目经费四大类报表的智能生成与分析。",
+      "url": "demos/ai-social-science-report/",
+      "screenshot": "",
+      "tags": ["社科统计", "年报", "报表生成"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "culture-expo-digital-human",
       "title": "AI 展会数字人",
       "category": "culture-tourism",

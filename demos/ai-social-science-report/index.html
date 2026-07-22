@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI 社科年报统计</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ========== Nav ========== */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0; height: 52px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; z-index: 100;
+  }
+  .topnav-back {
+    display: none; align-items: center; gap: 6px;
+    background: none; border: none; font-size: 14px;
+    font-family: inherit; color: #4f46e5; font-weight: 500;
+    cursor: pointer; padding: 6px 10px; border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .topnav-back:hover { background: #f0f0ff; }
+  .topnav-back.show { display: flex; }
+  .topnav-title { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+  .topnav-title small { font-weight: 400; color: #8b8fa3; font-size: 12px; margin-left: 6px; }
+  body { padding-top: 52px; }
+
+  /* ========== Page Container ========== */
+  .page {
+    display: none; max-width: 800px; margin: 0 auto;
+    padding: 24px 16px 40px; animation: fadeIn 0.3s ease;
+  }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ========== Home ========== */
+  .home-header { text-align: center; padding: 20px 0 28px; }
+  .home-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+  .home-header p { font-size: 14px; color: #8b8fa3; margin-top: 6px; }
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 480px) { .card-grid { grid-template-columns: 1fr; } }
+  .nav-card {
+    background: #fff; border-radius: 14px; padding: 22px 18px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    border: none; text-align: left; font-family: inherit;
+    display: flex; flex-direction: column;
+  }
+  .nav-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+  .nav-card:active { transform: scale(0.98); }
+  .nav-card .icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 12px;
+  }
+  .nav-card .icon.blue { background: #eef0ff; }
+  .nav-card .icon.green { background: #ecfdf5; }
+  .nav-card .icon.orange { background: #fff7ed; }
+  .nav-card .icon.purple { background: #f5f3ff; }
+  .nav-card h3 { font-size: 16px; font-weight: 600; color: #1a1a2e; }
+  .nav-card p { font-size: 12.5px; color: #8b8fa3; margin-top: 4px; line-height: 1.5; }
+  .nav-card .arrow { align-self: flex-end; margin-top: 10px; color: #c7cbd8; font-size: 18px; }
+
+  /* ========== Workflow Page ========== */
+  .wf-header { margin-bottom: 20px; }
+  .wf-header h2 { font-size: 20px; font-weight: 600; }
+  .wf-header p { font-size: 13px; color: #8b8fa3; margin-top: 4px; }
+
+  /* Upload Area */
+  .upload-zone {
+    border: 2px dashed #d0d3de; border-radius: 14px;
+    padding: 36px 20px; text-align: center;
+    cursor: pointer; transition: all 0.2s;
+    background: #fafafc;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: #4f46e5; background: #f5f5ff;
+  }
+  .upload-zone .icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-zone .hint { font-size: 14px; color: #5a5d72; font-weight: 500; }
+  .upload-zone .sub { font-size: 12px; color: #9ca0b4; margin-top: 4px; }
+  .upload-zone .fileinfo {
+    display: none; align-items: center; gap: 10px; justify-content: center;
+    margin-top: 12px; padding: 10px 14px; background: #f0f1f5;
+    border-radius: 10px; font-size: 13px; color: #3d3f50;
+  }
+  .upload-zone .fileinfo.show { display: flex; }
+  .upload-zone .fileinfo .name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .upload-zone .fileinfo .remove {
+    width: 24px; height: 24px; border-radius: 50%; border: none;
+    background: #d0d3de; color: #5a5d72; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: background 0.15s;
+  }
+  .upload-zone .fileinfo .remove:hover { background: #b0b4c7; }
+  .upload-zone input[type="file"] { display: none; }
+
+  /* Submit Button */
+  .submit-btn {
+    width: 100%; margin-top: 16px; padding: 12px;
+    border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #fff; font-size: 15px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+  }
+  .submit-btn:hover { opacity: 0.92; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .submit-btn .spinner {
+    display: none; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+    border-radius: 50%; animation: spin 0.6s linear infinite;
+    margin: 0 auto;
+  }
+  .submit-btn.loading .spinner { display: inline-block; }
+  .submit-btn.loading .text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Result Area */
+  .result-area {
+    display: none; margin-top: 20px;
+    background: #fff; border-radius: 14px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    animation: fadeIn 0.3s ease;
+  }
+  .result-area.show { display: block; }
+  .result-area h4 { font-size: 14px; font-weight: 600; color: #4f46e5; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .result-area .content { font-size: 14px; line-height: 1.8; color: #1a1a2e; white-space: pre-wrap; word-break: break-word; }
+  .result-area .content table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+  .result-area .content th, .result-area .content td { border: 1px solid #eef0f5; padding: 8px 10px; text-align: left; }
+  .result-area .content th { background: #f8f8ff; font-weight: 600; color: #4f46e5; }
+  .result-area .content .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #eef0ff; color: #4f46e5; margin: 2px; }
+  .result-area .error { color: #dc2626; }
+  .result-area .actions { margin-top: 14px; display: flex; gap: 8px; }
+  .result-area .actions button {
+    padding: 7px 14px; border-radius: 8px; border: 1px solid #d0d3de;
+    background: #fff; font-size: 13px; font-family: inherit; cursor: pointer;
+    color: #5a5d72; transition: all 0.15s;
+  }
+  .result-area .actions button:hover { border-color: #4f46e5; color: #4f46e5; }
+
+  /* ========== Responsive ========== */
+  @media (min-width: 640px) {
+    .page { padding: 32px 24px 60px; }
+    .home-header h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Top Nav ===== -->
+<nav class="topnav" id="topNav">
+  <button class="topnav-back" id="backBtn">‹ 返回</button>
+  <span class="topnav-title">AI 社科年报统计 <small>旌越科技</small></span>
+  <span style="width:60px"></span>
+</nav>
+
+<!-- ===== Home Page ===== -->
+<div class="page active" id="pageHome">
+  <div class="home-header">
+    <h1>📊 AI 社科年报统计</h1>
+    <p>选择统计类型，上传文件，AI 自动生成年报分析</p>
+  </div>
+  <div class="card-grid" id="cardGrid"></div>
+</div>
+
+<!-- ===== Workflow Page ===== -->
+<div class="page" id="pageWorkflow">
+  <div class="wf-header">
+    <h2 id="wfTitle"></h2>
+    <p id="wfDesc"></p>
+  </div>
+  <div class="upload-zone" id="uploadZone">
+    <div class="icon">📄</div>
+    <div class="hint">点击上传文件或拖拽到此处</div>
+    <div class="sub">支持 PDF、Word、Excel 文档</div>
+    <div class="fileinfo" id="fileInfo">
+      <span class="name" id="fileName"></span>
+      <button class="remove" id="removeFile">✕</button>
+    </div>
+    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx">
+  </div>
+  <button class="submit-btn" id="submitBtn" disabled>
+    <span class="text">开始分析</span>
+    <span class="spinner"></span>
+  </button>
+  <div class="result-area" id="resultArea">
+    <h4><span>✓</span> 分析结果</h4>
+    <div class="content" id="resultContent"></div>
+    <div class="actions">
+      <button id="newAnalysis">重新分析</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  CONFIG — 在这里配置各个 Workflow 的 API Key
+// ============================================================
+const API_BASE = 'https://dify.iflytek.com';
+const WORKFLOWS = [
+  {
+    id: 'academic-exchange',
+    title: '学术交流统计表',
+    desc: '上传学术交流活动相关文件，AI 自动生成年度学术交流统计报表',
+    icon: '🌐',
+    color: 'blue',
+    apiKey: 'app-xxxxxxxxxxxx', // ← 替换为学术交流的 API Key
+    inputs: { finance_url: '' } // 文件上传后自动填充
+  },
+  {
+    id: 'research-achievement',
+    title: '科研成果统计表',
+    desc: '上传科研成果相关文件，AI 自动生成年度科研成果统计报表',
+    icon: '🔬',
+    color: 'green',
+    apiKey: 'app-xxxxxxxxxxxx', // ← 替换为科研成果的 API Key
+    inputs: {}
+  },
+  {
+    id: 'project-funding',
+    title: '项目年度经费统计',
+    desc: '上传项目年度经费文件，AI 自动生成项目经费统计报表',
+    icon: '💰',
+    color: 'orange',
+    apiKey: 'app-9whfRTan4ZOOi4hclxm0xDMY', // ← 已提供
+    inputs: { finance_url: '' }
+  },
+  {
+    id: 'non-project-funding',
+    title: '非项目经费统计',
+    desc: '上传非项目经费相关文件，AI 自动生成非项目经费统计报表',
+    icon: '📋',
+    color: 'purple',
+    apiKey: 'app-xxxxxxxxxxxx', // ← 替换为非项目经费的 API Key
+    inputs: {}
+  }
+];
+
+// ============================================================
+//  STATE
+// ============================================================
+let currentWorkflow = null;
+let selectedFile = null;
+
+// ============================================================
+//  RENDER HOME
+// ============================================================
+function renderHome() {
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+  WORKFLOWS.forEach(wf => {
+    const card = document.createElement('button');
+    card.className = 'nav-card';
+    card.innerHTML = `
+      <div class="icon ${wf.color}">${wf.icon}</div>
+      <h3>${wf.title}</h3>
+      <p>${wf.desc}</p>
+      <span class="arrow">→</span>
+    `;
+    card.addEventListener('click', () => openWorkflow(wf.id));
+    grid.appendChild(card);
+  });
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function openWorkflow(id) {
+  currentWorkflow = WORKFLOWS.find(w => w.id === id);
+  if (!currentWorkflow) return;
+  document.getElementById('wfTitle').textContent = currentWorkflow.icon + ' ' + currentWorkflow.title;
+  document.getElementById('wfDesc').textContent = currentWorkflow.desc;
+  document.getElementById('pageHome').classList.remove('active');
+  document.getElementById('pageWorkflow').classList.add('active');
+  document.getElementById('backBtn').classList.add('show');
+  resetUpload();
+  resetResult();
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  document.getElementById('pageWorkflow').classList.remove('active');
+  document.getElementById('pageHome').classList.add('active');
+  document.getElementById('backBtn').classList.remove('show');
+  currentWorkflow = null;
+}
+
+document.getElementById('backBtn').addEventListener('click', goHome);
+
+// ============================================================
+//  FILE UPLOAD
+// ============================================================
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const removeBtn = document.getElementById('removeFile');
+const submitBtn = document.getElementById('submitBtn');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) handleFile(fileInput.files[0]);
+});
+
+removeBtn.addEventListener('click', e => { e.stopPropagation(); resetUpload(); });
+
+function handleFile(file) {
+  selectedFile = file;
+  fileName.textContent = file.name;
+  fileInfo.classList.add('show');
+  submitBtn.disabled = false;
+}
+
+function resetUpload() {
+  selectedFile = null;
+  fileInput.value = '';
+  fileInfo.classList.remove('show');
+  submitBtn.disabled = true;
+  submitBtn.classList.remove('loading');
+}
+
+// ============================================================
+//  SUBMIT
+// ============================================================
+submitBtn.addEventListener('click', async () => {
+  if (!selectedFile || !currentWorkflow) return;
+  submitBtn.classList.add('loading');
+  submitBtn.disabled = true;
+  resetResult();
+  try {
+    // 1. Upload file to Dify
+    const fileId = await uploadFile(selectedFile, currentWorkflow.apiKey);
+    // 2. Run workflow
+    const result = await runWorkflow(currentWorkflow, fileId);
+    // 3. Show result
+    showResult(result);
+  } catch (e) {
+    showError(e.message || '分析失败，请稍后重试');
+  } finally {
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled = false;
+  }
+});
+
+async function uploadFile(file, apiKey) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('user', 'demo');
+  formData.append('type', 'document');
+
+  const res = await fetch(API_BASE + '/v1/files/upload', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + apiKey },
+    body: formData
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || '文件上传失败 (HTTP ' + res.status + ')');
+  }
+  const data = await res.json();
+  return data.id;
+}
+
+async function runWorkflow(wf, fileId) {
+  const body = {
+    inputs: {},
+    response_mode: 'blocking',
+    user: 'demo'
+  };
+  // 如果 workflow 有 finance_url 参数，传入文件 ID
+  if (wf.inputs && wf.inputs.finance_url !== undefined) {
+    body.inputs.finance_url = fileId;
+  } else {
+    // 默认传入文件 ID
+    body.inputs.file_id = fileId;
+  }
+
+  const res = await fetch(API_BASE + '/v1/workflows/run', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + wf.apiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || '分析请求失败 (HTTP ' + res.status + ')');
+  }
+  const data = await res.json();
+  return data;
+}
+
+// ============================================================
+//  RESULT
+// ============================================================
+function showResult(data) {
+  const area = document.getElementById('resultArea');
+  const content = document.getElementById('resultContent');
+  area.classList.add('show');
+
+  // Try to extract useful text from workflow result
+  let text = '';
+  if (data.data && data.data.outputs) {
+    const outputs = data.data.outputs;
+    // Find the first non-empty output value
+    for (const key in outputs) {
+      if (outputs[key] && typeof outputs[key] === 'string') {
+        text = outputs[key];
+        break;
+      } else if (outputs[key] && typeof outputs[key] === 'object') {
+        text = JSON.stringify(outputs[key], null, 2);
+        break;
+      }
+    }
+  }
+  if (!text) {
+    text = JSON.stringify(data, null, 2);
+  }
+  content.innerHTML = formatResult(text);
+}
+
+function showError(msg) {
+  const area = document.getElementById('resultArea');
+  const content = document.getElementById('resultContent');
+  area.classList.add('show');
+  content.innerHTML = '<div class="error">⚠️ ' + escapeHtml(msg) + '</div>';
+}
+
+function resetResult() {
+  const area = document.getElementById('resultArea');
+  area.classList.remove('show');
+  document.getElementById('resultContent').innerHTML = '';
+}
+
+function formatResult(text) {
+  // Simple markdown-like formatting
+  let html = escapeHtml(text);
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Lines
+  html = html.replace(/\n/g, '<br>');
+  // Tables (simple pipe format)
+  html = html.replace(/\|(.+?)\|/g, function(match) {
+    return '<span class="tag">' + match.replace(/\|/g, '').trim() + '</span>';
+  });
+  return html;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+document.getElementById('newAnalysis').addEventListener('click', () => {
+  resetResult();
+  resetUpload();
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+renderHome();
+</script>
+</body>
+</html>
