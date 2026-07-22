@@ -4,68 +4,64 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI 社科年报统计</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js" defer></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 16px; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
-    background: #f0f2f5;
-    color: #1a1a2e;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
+    background: #f0f2f5; color: #1a1a2e; min-height: 100vh; -webkit-font-smoothing: antialiased;
   }
-
-  /* ========== Nav ========== */
   .topnav {
     position: fixed; top: 0; left: 0; right: 0; height: 52px;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255,255,255,0.88); backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(0,0,0,0.06);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 16px; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 100;
   }
-  .topnav-back {
-    display: none; align-items: center; gap: 6px;
-    background: none; border: none; font-size: 14px;
-    font-family: inherit; color: #4f46e5; font-weight: 500;
-    cursor: pointer; padding: 6px 10px; border-radius: 8px;
-    transition: background 0.15s;
-  }
+  .topnav-back { display: none; align-items: center; gap: 6px; background: none; border: none; font-size: 14px; font-family: inherit; color: #4f46e5; font-weight: 500; cursor: pointer; padding: 6px 10px; border-radius: 8px; }
   .topnav-back:hover { background: #f0f0ff; }
   .topnav-back.show { display: flex; }
-  .topnav-title { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+  .topnav-title { font-size: 15px; font-weight: 600; color: #1a1a2e; display: flex; align-items: center; gap: 10px; }
+  .topnav-title img { height: 24px; width: auto; }
   .topnav-title small { font-weight: 400; color: #8b8fa3; font-size: 12px; margin-left: 6px; }
   body { padding-top: 52px; }
 
-  /* ========== Page Container ========== */
-  .page {
-    display: none; max-width: 800px; margin: 0 auto;
-    padding: 24px 16px 40px; animation: fadeIn 0.3s ease;
-  }
+  .page { display: none; animation: fadeIn 0.3s ease; }
   .page.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ========== Home ========== */
-  .home-header { text-align: center; padding: 20px 0 28px; }
-  .home-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
-  .home-header p { font-size: 14px; color: #8b8fa3; margin-top: 6px; }
+  /* Home */
+  .home-wrap { max-width: 800px; margin: 0 auto; padding: 24px 16px 40px; }
+  .home-hero {
+    text-align: center; padding: 32px 20px 36px;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    border-radius: 20px; margin-bottom: 28px; position: relative; overflow: hidden;
+  }
+  .home-hero::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 50%, rgba(168,85,247,0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .home-hero-inner { position: relative; z-index: 1; }
+  .home-hero h1 {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.3px;
+    background: linear-gradient(135deg, #fff 60%, #a5b4fc);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 8px;
+  }
+  .home-hero p { font-size: 14px; color: rgba(255,255,255,0.65); max-width: 420px; margin: 0 auto; line-height: 1.6; }
+  @media (max-width: 480px) { .home-hero { padding: 24px 16px 28px; } .home-hero h1 { font-size: 22px; } .home-hero-logo img { height: 36px; padding: 8px 16px; } }
   .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 480px) { .card-grid { grid-template-columns: 1fr; } }
   .nav-card {
     background: #fff; border-radius: 14px; padding: 22px 18px 18px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    border: none; text-align: left; font-family: inherit;
-    display: flex; flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    border: none; text-align: left; font-family: inherit; display: flex; flex-direction: column;
   }
   .nav-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
   .nav-card:active { transform: scale(0.98); }
-  .nav-card .icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; margin-bottom: 12px;
-  }
+  .nav-card .icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; }
   .nav-card .icon.blue { background: #eef0ff; }
   .nav-card .icon.green { background: #ecfdf5; }
   .nav-card .icon.orange { background: #fff7ed; }
@@ -74,192 +70,204 @@
   .nav-card p { font-size: 12.5px; color: #8b8fa3; margin-top: 4px; line-height: 1.5; }
   .nav-card .arrow { align-self: flex-end; margin-top: 10px; color: #c7cbd8; font-size: 18px; }
 
-  /* ========== Workflow Page ========== */
-  .wf-header { margin-bottom: 20px; }
-  .wf-header h2 { font-size: 20px; font-weight: 600; }
-  .wf-header p { font-size: 13px; color: #8b8fa3; margin-top: 4px; }
+  /* ========== Workflow - Two Column Layout ========== */
+  .wf-layout {
+    display: flex; height: calc(100vh - 52px); max-width: 1400px; margin: 0 auto;
+  }
+  @media (max-width: 768px) { .wf-layout { flex-direction: column; } }
 
-  /* Upload Area */
+  /* Left Panel - Upload */
+  .wf-left {
+    width: 380px; min-width: 380px; padding: 20px; overflow-y: auto;
+    border-right: 1px solid #eef0f5; background: #fafafc;
+  }
+  @media (max-width: 768px) { .wf-left { width: 100%; min-width: auto; border-right: none; border-bottom: 1px solid #eef0f5; max-height: 50vh; } }
+  .wf-left .wf-header { margin-bottom: 16px; }
+  .wf-left .wf-header h2 { font-size: 18px; font-weight: 600; }
+  .wf-left .wf-header p { font-size: 12px; color: #8b8fa3; margin-top: 2px; }
+
   .upload-zone {
-    border: 2px dashed #d0d3de; border-radius: 14px;
-    padding: 36px 20px; text-align: center;
-    cursor: pointer; transition: all 0.2s;
-    background: #fafafc;
+    border: 2px dashed #d0d3de; border-radius: 12px; padding: 20px 16px; text-align: center;
+    cursor: pointer; transition: all 0.2s; background: #fff;
   }
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: #4f46e5; background: #f5f5ff;
-  }
-  .upload-zone .icon { font-size: 36px; margin-bottom: 8px; }
-  .upload-zone .hint { font-size: 14px; color: #5a5d72; font-weight: 500; }
-  .upload-zone .sub { font-size: 12px; color: #9ca0b4; margin-top: 4px; }
-  .upload-zone .fileinfo {
-    display: none; align-items: center; gap: 10px; justify-content: center;
-    margin-top: 12px; padding: 10px 14px; background: #f0f1f5;
-    border-radius: 10px; font-size: 13px; color: #3d3f50;
-  }
+  .upload-zone:hover, .upload-zone.dragover { border-color: #4f46e5; background: #f5f5ff; }
+  .upload-zone .icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone .hint { font-size: 13px; color: #5a5d72; font-weight: 500; }
+  .upload-zone .sub { font-size: 11px; color: #9ca0b4; margin-top: 2px; }
+  .upload-zone .fileinfo { display: none; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; background: #f0f1f5; border-radius: 8px; font-size: 12px; color: #3d3f50; }
   .upload-zone .fileinfo.show { display: flex; }
   .upload-zone .fileinfo .name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .upload-zone .fileinfo .remove {
-    width: 24px; height: 24px; border-radius: 50%; border: none;
-    background: #d0d3de; color: #5a5d72; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; transition: background 0.15s;
-  }
+  .upload-zone .fileinfo .remove { width: 22px; height: 22px; border-radius: 50%; border: none; background: #d0d3de; color: #5a5d72; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
   .upload-zone .fileinfo .remove:hover { background: #b0b4c7; }
   .upload-zone input[type="file"] { display: none; }
 
-  /* Submit Button */
   .submit-btn {
-    width: 100%; margin-top: 16px; padding: 12px;
-    border: none; border-radius: 12px;
-    background: linear-gradient(135deg, #4f46e5, #6366f1);
-    color: #fff; font-size: 15px; font-weight: 600;
-    font-family: inherit; cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
+    width: 100%; margin-top: 12px; padding: 10px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: opacity 0.2s;
     box-shadow: 0 2px 8px rgba(79,70,229,0.25);
   }
   .submit-btn:hover { opacity: 0.92; }
-  .submit-btn:active { transform: scale(0.98); }
   .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .submit-btn .spinner {
-    display: none; width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
-    border-radius: 50%; animation: spin 0.6s linear infinite;
-    margin: 0 auto;
-  }
+  .submit-btn .spinner { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto; }
   .submit-btn.loading .spinner { display: inline-block; }
   .submit-btn.loading .text { display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Result Area */
-  .result-area {
-    display: none; margin-top: 20px;
-    background: #fff; border-radius: 14px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    animation: fadeIn 0.3s ease;
+  /* Right Panel - Chat */
+  .wf-right {
+    flex: 1; display: flex; flex-direction: column; background: #fff;
+    min-width: 0; /* prevent flex overflow */
   }
-  .result-area.show { display: block; }
-  .result-area h4 { font-size: 14px; font-weight: 600; color: #4f46e5; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-  .result-area .content { font-size: 14px; line-height: 1.8; color: #1a1a2e; white-space: pre-wrap; word-break: break-word; }
-  .result-area .content table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px; }
-  .result-area .content th, .result-area .content td { border: 1px solid #eef0f5; padding: 8px 10px; text-align: left; }
-  .result-area .content th { background: #f8f8ff; font-weight: 600; color: #4f46e5; }
-  .result-area .content .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; background: #eef0ff; color: #4f46e5; margin: 2px; }
-  .result-area .error { color: #dc2626; }
-  .result-area .actions { margin-top: 14px; display: flex; gap: 8px; }
-  .result-area .actions button {
-    padding: 7px 14px; border-radius: 8px; border: 1px solid #d0d3de;
-    background: #fff; font-size: 13px; font-family: inherit; cursor: pointer;
-    color: #5a5d72; transition: all 0.15s;
+  .chat-header {
+    padding: 14px 20px; border-bottom: 1px solid #eef0f5;
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
   }
-  .result-area .actions button:hover { border-color: #4f46e5; color: #4f46e5; }
+  .chat-header .dot { width: 8px; height: 8px; border-radius: 50%; background: #4f46e5; }
+  .chat-header h3 { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+  .chat-header .status { font-size: 12px; color: #9ca0b4; margin-left: auto; }
 
-  /* ========== Responsive ========== */
-  @media (min-width: 640px) {
-    .page { padding: 32px 24px 60px; }
-    .home-header h1 { font-size: 28px; }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 12px;
   }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: #d0d3de; border-radius: 2px; }
+
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; margin-top: 2px;
+  }
+  .msg.user .msg-avatar { background: #eef0ff; color: #4f46e5; }
+  .msg.ai .msg-avatar { background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; }
+  .msg-bubble {
+    max-width: 80%; padding: 10px 14px; border-radius: 12px;
+    font-size: 14px; line-height: 1.7; color: #1a1a2e; word-break: break-word;
+  }
+  .msg.user .msg-bubble { background: #4f46e5; color: #fff; border-bottom-right-radius: 4px; }
+  .msg.ai .msg-bubble { background: #f5f5ff; border-bottom-left-radius: 4px; }
+
+  /* Markdown Styling */
+  .msg-bubble h1, .msg-bubble h2, .msg-bubble h3, .msg-bubble h4 {
+    margin: 12px 0 6px; font-weight: 600; line-height: 1.4;
+  }
+  .msg-bubble h1 { font-size: 18px; }
+  .msg-bubble h2 { font-size: 16px; }
+  .msg-bubble h3 { font-size: 15px; }
+  .msg-bubble h4 { font-size: 14px; }
+  .msg-bubble p { margin: 6px 0; }
+  .msg-bubble ul, .msg-bubble ol { padding-left: 20px; margin: 6px 0; }
+  .msg-bubble li { margin: 3px 0; }
+  .msg-bubble table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; }
+  .msg-bubble th, .msg-bubble td { border: 1px solid #e0e2e8; padding: 6px 8px; text-align: left; }
+  .msg-bubble th { background: #eef0ff; font-weight: 600; color: #4f46e5; }
+  .msg-bubble code { background: #f0f1f5; padding: 1px 4px; border-radius: 3px; font-size: 13px; }
+  .msg-bubble pre { background: #f5f5f7; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+  .msg-bubble pre code { background: none; padding: 0; }
+  .msg-bubble strong { font-weight: 600; }
+  .msg-bubble .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; background: #eef0ff; color: #4f46e5; margin: 1px; }
+  .msg-bubble .error { color: #dc2626; }
+  .msg-bubble .typing { display: inline-flex; gap: 3px; align-items: center; }
+  .msg-bubble .typing span { width: 5px; height: 5px; border-radius: 50%; background: #9ca0b4; animation: typing 1.2s infinite; }
+  .msg-bubble .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .msg-bubble .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+
+  .chat-input {
+    padding: 10px 16px; border-top: 1px solid #eef0f5;
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+  }
+  .chat-input input {
+    flex: 1; border: 1px solid #e0e2e8; border-radius: 10px;
+    padding: 8px 12px; font-size: 13px; font-family: inherit;
+    outline: none; background: #fafafc; color: #1a1a2e;
+  }
+  .chat-input input:focus { border-color: #4f46e5; }
+  .chat-input button {
+    padding: 8px 16px; border: none; border-radius: 10px;
+    background: #4f46e5; color: #fff; font-size: 13px; font-weight: 500;
+    font-family: inherit; cursor: pointer; white-space: nowrap;
+  }
+  .chat-input button:hover { background: #4338ca; }
+  .chat-input button:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
 
-<!-- ===== Top Nav ===== -->
-<nav class="topnav" id="topNav">
+<nav class="topnav">
   <button class="topnav-back" id="backBtn">‹ 返回</button>
-  <span class="topnav-title">AI 社科年报统计 <small>旌越科技</small></span>
+  <span class="topnav-title"><img src="logo.png" alt="旌越科技"> AI 社科年报统计</span>
   <span style="width:60px"></span>
 </nav>
 
-<!-- ===== Home Page ===== -->
+<!-- Home -->
 <div class="page active" id="pageHome">
-  <div class="home-header">
-    <h1>📊 AI 社科年报统计</h1>
-    <p>选择统计类型，上传文件，AI 自动生成年报分析</p>
+  <div class="home-wrap">
+    <div class="home-hero">
+      <div class="home-hero-inner">
+        <h1>AI 社科年报统计</h1>
+        <p>选择统计类型，上传 CSV 文件，AI 自动生成年度社科统计报表及审核建议</p>
+      </div>
+    </div>
+    <div class="card-grid" id="cardGrid"></div>
   </div>
-  <div class="card-grid" id="cardGrid"></div>
 </div>
 
-<!-- ===== Workflow Page ===== -->
+<!-- Workflow -->
 <div class="page" id="pageWorkflow">
-  <div class="wf-header">
-    <h2 id="wfTitle"></h2>
-    <p id="wfDesc"></p>
-  </div>
-  <div class="upload-zone" id="uploadZone">
-    <div class="icon">📄</div>
-    <div class="hint">点击上传文件或拖拽到此处</div>
-    <div class="sub">支持 PDF、Word、Excel 文档</div>
-    <div class="fileinfo" id="fileInfo">
-      <span class="name" id="fileName"></span>
-      <button class="remove" id="removeFile">✕</button>
+  <div class="wf-layout">
+    <!-- Left: Upload -->
+    <div class="wf-left">
+      <div class="wf-header">
+        <h2 id="wfTitle"></h2>
+        <p id="wfDesc"></p>
+      </div>
+      <div id="uploadAreas"></div>
+      <button class="submit-btn" id="submitBtn" disabled>
+        <span class="text">开始分析</span>
+        <span class="spinner"></span>
+      </button>
     </div>
-    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx">
-  </div>
-  <button class="submit-btn" id="submitBtn" disabled>
-    <span class="text">开始分析</span>
-    <span class="spinner"></span>
-  </button>
-  <div class="result-area" id="resultArea">
-    <h4><span>✓</span> 分析结果</h4>
-    <div class="content" id="resultContent"></div>
-    <div class="actions">
-      <button id="newAnalysis">重新分析</button>
+    <!-- Right: Chat -->
+    <div class="wf-right">
+      <div class="chat-header">
+        <span class="dot"></span>
+        <h3>AI 分析助手</h3>
+        <span class="status" id="chatStatus">就绪</span>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="输入你的问题..." disabled>
+        <button id="chatSendBtn" disabled>发送</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 // ============================================================
-//  CONFIG — 在这里配置各个 Workflow 的 API Key
+//  CONFIG
 // ============================================================
 const API_BASE = 'https://dify.iflytek.com';
 const WORKFLOWS = [
-  {
-    id: 'academic-exchange',
-    title: '学术交流统计表',
-    desc: '上传学术交流活动相关文件，AI 自动生成年度学术交流统计报表',
-    icon: '🌐',
-    color: 'blue',
-    apiKey: 'app-xxxxxxxxxxxx', // ← 替换为学术交流的 API Key
-    inputs: { finance_url: '' } // 文件上传后自动填充
-  },
-  {
-    id: 'research-achievement',
-    title: '科研成果统计表',
-    desc: '上传科研成果相关文件，AI 自动生成年度科研成果统计报表',
-    icon: '🔬',
-    color: 'green',
-    apiKey: 'app-xxxxxxxxxxxx', // ← 替换为科研成果的 API Key
-    inputs: {}
-  },
-  {
-    id: 'project-funding',
-    title: '项目年度经费统计',
-    desc: '上传项目年度经费文件，AI 自动生成项目经费统计报表',
-    icon: '💰',
-    color: 'orange',
-    apiKey: 'app-9whfRTan4ZOOi4hclxm0xDMY', // ← 已提供
-    inputs: { finance_url: '' }
-  },
-  {
-    id: 'non-project-funding',
-    title: '非项目经费统计',
-    desc: '上传非项目经费相关文件，AI 自动生成非项目经费统计报表',
-    icon: '📋',
-    color: 'purple',
-    apiKey: 'app-xxxxxxxxxxxx', // ← 替换为非项目经费的 API Key
-    inputs: {}
-  }
+  { id: 'academic-exchange', title: '学术交流统计表', desc: '上传主办会议清单、学术讲座清单、参加会议清单 CSV，AI 自动生成学术交流统计报表', icon: '🌐', color: 'blue', apiKey: 'app-nIt7Ouv35LsZimWibSWds27b', multiFile: true, files: [{ key: 'hosted_file', label: '主办会议清单 CSV（11-1）', required: true, defaultName: '11-1主办会议清单.csv', defaultData: 'u+HS6cP7s8Ysu+HS6cDg0M0s1vew7LWlzrsss9Cw7LK/w8Usu+HS6bXYteMsv6rKvMjVxtosveHK+MjVxtosu+HS6db3zOIs0K2w7LWlzrsswtvOxMr9wb8stPqx7cjLyv0sufrN4rT6se3K/cG/LLvh0unBqs+1yMssu+HS6bXnu7Asu+HS6bXn08osyse38dDOs8nX27rPsai45rvyvajS6Sy74dLpvt230Sy+rbfRwLTUtCy88r3pDQrM5dP9v8bRp7Tzu+EsufrE2tGnyvW74dLpLNbQufrM5dP9v8bRp9Gnu+Esv8bRp7y8yvWyvyy549bdzOXT/dGn1LosMjAyNS0xMS0wOSwyMDI1LTExLTEyLCwsNjIzLDcwMSwsLCwsLDAsLA0Kufq8ysLbzLMsufq8ytGnyvW74dLpLLnj1t3M5dP90afUuizUy7av0+u9ob+10afUuiy549bdzOXT/dGn1LosMjAyNC05LTE4LDIwMjQtOS0xOCwsLDQzNyw0OTYsLCwsLCwwLCwNCg==' }, { key: 'lecture_file', label: '学术讲座清单 CSV（11-2）', required: false, defaultName: '11-2学术讲座清单.csv', defaultData: 'vbLX+cP7s8Ys1ve9ssjLLL2y1/nA4NDNLL2y1/nI1cbaLMv5yvS1pc67LL2y1/m8trHwLNb3vbLIy7Wlzrss1ve9ssjL1rDO8SzW972yyMvWsLPGLL2y1/m12LXjLLLOvNO9stf5yMvK/Sy9stf5ttTP8yzW97PWyMssvM6x9izW972yyMvRp8r1vPLA+iy527Xj19vK9g0KvbLX+TEswO7O5SzG5Mv7vbLX+SwyMDI1LTA1LTI0LM28yum53SwsLCwsLDIyMCwsLCwsDQo=' }, { key: 'attended_file', label: '参加会议清单 CSV（11-3）', required: true, defaultName: '11-3参加会议清单.csv', defaultData: 'u+HS6cP7s8Ysss674cjLLLvh0unA4NDNLNb3sOy1pc67LLLOu+HI1cbaLMv5yvS1pc67LLvh0unOu9bDLLLOu+G12Na3LMzhvbvC287ExqrK/SzM2NH7sai45saqyv0swtvOxMzixL8ssai45szixL8su+HS6bzyvekNCrvh0ukxLNXFyP0sufrE2tGnyvW74dLpLDEsMjAyNS0xMi0xOSzM5dP9yczRp9S6LLn6xNosLCwsLCwNCrvh0ukyLMDu0rssufrE2tGnyvW74dLpLDIsMjAyNS0xMi0xNyzUy7av0+u9ob+10afUuiy5+sTaLCwxLCwsLA0Ku+HS6TMss8LG3yy5+rzK0afK9bvh0uksMywyMDI1LTEyLTA2LNTLtq/T672hv7XRp9S6LLn6zeIsLDEsLCwsDQq74dLpNCzCvbb+LLn6xNrRp8r1u+HS6Sw0LDIwMjUtMTItMDUsw+PH8tGn1LosufrE2iwsMSwsLCwNCrvh0uk1LMH1zuUsufrE2tGnyvW74dLpLDUsMjAyNS0xMS0yOSzUy7av0+u9ob+10afUuiy5+sTaLCwxLCwsLA0Ku+HS6TUss8K+xSy5+sTa0afK9bvh0uksNSwyMDI1LTExLTI5LMzl0/3S1cr10afUuiy5+sTaLCwxLDEsLCwNCrvh0uk2LLPCyP0sufq8ytGnyvW74dLpLDYsMjAyNS0xMS0yNizM5dP9vczT/dGn1LosufrE2iwsMSwsLCwNCrvh0uk3LMH10rssufrE2tGnyvW74dLpLDcsMjAyNS0xMS0yNyzO5Mr10afUuiy5+sTaLCwxLCwsLA0Ku+HS6Tgswc62/iy5+sTa0afK9bvh0uksOCwyMDI1LTExLTIyLLn6vNLT8MOrx/LRp9S6LLn6xNosLDEsLCwsDQq74dLpOSy5xcj9LLn6xNrRp8r1u+HS6Sw5LDIwMjUtMTAtMjUs1Mu2r9G1wbfRp9S6LLn6xNosLDEsMSwsLA0Ku+HS6TEwLMDuwfksufrE2tGnyvW74dLpLDEwLDIwMjUtMDYtMjMs1Mu2r9PrvaG/tdGn1LosufrE2iwsMSwwLCwsDQq74dLpMTEswO7B+Sy5+sTa0afK9bvh0uksMTEsMjAyNS0wNS0yNCzUy7av0+u9ob+10afUuiy5+sTaLCwxLDAsLCwNCg==' }] },
+  { id: 'research-achievement', title: '科研成果统计表', desc: '上传论文成果、著作成果、研究报告成果 CSV，AI 自动生成科研成果统计报表', icon: '🔬', color: 'green', apiKey: 'app-p2AdM0LR8j8UTPYvHfRlGV67', multiFile: true, files: [{ key: 'paper_file', label: '论文成果 CSV（8-1）', required: true, defaultName: '8-1论文成果（学校系统）.csv', defaultData: 'wtvOxMDg0M0sw/uzxiy78cihwtvOxLXa0rvX99XfLLeise0vs/aw5sqxvOQst6Kx7S+/r87vwtvOxLyvLMrVwrzA4LHwLMv5yvS1pc67LMv509DX99Xfo6jB0LHtyrnTw6OpLM2o0bbX99XfLL+vzu+8trHwLFNDScLbzsS31sf4LNOwz+zS8tfTLMrHt/G56cr019TIu9a4yv3G2r+vLERPSSyxu9L9tM7K/SzSu7y20ae/xiy3orHtt7bOpyy+7cba0rMs0afQo8rww/ssSVNTTrrFLENOusUsu+HS6cP7s8Ysu+HS6cjVxtosu+HS6bXY1rcswtvOxMzixL8svczT/bK/zbO8xrnpyvQss8m5+8C01LQsyeqxqMnzusvXtMysLMzhvbvKsbzkDQrG2r+vwtvOxCzC287EMSyzwsbfLDIwMjUtMTItMTEszOXT/dGnv68sLNTLtq/T672hv7XRp9S6LLPCxt+hosH1zuUswfXO5SxDU1NDSdS0xtq/rywsLLfxLCwszOXT/b/G0acsufrE2rmrv6q3otDQLCy12tK7taXOuywsLCwsLCzJ57/GwOAsufq80snnv8a7+b3wz+7EvyzRp9Cjzai5/SwyMDI1LTEyLTIyIDEwOjI5OjE1DQrG2r+vwtvOxCzC287EMizCvbb+LDIwMjUtMDMtMDEscGVlcmosLNfjx/LRp9S6LMK9tv6horPCvsUss8K+xSxTQ0koRSksyP3H+Cwst/EsLCzM5dP9v8bRpyy5+s3i0afK9cbav68sLLXa0ru1pc67LCwsLCwsLMnnv8bA4Cy12KGiytChosz8oaK+1rXI1f64rrK/w8XP7sS/LNGn0KPNqLn9LDIwMjUtMTItMjIgMTE6MDE6MTENCg==' }, { key: 'book_file', label: '著作成果 CSV（8-2）', required: false, defaultName: '8-2著作成果（学校系统）.csv', defaultData: '1vjX98P7s8Ys1vjX98DgsfAss/aw5rWlzrsss/aw5sqxvOQsy/nK9LWlzrss19zX1sr9LMv509DX99Xfo6jB0LHtyrnTw6OpLLP2sObJ57y2sfAs0afQo8rww/ssyse38bet0uvOqs3izsQs0+/W1ixJU0JOusUsQ0lQusUsvcyyxMDgsfAss8m5+8C01LQsyfO6y9e0zKwsvczT/bK/zbO8xrnpyvQs0ru8ttGnv8YszOG9u8qxvOQNCteo1vgxLNeo1vgsyc+6o8jLw/Gz9rDmyecsMjAyNS0wNi0wMSzO5Mr10afUuiwyMCzB9dK7LMj9wOCz9rDmyecstdrSu7Wlzrsst/EsLCx4eHgteC14eHh4LXh4eHh4eC14LHh4eHh4eHh4eHgsLM7e0sDN0M/uxL/R0L6/s8m5+yzRp9Cjzai5/SwxLMzl0/2/xtGnLDIwMjUtMTItMTggMTU6NDY6MzQNCg==' }, { key: 'report_file', label: '研究报告成果 CSV（8-3）', required: true, defaultName: '8-3研究报告成果（学校系统）.csv', defaultData: 'sai45szixL8szOG9u7WlzrsszOG9u8qxvOQsssnEybbUz/Msy/nK9LWlzrssy/nT0M3qs8nIyyzKx7fxsbuyycTJLNGn0KPK8MP7LNK7vLbRp7/GLNfc19bK/SzJ87rL17TMrCyxuNeiLLPJufvAtNS0LMzhvbvKsbzkLLLJxMm1pc67DQrR0L6/u/LXydGvsai45jEsuePW3czl0/3Rp9S6LDIwMjUtMDEtMjUsyqGyv7y2taXOuyzM5dP9vczT/dGn1Loss8LI/SzKxyy12tK7taXOuyzM5dP9v8bRpywwLNGn0KPNqLn9LCzO3tLAzdDP7sS/0dC+v7PJufssMjAyNS0xMi0xOSAwMDowMDoxOCy549bdytDV/riuDQo=' }] },
+  { id: 'project-funding', title: '项目年度经费统计', desc: '上传项目年度经费 CSV 文件，AI 自动生成年度项目经费统计报表', icon: '💰', color: 'orange', apiKey: 'app-yTMOTR0ij4sdWSAyVaarWCJG', multiFile: false, fileVar: 'funding_file', defaultName: '6-1项目年度经费（学校）.csv', defaultData: 'sr/DxbHgusUssr/DxcP7s8Ysz+7Ev7HgusUsz+7Ev8P7s8Ysxr7WpMjVxtosxr7WpLHgusUs1arSqiy/xsS/LL/GxL/D+7PGLM/uxL/K1cjrLM/uxL/Wp7P2LLK/w8Uvz+7Ev9Pgtu4NCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMxLLrhz/LP7sS/MS3Wsb3Tvq230SwsLMbas/XP7sS/0+C27iwsLDAsMCwiMTAsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sMzIzMDIyMzEsuuHP8s/uxL8xLdaxvdO+rbfRLDIwMjUvMi8yOCwoMDEpMDAwNDMsMi4yOHh4eLvjyOt4eHi64c/yv87M4r6tt9EsMDAwMSy/xtHQv6q3otPr0K3X98rVyOssIjUwLDAwMC4wMCIsMCwiNjAsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sMzIzMDIyMzEsuuHP8s/uxL8xLdaxvdO+rbfRLDIwMjUvMi8yOCwoMDEpMDAwNDMsMi4yOHh4eLvjyOt4eHi64c/yv87M4r6tt9G8xsuwLDAwMDEsv8bR0L+qt6LT69Ct1/fK1cjrLCItMiwwMDAuMDAiLDAsIjU4LDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMxLLrhz/LP7sS/MS3Wsb3Tvq230SwyMDI1LzMvMTcsKDAxKTAwMzA2LHh4t6IyyMu/zsziyv2+3bfWzva1yMDNzvG30Sw3MjMwMizP7sS/1qez9i3Azc7xt9EsMCwiMywwMDAuMDAiLCI1NSwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMSy64c/yz+7EvzEt1rG9076tt9EsMjAyNS8xMS8yMSwoMDEpMDAzNTYseHh4sajK6byuo6zTssXMo6xVxcy1yCw3MjMwMyzP7sS/1qez9i3XqNPDssTBz7fRLDAsIjQsMDAwLjAwIiwiNTEsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sMzIzMDIyMzEsuuHP8s/uxL8xLdaxvdO+rbfRLDI1LURlYywssb7E6sDbvMYsLCwiNDgsMDAwLjAwIiwiNywwMDAuMDAiLCI1MSwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMSy64c/yz+7EvzEt1rG9076tt9EsLCzP7sS/us+8xiwsLCI0OCwwMDAuMDAiLCI3LDAwMC4wMCIsIjUxLDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMyLLrhz/LP7sS/MS285L3Tvq230aOow/uzxrK7yKujqSwsLMbas/XP7sS/0+C27iwsLDAsMCwwDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMiy64c/yz+7EvzEtvOS9076tt9GjqMP7s8ayu8iro6ksMjAyNS8yLzI4LCgwMSkwMDA4MywyLjI4eHh4u+PI63h4eLrhz/K/zszivq230SwwMDAxLL/G0dC/qrei0+vQrdf3ytXI6ywiMjAsMDAwLjAwIiwwLCIyMCwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMiy64c/yz+7EvzEtvOS9076tt9GjqMP7s8ayu8iro6ksMjAyNS8yLzI4LCgwMSkwMDA4Myy4+b7dv8a8vLK/zsS8/rzGzOF4eHi64c/yv87M4r6tt9G53MDtt9EsODIwMyzP7sS/vOS907fR08O78rncwO230SwwLCIyLDUwMC4wMCIsIjE3LDUwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMyLLrhz/LP7sS/MS285L3Tvq230aOow/uzxrK7yKujqSwyMDI1LzMvMTMsKDAxKTAwMTg0LHh4eLeiv8bR0Lyo0KcsNzIzMDQsz+7Ev9ans/Ytv8bR0Lyo0KcsMCwiMywwMDAuMDAiLCIxNCw1MDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMiy64c/yz+7EvzEtvOS9076tt9GjqMP7s8ayu8iro6ksMjUtRGVjLCyxvsTqwNu8xiwsLCIyMCwwMDAuMDAiLCI1LDUwMC4wMCIsIjE0LDUwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMyLLrhz/LP7sS/MS285L3Tvq230aOow/uzxrK7yKujqSwsLM/uxL+6z7zGLCwsIjIwLDAwMC4wMCIsIjUsNTAwLjAwIiwiMTQsNTAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMSzX3c/yz+7EvzIt1rG9076tt9EsLCzG2rP1z+7Ev9Pgtu4sLCwwLDAsIjEwMCwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwyMDI1LzIvMjcsKDAxKTAwMDY3LHh4eL3ou+N4eHiw5sPmt9EsNzIyNyzP7sS/1qez9i3Or83Q0rXO8bfRLDAsIjMsMDAwLjAwIiwiOTcsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMSzX3c/yz+7EvzIt1rG9076tt9EsMjAyNS80LzE4LCgwMSkwMDc5NSx4eHi3ojE0yMvAzc7xLDcyMjYsz+7Ev9ans/YtwM3O8bfRLDAsIjIwLDAwMC4wMCIsIjc3LDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDIwMjUvNC8xOCwoMDEpMDAzMjEss+V4eHi96LvjeHh4sObD5rfRLDcyMjcsz+7Ev9ans/Ytzq/N0NK1zvG30SwwLCIzLDAwMC4wMCIsIjc0LDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDIwMjUvNC8xOCwoMDEpMDAzMjEss+V4eHi96LvjeHh4sObD5rfRLDcyMjcsz+7Ev9ans/Ytzq/N0NK1zvG30SwwLCItMywwMDAuMDAiLCI3NywwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwyMDI1LzQvMTksKDAxKTAwMzY3LHh4eLGoob7XyrL6ob/M5bjQxvcsNzIwMyzP7sS/1qez9i3XqNPDyeixuLm61sMsMCwiMSwwMDAuMDAiLCI3NiwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwyMDI1LzQvMTksKDAxKTAwMzY3LHh4eLGoeHh4vcyyxLP2sOa30c6yv+4sNzIwNizP7sS/1qez9i3Tocuit9EsMCw4MDAsIjc1LDIwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDIwMjUvNC8xOSwoMDEpMDAwNzkseHh4sah4eHiy7sLDt9HTwyw3MjAtMSzP7sS/1qez9i25+sTasu7Cw7fRLDAsIjEyLDIwMC4wMCIsIjYzLDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDI1LURlYywssb7E6sDbvMYsLCwwLCIzNywwMDAuMDAiLCI2MywwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwsLM/uxL+6z7zGLCwsMCwiMzcsMDAwLjAwIiwiNjMsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMizX3c/yz+7EvzItvOS9076tt9EsLCzG2rP1z+7Ev9Pgtu4sLCwwLDAsIjMsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMizX3c/yz+7EvzItvOS9076tt9EsMjAyNS81LzE0LCgwMSkwMDM0Mix4eHi3onh4v87M4sDNzvG30Sw3MjI2LM/uxL/Wp7P2LcDNzvG30SwwLCIzLDAwMC4wMCIsMA0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMizX3c/yz+7EvzItvOS9076tt9EsMjUtRGVjLCyxvsTqwNu8xiwsLDAsIjMsMDAwLjAwIiwwDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAyLNfdz/LP7sS/Mi285L3Tvq230SwsLM/uxL+6z7zGLCwsMCwiMywwMDAuMDAiLDANCiwsLCwsLCwsLCwsDQowMDAs0afUuiw1MjYseHh40dC+vy3Kob3M0/3M/LPlsrnHv6OoyqG9zNP9zPzG5Mv7v8bR0L6tt9GjqSwsLMbas/XP7sS/0+C27iwsLDAsMCwwDQowMDAs0afUuiw1MjYseHh40dC+vy3Kob3M0/3M/LPlsrnHv6OoyqG9zNP9zPzG5Mv7v8bR0L6tt9GjqSwyMDI1LzMvMTIsKDAyKTAwMDA5LM/CtO8yMDI1xOqz5bK5x7/P7sS/1KTL4ywxMDEs1KTL47fWxeQsIjEwLDAwMC4wMCIsMCwiMTAsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS80LzIzLCgwMSkwMDI1OSyxqLei0afJ+jXIy7/OzOLAzc7xt9EsNzI2LM/uxL/Wp7P2LcDNzvG30SwwLCIzLDAwMC4wMCIsIjcsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS81LzIyLCgwMSkwMDk4MSyxqLei0afJ+jPIy7/OzOLAzc7xt9EsNzI2LM/uxL/Wp7P2LcDNzvG30SwwLCIyLDAwMC4wMCIsIjUsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS8xMS8yNiwoMDEpMDA0NjcssajP+r/OzMPK/b7dtKbA7dPrzbO8xrfWzva1yNDFz6K8vMr1t/7O8Sw3Mjcsz+7Ev9ans/Ytzq/N0NK1zvG30SwwLCIzLDAwMC4wMCIsIjIsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS8xMi8xMSwoMDEpMDA3MjEssajOxLz+utChotLGtq/TssXMtcgsNzIxOCzP7sS/1qez9i3XqNPDssTBz7fRLDAsIjIsMDAwLjAwIiwwDQowMDAs0afUuiw1MjYseHh40dC+vy3Kob3M0/3M/LPlsrnHv6OoyqG9zNP9zPzG5Mv7v8bR0L6tt9GjqSwyNS1EZWMsLLG+xOrA27zGLCwsIjEwLDAwMC4wMCIsIjEwLDAwMC4wMCIsMA0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksLCzP7sS/us+8xiwsLCIxMCwwMDAuMDAiLCIxMCwwMDAuMDAiLDANCiwsLCwsLCwsLCwsDQowMDAs0afUuiw1MjUss6G53bTy1OwsLCzG2rP1z+7Ev9Pgtu4sLCwwLDAsMA0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvMy8xMiwoMDIpMDA0NSzPwrTvMjAyNcTqs+Wyuce/z+7Ev9Sky+MsOTIs1KTL47fWxeQsIjEsMDAwLDAwMC4wMCIsMCwiMSwwMDAsMDAwLjAwIg0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvNy85LCgwMSkwMDEzLLGosOy5q7zSvt8sNzI4LM/uxL/Wp7P2Ldeo08OyxMHPt9EsMCwiMTAwLDAwMC4wMCIsIjkwMCwwMDAuMDAiDQowMDAs0afUuiw1MjUss6G53bTy1OwsMjAyNS83LzIzLCgwMSkwMDc1NyyxqLvjuavLvi3B49DHzqzQ3iw3MjAyMTMsz+7Ev9ans/YtzqzQ3qOou6SjqbfRLDAsIjEwMCwwMDAuMDAiLCI4MDAsMDAwLjAwIg0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvOS85LCgwMSkwNDk2LLGoxNW157Kiv9rP3yw3Mjgsz+7Ev9ans/Yt16jTw7LEwc+30SwwLCIxMCwwMDAuMDAiLCI3OTAsMDAwLjAwIg0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvMTEvNCwoMDEpMDA0MiyxqLOhud3OxLuv19bFxiw3MjAyNyzP7sS/1qez9i3Or83Q0rXO8bfRLDAsIjkwLDAwMC4wMCIsIjcwMCwwMDAuMDAiDQowMDAs0afUuiw1MjUss6G53bTy1OwsMjUtRGVjLCyxvsTqwNu8xiwsLCIxLDAwMCwwMDAuMDAiLCIzMDAsMDAwLjAwIiwiNzAwLDAwMC4wMCINCjAwMCzRp9S6LDUyNSyzobndtPLU7CwsLM/uxL+6z7zGLCwsIjEsMDAwLDAwMC4wMCIsIjMwMCwwMDAuMDAiLCI3MDAsMDAwLjAwIg0K' },
+  { id: 'non-project-funding', title: '非项目经费统计', desc: '上传项目年度经费 CSV 文件，AI 自动生成非项目经费统计报表', icon: '📋', color: 'purple', apiKey: 'app-bkJevM0zrmOG35Eiljc97x2v', multiFile: false, fileVar: 'funding_file', defaultName: '6-1项目年度经费（学校）.csv', defaultData: 'sr/DxbHgusUssr/DxcP7s8Ysz+7Ev7HgusUsz+7Ev8P7s8Ysxr7WpMjVxtosxr7WpLHgusUs1arSqiy/xsS/LL/GxL/D+7PGLM/uxL/K1cjrLM/uxL/Wp7P2LLK/w8Uvz+7Ev9Pgtu4NCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMxLLrhz/LP7sS/MS3Wsb3Tvq230SwsLMbas/XP7sS/0+C27iwsLDAsMCwiMTAsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sMzIzMDIyMzEsuuHP8s/uxL8xLdaxvdO+rbfRLDIwMjUvMi8yOCwoMDEpMDAwNDMsMi4yOHh4eLvjyOt4eHi64c/yv87M4r6tt9EsMDAwMSy/xtHQv6q3otPr0K3X98rVyOssIjUwLDAwMC4wMCIsMCwiNjAsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sMzIzMDIyMzEsuuHP8s/uxL8xLdaxvdO+rbfRLDIwMjUvMi8yOCwoMDEpMDAwNDMsMi4yOHh4eLvjyOt4eHi64c/yv87M4r6tt9G8xsuwLDAwMDEsv8bR0L+qt6LT69Ct1/fK1cjrLCItMiwwMDAuMDAiLDAsIjU4LDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMxLLrhz/LP7sS/MS3Wsb3Tvq230SwyMDI1LzMvMTcsKDAxKTAwMzA2LHh4t6IyyMu/zsziyv2+3bfWzva1yMDNzvG30Sw3MjMwMizP7sS/1qez9i3Azc7xt9EsMCwiMywwMDAuMDAiLCI1NSwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMSy64c/yz+7EvzEt1rG9076tt9EsMjAyNS8xMS8yMSwoMDEpMDAzNTYseHh4sajK6byuo6zTssXMo6xVxcy1yCw3MjMwMyzP7sS/1qez9i3XqNPDssTBz7fRLDAsIjQsMDAwLjAwIiwiNTEsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sMzIzMDIyMzEsuuHP8s/uxL8xLdaxvdO+rbfRLDI1LURlYywssb7E6sDbvMYsLCwiNDgsMDAwLjAwIiwiNywwMDAuMDAiLCI1MSwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMSy64c/yz+7EvzEt1rG9076tt9EsLCzP7sS/us+8xiwsLCI0OCwwMDAuMDAiLCI3LDAwMC4wMCIsIjUxLDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMyLLrhz/LP7sS/MS285L3Tvq230aOow/uzxrK7yKujqSwsLMbas/XP7sS/0+C27iwsLDAsMCwwDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMiy64c/yz+7EvzEtvOS9076tt9GjqMP7s8ayu8iro6ksMjAyNS8yLzI4LCgwMSkwMDA4MywyLjI4eHh4u+PI63h4eLrhz/K/zszivq230SwwMDAxLL/G0dC/qrei0+vQrdf3ytXI6ywiMjAsMDAwLjAwIiwwLCIyMCwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMiy64c/yz+7EvzEtvOS9076tt9GjqMP7s8ayu8iro6ksMjAyNS8yLzI4LCgwMSkwMDA4Myy4+b7dv8a8vLK/zsS8/rzGzOF4eHi64c/yv87M4r6tt9G53MDtt9EsODIwMyzP7sS/vOS907fR08O78rncwO230SwwLCIyLDUwMC4wMCIsIjE3LDUwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMyLLrhz/LP7sS/MS285L3Tvq230aOow/uzxrK7yKujqSwyMDI1LzMvMTMsKDAxKTAwMTg0LHh4eLeiv8bR0Lyo0KcsNzIzMDQsz+7Ev9ans/Ytv8bR0Lyo0KcsMCwiMywwMDAuMDAiLCIxNCw1MDAuMDAiDQozMTMsv8bRp7y8yvWyvywzMjMwMjIzMiy64c/yz+7EvzEtvOS9076tt9GjqMP7s8ayu8iro6ksMjUtRGVjLCyxvsTqwNu8xiwsLCIyMCwwMDAuMDAiLCI1LDUwMC4wMCIsIjE0LDUwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDMyMzAyMjMyLLrhz/LP7sS/MS285L3Tvq230aOow/uzxrK7yKujqSwsLM/uxL+6z7zGLCwsIjIwLDAwMC4wMCIsIjUsNTAwLjAwIiwiMTQsNTAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMSzX3c/yz+7EvzIt1rG9076tt9EsLCzG2rP1z+7Ev9Pgtu4sLCwwLDAsIjEwMCwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwyMDI1LzIvMjcsKDAxKTAwMDY3LHh4eL3ou+N4eHiw5sPmt9EsNzIyNyzP7sS/1qez9i3Or83Q0rXO8bfRLDAsIjMsMDAwLjAwIiwiOTcsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMSzX3c/yz+7EvzIt1rG9076tt9EsMjAyNS80LzE4LCgwMSkwMDc5NSx4eHi3ojE0yMvAzc7xLDcyMjYsz+7Ev9ans/YtwM3O8bfRLDAsIjIwLDAwMC4wMCIsIjc3LDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDIwMjUvNC8xOCwoMDEpMDAzMjEss+V4eHi96LvjeHh4sObD5rfRLDcyMjcsz+7Ev9ans/Ytzq/N0NK1zvG30SwwLCIzLDAwMC4wMCIsIjc0LDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDIwMjUvNC8xOCwoMDEpMDAzMjEss+V4eHi96LvjeHh4sObD5rfRLDcyMjcsz+7Ev9ans/Ytzq/N0NK1zvG30SwwLCItMywwMDAuMDAiLCI3NywwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwyMDI1LzQvMTksKDAxKTAwMzY3LHh4eLGoob7XyrL6ob/M5bjQxvcsNzIwMyzP7sS/1qez9i3XqNPDyeixuLm61sMsMCwiMSwwMDAuMDAiLCI3NiwwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwyMDI1LzQvMTksKDAxKTAwMzY3LHh4eLGoeHh4vcyyxLP2sOa30c6yv+4sNzIwNizP7sS/1qez9i3Tocuit9EsMCw4MDAsIjc1LDIwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDIwMjUvNC8xOSwoMDEpMDAwNzkseHh4sah4eHiy7sLDt9HTwyw3MjAtMSzP7sS/1qez9i25+sTasu7Cw7fRLDAsIjEyLDIwMC4wMCIsIjYzLDAwMC4wMCINCjMxMyy/xtGnvLzK9bK/LDQyNTk1MDEs193P8s/uxL8yLdaxvdO+rbfRLDI1LURlYywssb7E6sDbvMYsLCwwLCIzNywwMDAuMDAiLCI2MywwMDAuMDAiDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAxLNfdz/LP7sS/Mi3Wsb3Tvq230SwsLM/uxL+6z7zGLCwsMCwiMzcsMDAwLjAwIiwiNjMsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMizX3c/yz+7EvzItvOS9076tt9EsLCzG2rP1z+7Ev9Pgtu4sLCwwLDAsIjMsMDAwLjAwIg0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMizX3c/yz+7EvzItvOS9076tt9EsMjAyNS81LzE0LCgwMSkwMDM0Mix4eHi3onh4v87M4sDNzvG30Sw3MjI2LM/uxL/Wp7P2LcDNzvG30SwwLCIzLDAwMC4wMCIsMA0KMzEzLL/G0ae8vMr1sr8sNDI1OTUwMizX3c/yz+7EvzItvOS9076tt9EsMjUtRGVjLCyxvsTqwNu8xiwsLDAsIjMsMDAwLjAwIiwwDQozMTMsv8bRp7y8yvWyvyw0MjU5NTAyLNfdz/LP7sS/Mi285L3Tvq230SwsLM/uxL+6z7zGLCwsMCwiMywwMDAuMDAiLDANCiwsLCwsLCwsLCwsDQowMDAs0afUuiw1MjYseHh40dC+vy3Kob3M0/3M/LPlsrnHv6OoyqG9zNP9zPzG5Mv7v8bR0L6tt9GjqSwsLMbas/XP7sS/0+C27iwsLDAsMCwwDQowMDAs0afUuiw1MjYseHh40dC+vy3Kob3M0/3M/LPlsrnHv6OoyqG9zNP9zPzG5Mv7v8bR0L6tt9GjqSwyMDI1LzMvMTIsKDAyKTAwMDA5LM/CtO8yMDI1xOqz5bK5x7/P7sS/1KTL4ywxMDEs1KTL47fWxeQsIjEwLDAwMC4wMCIsMCwiMTAsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS80LzIzLCgwMSkwMDI1OSyxqLei0afJ+jXIy7/OzOLAzc7xt9EsNzI2LM/uxL/Wp7P2LcDNzvG30SwwLCIzLDAwMC4wMCIsIjcsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS81LzIyLCgwMSkwMDk4MSyxqLei0afJ+jPIy7/OzOLAzc7xt9EsNzI2LM/uxL/Wp7P2LcDNzvG30SwwLCIyLDAwMC4wMCIsIjUsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS8xMS8yNiwoMDEpMDA0NjcssajP+r/OzMPK/b7dtKbA7dPrzbO8xrfWzva1yNDFz6K8vMr1t/7O8Sw3Mjcsz+7Ev9ans/Ytzq/N0NK1zvG30SwwLCIzLDAwMC4wMCIsIjIsMDAwLjAwIg0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksMjAyNS8xMi8xMSwoMDEpMDA3MjEssajOxLz+utChotLGtq/TssXMtcgsNzIxOCzP7sS/1qez9i3XqNPDssTBz7fRLDAsIjIsMDAwLjAwIiwwDQowMDAs0afUuiw1MjYseHh40dC+vy3Kob3M0/3M/LPlsrnHv6OoyqG9zNP9zPzG5Mv7v8bR0L6tt9GjqSwyNS1EZWMsLLG+xOrA27zGLCwsIjEwLDAwMC4wMCIsIjEwLDAwMC4wMCIsMA0KMDAwLNGn1LosNTI2LHh4eNHQvr8tyqG9zNP9zPyz5bK5x7+jqMqhvczT/cz8xuTL+7/G0dC+rbfRo6ksLCzP7sS/us+8xiwsLCIxMCwwMDAuMDAiLCIxMCwwMDAuMDAiLDANCiwsLCwsLCwsLCwsDQowMDAs0afUuiw1MjUss6G53bTy1OwsLCzG2rP1z+7Ev9Pgtu4sLCwwLDAsMA0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvMy8xMiwoMDIpMDA0NSzPwrTvMjAyNcTqs+Wyuce/z+7Ev9Sky+MsOTIs1KTL47fWxeQsIjEsMDAwLDAwMC4wMCIsMCwiMSwwMDAsMDAwLjAwIg0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvNy85LCgwMSkwMDEzLLGosOy5q7zSvt8sNzI4LM/uxL/Wp7P2Ldeo08OyxMHPt9EsMCwiMTAwLDAwMC4wMCIsIjkwMCwwMDAuMDAiDQowMDAs0afUuiw1MjUss6G53bTy1OwsMjAyNS83LzIzLCgwMSkwMDc1NyyxqLvjuavLvi3B49DHzqzQ3iw3MjAyMTMsz+7Ev9ans/YtzqzQ3qOou6SjqbfRLDAsIjEwMCwwMDAuMDAiLCI4MDAsMDAwLjAwIg0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvOS85LCgwMSkwNDk2LLGoxNW157Kiv9rP3yw3Mjgsz+7Ev9ans/Yt16jTw7LEwc+30SwwLCIxMCwwMDAuMDAiLCI3OTAsMDAwLjAwIg0KMDAwLNGn1LosNTI1LLOhud208tTsLDIwMjUvMTEvNCwoMDEpMDA0MiyxqLOhud3OxLuv19bFxiw3MjAyNyzP7sS/1qez9i3Or83Q0rXO8bfRLDAsIjkwLDAwMC4wMCIsIjcwMCwwMDAuMDAiDQowMDAs0afUuiw1MjUss6G53bTy1OwsMjUtRGVjLCyxvsTqwNu8xiwsLCIxLDAwMCwwMDAuMDAiLCIzMDAsMDAwLjAwIiwiNzAwLDAwMC4wMCINCjAwMCzRp9S6LDUyNSyzobndtPLU7CwsLM/uxL+6z7zGLCwsIjEsMDAwLDAwMC4wMCIsIjMwMCwwMDAuMDAiLCI3MDAsMDAwLjAwIg0K' },
 ];
 
 // ============================================================
 //  STATE
 // ============================================================
 let currentWorkflow = null;
-let selectedFile = null;
+let selectedFiles = {};
+let aborted = false;
 
 // ============================================================
-//  RENDER HOME
+//  HOME
 // ============================================================
 function renderHome() {
   const grid = document.getElementById('cardGrid');
@@ -267,12 +275,7 @@ function renderHome() {
   WORKFLOWS.forEach(wf => {
     const card = document.createElement('button');
     card.className = 'nav-card';
-    card.innerHTML = `
-      <div class="icon ${wf.color}">${wf.icon}</div>
-      <h3>${wf.title}</h3>
-      <p>${wf.desc}</p>
-      <span class="arrow">→</span>
-    `;
+    card.innerHTML = `<div class="icon ${wf.color}">${wf.icon}</div><h3>${wf.title}</h3><p>${wf.desc}</p><span class="arrow">→</span>`;
     card.addEventListener('click', () => openWorkflow(wf.id));
     grid.appendChild(card);
   });
@@ -289,80 +292,166 @@ function openWorkflow(id) {
   document.getElementById('pageHome').classList.remove('active');
   document.getElementById('pageWorkflow').classList.add('active');
   document.getElementById('backBtn').classList.add('show');
-  resetUpload();
-  resetResult();
-  window.scrollTo(0, 0);
+  resetAll();
+  renderUploadAreas();
+  appendMsg('ai', '请上传文件并点击"开始分析"，AI 将自动生成年报统计报表 📊');
 }
 
 function goHome() {
+  aborted = true;
   document.getElementById('pageWorkflow').classList.remove('active');
   document.getElementById('pageHome').classList.add('active');
   document.getElementById('backBtn').classList.remove('show');
   currentWorkflow = null;
 }
-
 document.getElementById('backBtn').addEventListener('click', goHome);
 
 // ============================================================
-//  FILE UPLOAD
+//  UPLOAD
 // ============================================================
-const uploadZone = document.getElementById('uploadZone');
-const fileInput = document.getElementById('fileInput');
-const fileInfo = document.getElementById('fileInfo');
-const fileName = document.getElementById('fileName');
-const removeBtn = document.getElementById('removeFile');
-const submitBtn = document.getElementById('submitBtn');
-
-uploadZone.addEventListener('click', () => fileInput.click());
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('dragover');
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
-
-fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) handleFile(fileInput.files[0]);
-});
-
-removeBtn.addEventListener('click', e => { e.stopPropagation(); resetUpload(); });
-
-function handleFile(file) {
-  selectedFile = file;
-  fileName.textContent = file.name;
-  fileInfo.classList.add('show');
-  submitBtn.disabled = false;
+function renderUploadAreas() {
+  const container = document.getElementById('uploadAreas');
+  container.innerHTML = '';
+  selectedFiles = {};
+  if (currentWorkflow.multiFile) {
+    currentWorkflow.files.forEach(f => {
+      const zone = createUploadZone(f.key, f.label, f.required);
+      container.appendChild(zone);
+      if (f.defaultData && f.defaultName) {
+        prefillFile(zone, f.key, f.defaultData, f.defaultName);
+      }
+    });
+  } else {
+    const zone = createUploadZone('file', '上传 CSV 文件', true);
+    container.appendChild(zone);
+    if (currentWorkflow.defaultData && currentWorkflow.defaultName) {
+      prefillFile(zone, 'file', currentWorkflow.defaultData, currentWorkflow.defaultName);
+    }
+  }
+  updateSubmitBtn();
 }
 
-function resetUpload() {
-  selectedFile = null;
-  fileInput.value = '';
-  fileInfo.classList.remove('show');
-  submitBtn.disabled = true;
-  submitBtn.classList.remove('loading');
+function base64ToFile(b64, filename) {
+  const byteChars = atob(b64);
+  const bytes = new Uint8Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+  return new File([bytes], filename, { type: 'text/csv' });
+}
+
+function prefillFile(zone, key, b64, name) {
+  const file = base64ToFile(b64, name);
+  selectedFiles[key] = file;
+  const info = zone.querySelector('.fileinfo');
+  const nameSpan = info.querySelector('.name');
+  nameSpan.textContent = name + ' ✅ 示例数据';
+  info.classList.add('show');
+  updateSubmitBtn();
+}
+
+function createUploadZone(key, label, required) {
+  const div = document.createElement('div');
+  div.className = 'upload-zone';
+  div.style.marginBottom = '10px';
+  div.dataset.key = key;
+  div.innerHTML = `<div class="icon">📄</div><div class="hint">${label}${required ? ' <span style="color:#dc2626;font-size:11px">*必填</span>' : ' <span style="color:#8b8fa3;font-size:11px">可选</span>'}</div><div class="sub">点击上传 CSV</div><div class="fileinfo" data-key="${key}"><span class="name"></span><button class="remove">✕</button></div><input type="file" accept=".csv" data-key="${key}">`;
+  const input = div.querySelector('input');
+  const info = div.querySelector('.fileinfo');
+  const nameSpan = info.querySelector('.name');
+  const removeBtn = info.querySelector('.remove');
+  input.addEventListener('change', () => { if (input.files.length) { selectedFiles[key] = input.files[0]; nameSpan.textContent = input.files[0].name; info.classList.add('show'); updateSubmitBtn(); } });
+  div.addEventListener('click', e => { if (e.target.closest('.remove') || e.target.closest('.fileinfo')) return; input.click(); });
+  div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('dragover'); });
+  div.addEventListener('dragleave', () => div.classList.remove('dragover'));
+  div.addEventListener('drop', e => { e.preventDefault(); div.classList.remove('dragover'); if (e.dataTransfer.files.length) { selectedFiles[key] = e.dataTransfer.files[0]; nameSpan.textContent = e.dataTransfer.files[0].name; info.classList.add('show'); updateSubmitBtn(); } });
+  removeBtn.addEventListener('click', e => { e.stopPropagation(); delete selectedFiles[key]; input.value = ''; info.classList.remove('show'); updateSubmitBtn(); });
+  return div;
+}
+
+function updateSubmitBtn() {
+  const btn = document.getElementById('submitBtn');
+  if (!currentWorkflow) { btn.disabled = true; return; }
+  if (currentWorkflow.multiFile) {
+    btn.disabled = !currentWorkflow.files.filter(f => f.required).every(f => selectedFiles[f.key]);
+  } else {
+    btn.disabled = !selectedFiles['file'];
+  }
+}
+
+function resetAll() {
+  selectedFiles = {};
+  aborted = false;
+  document.getElementById('uploadAreas').innerHTML = '';
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').classList.remove('loading');
+  document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('chatStatus').textContent = '就绪';
 }
 
 // ============================================================
-//  SUBMIT
+//  CHAT
 // ============================================================
-submitBtn.addEventListener('click', async () => {
-  if (!selectedFile || !currentWorkflow) return;
-  submitBtn.classList.add('loading');
-  submitBtn.disabled = true;
-  resetResult();
+function appendMsg(role, html) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = `<div class="msg-avatar">${role === 'user' ? '你' : 'AI'}</div><div class="msg-bubble">${html}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function updateLastMsg(html) {
+  const container = document.getElementById('chatMessages');
+  const last = container.lastElementChild;
+  if (last && last.classList.contains('msg') && last.classList.contains('ai')) {
+    const bubble = last.querySelector('.msg-bubble');
+    if (bubble) bubble.innerHTML = html;
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+function setStatus(text) {
+  document.getElementById('chatStatus').textContent = text;
+}
+
+// ============================================================
+//  SUBMIT - Streaming
+// ============================================================
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  if (!currentWorkflow) return;
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  aborted = false;
+
+  // Add user message
+  const fileNames = Object.values(selectedFiles).map(f => f.name).join('、');
+  appendMsg('user', '已上传文件：' + fileNames);
+
+  // Add AI placeholder
+  appendMsg('ai', '<div class="typing"><span></span><span></span><span></span></div>');
+  setStatus('分析中...');
+
   try {
-    // 1. Upload file to Dify
-    const fileId = await uploadFile(selectedFile, currentWorkflow.apiKey);
-    // 2. Run workflow
-    const result = await runWorkflow(currentWorkflow, fileId);
-    // 3. Show result
-    showResult(result);
+    const fileIds = {};
+    if (currentWorkflow.multiFile) {
+      for (const f of currentWorkflow.files) {
+        if (selectedFiles[f.key]) fileIds[f.key] = await uploadFile(selectedFiles[f.key], currentWorkflow.apiKey);
+      }
+      await runStreaming(currentWorkflow, fileIds, true);
+    } else {
+      const fileId = await uploadFile(selectedFiles['file'], currentWorkflow.apiKey);
+      await runStreaming(currentWorkflow, fileId, false);
+    }
   } catch (e) {
-    showError(e.message || '分析失败，请稍后重试');
+    if (!aborted) {
+      updateLastMsg('<div class="error">⚠️ ' + escapeHtml(e.message) + '</div>');
+      setStatus('出错');
+    }
   } finally {
-    submitBtn.classList.remove('loading');
-    submitBtn.disabled = false;
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    if (!aborted) setStatus('完成');
   }
 });
 
@@ -371,104 +460,89 @@ async function uploadFile(file, apiKey) {
   formData.append('file', file);
   formData.append('user', 'demo');
   formData.append('type', 'document');
-
   const res = await fetch(API_BASE + '/v1/files/upload', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + apiKey },
-    body: formData
+    method: 'POST', headers: { 'Authorization': 'Bearer ' + apiKey }, body: formData
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || '文件上传失败 (HTTP ' + res.status + ')');
+    throw new Error(err.message || '文件上传失败');
   }
   const data = await res.json();
   return data.id;
 }
 
-async function runWorkflow(wf, fileId) {
-  const body = {
-    inputs: {},
-    response_mode: 'blocking',
-    user: 'demo'
-  };
-  // 如果 workflow 有 finance_url 参数，传入文件 ID
-  if (wf.inputs && wf.inputs.finance_url !== undefined) {
-    body.inputs.finance_url = fileId;
+async function runStreaming(wf, fileArg, isMulti) {
+  const inputs = {};
+  if (isMulti) {
+    for (const key in fileArg) {
+      inputs[key] = { transfer_method: 'local_file', upload_file_id: fileArg[key], type: 'document' };
+    }
   } else {
-    // 默认传入文件 ID
-    body.inputs.file_id = fileId;
+    inputs[wf.fileVar || 'finance_url'] = { transfer_method: 'local_file', upload_file_id: fileArg, type: 'document' };
   }
+
+  const body = { inputs, files: [], response_mode: 'streaming', user: 'demo' };
 
   const res = await fetch(API_BASE + '/v1/workflows/run', {
     method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + wf.apiKey,
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Authorization': 'Bearer ' + wf.apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || '分析请求失败 (HTTP ' + res.status + ')');
+    throw new Error(err.message || '分析请求失败');
   }
-  const data = await res.json();
-  return data;
-}
 
-// ============================================================
-//  RESULT
-// ============================================================
-function showResult(data) {
-  const area = document.getElementById('resultArea');
-  const content = document.getElementById('resultContent');
-  area.classList.add('show');
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let outputText = '';
 
-  // Try to extract useful text from workflow result
-  let text = '';
-  if (data.data && data.data.outputs) {
-    const outputs = data.data.outputs;
-    // Find the first non-empty output value
-    for (const key in outputs) {
-      if (outputs[key] && typeof outputs[key] === 'string') {
-        text = outputs[key];
-        break;
-      } else if (outputs[key] && typeof outputs[key] === 'object') {
-        text = JSON.stringify(outputs[key], null, 2);
-        break;
-      }
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith('data: ')) continue;
+      try {
+        const event = JSON.parse(trimmed.slice(6));
+        if (event.event === 'text_chunk' && event.data?.text) {
+          outputText += event.data.text;
+          updateLastMsg(renderMarkdown(outputText));
+        } else if (event.event === 'workflow_finished' && event.data?.outputs) {
+          const outputs = event.data.outputs;
+          if (outputs.x && typeof outputs.x === 'string') {
+            outputText = outputs.x;
+            updateLastMsg(renderMarkdown(outputText));
+          } else if (outputs.text && typeof outputs.text === 'string') {
+            outputText = outputs.text;
+            updateLastMsg(renderMarkdown(outputText));
+          }
+        } else if (event.event === 'node_started') {
+          setStatus(event.data?.title || '处理中...');
+        }
+      } catch (e) { /* skip parse errors */ }
     }
   }
-  if (!text) {
-    text = JSON.stringify(data, null, 2);
-  }
-  content.innerHTML = formatResult(text);
 }
 
-function showError(msg) {
-  const area = document.getElementById('resultArea');
-  const content = document.getElementById('resultContent');
-  area.classList.add('show');
-  content.innerHTML = '<div class="error">⚠️ ' + escapeHtml(msg) + '</div>';
-}
-
-function resetResult() {
-  const area = document.getElementById('resultArea');
-  area.classList.remove('show');
-  document.getElementById('resultContent').innerHTML = '';
-}
-
-function formatResult(text) {
-  // Simple markdown-like formatting
-  let html = escapeHtml(text);
-  // Bold
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  // Lines
-  html = html.replace(/\n/g, '<br>');
-  // Tables (simple pipe format)
-  html = html.replace(/\|(.+?)\|/g, function(match) {
-    return '<span class="tag">' + match.replace(/\|/g, '').trim() + '</span>';
-  });
-  return html;
+// ============================================================
+//  MARKDOWN RENDER
+// ============================================================
+function renderMarkdown(text) {
+  if (!text) return '<div class="typing"><span></span><span></span><span></span></div>';
+  try {
+    if (typeof marked !== 'undefined') {
+      return marked.parse(text, { breaks: true, gfm: true });
+    }
+  } catch (e) { /* fallback */ }
+  return escapeHtml(text).replace(/\n/g, '<br>');
 }
 
 function escapeHtml(str) {
@@ -476,11 +550,6 @@ function escapeHtml(str) {
   div.textContent = str;
   return div.innerHTML;
 }
-
-document.getElementById('newAnalysis').addEventListener('click', () => {
-  resetResult();
-  resetUpload();
-});
 
 // ============================================================
 //  INIT
