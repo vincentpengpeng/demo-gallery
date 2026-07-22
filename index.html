@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>旌越科技 · 售前 Demo 展厅</title>
-<meta name="description" content="科大讯飞 × 旌越科技 — 一站式预览所有产品能力演示，涵盖教育、文旅及基础能力场景。">
+<meta name="description" content="旌越科技 — 一站式预览所有产品能力演示，涵盖教育、文旅及基础能力场景。">
 <style>
   /* ========== Reset & Base ========== */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -95,18 +95,21 @@
     margin: 0 auto;
   }
   .hero-logo {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 12px;
+    padding: 0.6rem 1.2rem;
   }
   .hero-logo img {
-    height: 36px;
+    height: 32px;
     width: auto;
-    filter: brightness(0) invert(1);
-    opacity: 0.95;
   }
   .hero-logo .sep {
     width: 1px;
@@ -451,7 +454,7 @@
 <!-- ===== Top Navigation ===== -->
 <nav class="top-nav">
   <div class="brand">
-    <img src="assets/logo.png" alt="科大讯飞 × 旌越科技">
+    <img src="assets/logo.png" alt="旌越科技">
     <span class="brand-text">旌越科技</span>
   </div>
   <span class="badge">Pre-Sales Demo Gallery</span>
@@ -461,7 +464,7 @@
 <header class="hero">
   <div class="hero-inner">
     <div class="hero-logo">
-      <img src="assets/logo.png" alt="科大讯飞 × 旌越科技">
+      <img src="assets/logo.png" alt="旌越科技">
     </div>
     <h1>售前 Demo 展厅</h1>
     <p>一站式预览所有产品能力演示，快速定位适合客户场景的解决方案</p>
@@ -497,7 +500,7 @@
 <!-- ===== Footer ===== -->
 <footer class="footer">
   <div class="footer-brand">
-    <img src="assets/logo.png" alt="科大讯飞 × 旌越科技">
+    <img src="assets/logo.png" alt="旌越科技">
   </div>
   <p id="footerText"></p>
 </footer>
