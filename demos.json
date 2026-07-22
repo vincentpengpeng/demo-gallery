@@ -79,6 +79,28 @@
       "tags": ["多语种", "导览", "景区"],
       "status": "online",
       "created": "2026-07"
+    },
+    {
+      "id": "foundation-voice-dictation",
+      "title": "多语种实时语音听写",
+      "category": "foundation",
+      "description": "将短音频（≤60秒）精准识别成文字，支持65个语种、23种方言和1个民族语言，实时返回结果，达到边说边返回的效果，可提供公有云接口及私有化部署方案。",
+      "url": "https://www.xfyun.cn/services/voicedictation",
+      "screenshot": "",
+      "tags": ["语音识别", "多语种", "实时转写"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "foundation-online-tts",
+      "title": "在线语音合成",
+      "category": "foundation",
+      "description": "将文本转化为语音，提供众多特色的发音人（音库）供选择，合成音在音色、自然度等方面接近甚至超过人声，可提供公有云接口及私有化部署方案。",
+      "url": "https://www.xfyun.cn/services/online_tts",
+      "screenshot": "",
+      "tags": ["语音合成", "TTS", "音库"],
+      "status": "online",
+      "created": "2026-07"
     }
   ]
 }
