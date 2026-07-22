@@ -86,7 +86,7 @@
       "category": "foundation",
       "description": "将短音频（≤60秒）精准识别成文字，支持65个语种、23种方言和1个民族语言，实时返回结果，达到边说边返回的效果，可提供公有云接口及私有化部署方案。",
       "url": "https://www.xfyun.cn/services/voicedictation",
-      "screenshot": "",
+      "screenshot": "assets/screenshots/foundation-voice-dictation.png",
       "tags": ["语音识别", "多语种", "实时转写"],
       "status": "online",
       "created": "2026-07"
