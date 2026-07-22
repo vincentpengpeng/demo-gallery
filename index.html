@@ -55,19 +55,13 @@
   .hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
   .hero-top { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
   .hero-title-group { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
-  .hero-badge {
-    font-family: "Outfit", sans-serif; font-size: 0.6rem; letter-spacing: 0.08em;
-    padding: 0.25rem 0.8rem; border-radius: 100px; display: inline-block;
-    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.45); text-transform: uppercase; margin-bottom: 0.4rem;
-  }
   .hero h1 {
     font-family: "Outfit", sans-serif; font-size: 2.2rem; font-weight: 700;
     letter-spacing: -0.03em; line-height: 1.15;
     background: linear-gradient(135deg, #fff 50%, #818cf8 90%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .hero-stats { display: flex; gap: 1.5rem; flex-shrink: 0; margin-left: auto; }
+  .hero-stats { display: flex; gap: 1.5rem; flex-shrink: 0; margin-left: auto; padding-top: 2px; }
   .hero-stat { text-align: center; }
   .hero-stat-num { font-family: "Outfit", sans-serif; font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
   .hero-stat-label { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-top: 0.15rem; }
@@ -267,10 +261,7 @@
   <div class="hero-inner">
     <div class="hero-top">
       <div class="hero-title-group">
-        <div>
-          <div class="hero-badge">✦ Product Showcase</div>
-          <h1>产品能力展示</h1>
-        </div>
+        <h1>产品能力展示</h1>
         <div class="hero-stats">
           <div class="hero-stat">
             <div class="hero-stat-num" id="totalDemos">0</div>
