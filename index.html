@@ -122,6 +122,27 @@
   }
   .stat-divider { width: 1px; background: #eaebf2; align-self: stretch; }
 
+  /* ========== Company Intro ========== */
+  .company-intro {
+    max-width: 720px; margin: 2.5rem auto 1.5rem;
+    text-align: center; padding: 0 1.5rem;
+  }
+  .company-intro .tagline {
+    font-size: 0.85rem; color: #4f46e5; font-weight: 600;
+    letter-spacing: 0.04em; margin-bottom: 0.8rem;
+  }
+  .company-intro .mission {
+    font-size: 1.05rem; color: #3d3f50; font-weight: 500;
+    line-height: 1.8; margin-bottom: 0.5rem;
+  }
+  .company-intro .vision {
+    font-size: 0.9rem; color: #6b6f84; line-height: 1.7;
+  }
+  @media (max-width: 768px) {
+    .company-intro { margin: 1.5rem auto 0.5rem; }
+    .company-intro .mission { font-size: 0.95rem; }
+  }
+
   /* ========== Workspace ========== */
   .workspace { max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 0; }
 
@@ -335,6 +356,13 @@
     <div class="stat-number" id="onlineCount">0</div>
     <div class="stat-label">可在线体验</div>
   </div>
+</div>
+
+<!-- ===== Company Intro ===== -->
+<div class="company-intro">
+  <div class="tagline">科大讯飞集团旗下子公司</div>
+  <div class="mission">专注文旅、教育产业 AI 赋能<br>用技术守护文化，推动人工智能向善，切实造福大众</div>
+  <div class="vision">以 AI 大模型为引擎，打造「AI + 行业」的全景式解决方案</div>
 </div>
 
 <!-- ===== Main ===== -->
