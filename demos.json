@@ -57,6 +57,17 @@
       "tags": ["数字人", "展会", "多语种"],
       "status": "online",
       "created": "2026-07"
+    },
+    {
+      "id": "culture-multilingual-guide",
+      "title": "多语种 AI 导览助手",
+      "category": "culture-tourism",
+      "description": "面向景区/博物馆的多语种 AI 智能导览助手（小程序 + H5），支持多语种语音交互、路线指引、景点讲解、智能问答等一站式服务。",
+      "url": "https://ai-h5.zjjdaxiagu.com/home",
+      "screenshot": "",
+      "tags": ["多语种", "导览", "景区"],
+      "status": "online",
+      "created": "2026-07"
     }
   ]
 }
