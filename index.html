@@ -197,6 +197,50 @@
     width: 5px; height: 5px; border-radius: 50%;
     background: #34d399; box-shadow: 0 0 4px rgba(52,211,153,0.5);
   }
+  .card-play-btn {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.15);
+    opacity: 0; transition: opacity 0.25s; cursor: pointer; border: none;
+  }
+  .card-media:hover .card-play-btn { opacity: 1; }
+  .card-play-btn .circle {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s; border: 2px solid rgba(255,255,255,0.3);
+  }
+  .card-play-btn:hover .circle { transform: scale(1.1); }
+  .card-play-btn .circle::after {
+    content: ''; display: block;
+    width: 0; height: 0;
+    border-style: solid; border-width: 8px 0 8px 14px;
+    border-color: transparent transparent transparent #fff;
+    margin-left: 3px;
+  }
+
+  /* Video Modal */
+  .video-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+  }
+  .video-overlay.show { display: flex; }
+  .video-overlay .close {
+    position: absolute; top: 20px; right: 24px;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); border: none; cursor: pointer;
+    color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .video-overlay .close:hover { background: rgba(255,255,255,0.2); }
+  .video-overlay .video-wrap {
+    width: 90%; max-width: 800px; aspect-ratio: 16 / 9;
+    border-radius: 12px; overflow: hidden;
+  }
+  .video-overlay .video-wrap iframe {
+    width: 100%; height: 100%; border: none;
+  }
 
   .card-body { padding: 1rem 1.1rem 1.1rem; flex: 1; display: flex; flex-direction: column; }
   .card-body h3 { font-size: 0.95rem; font-weight: 600; color: #1a1a2e; margin-bottom: 0.3rem; line-height: 1.4; }
@@ -294,6 +338,12 @@
   <div class="demo-grid" id="demoGrid"></div>
 </div>
 
+<!-- ===== Video Modal ===== -->
+<div class="video-overlay" id="videoOverlay">
+  <button class="close" id="videoClose">✕</button>
+  <div class="video-wrap" id="videoWrap"></div>
+</div>
+
 <!-- ===== Footer ===== -->
 <footer class="footer">
   <div class="footer-inner">
@@ -317,6 +367,25 @@
   window.placeholderHTML = function(icon) {
     return '<div class="media-placeholder"><div class="icon">' + icon + '</div><span class="hint">截图待添加</span></div>';
   };
+
+  window.playVideo = function(url) {
+    var overlay = document.getElementById('videoOverlay');
+    var wrap = document.getElementById('videoWrap');
+    wrap.innerHTML = '<iframe src="' + url + '" allowfullscreen allow="autoplay"></iframe>';
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  };
+
+  document.getElementById('videoClose').addEventListener('click', function() {
+    document.getElementById('videoOverlay').classList.remove('show');
+    document.getElementById('videoWrap').innerHTML = '';
+    document.body.style.overflow = '';
+  });
+  document.getElementById('videoOverlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      document.getElementById('videoClose').click();
+    }
+  });
 
   window.handleScreenshot = function(img) {
     img.addEventListener('load', function() {
@@ -381,9 +450,11 @@
         card.style.animationDelay = (i * 0.05) + 's';
 
         var hasShot = demo.screenshot && demo.screenshot.length > 0;
+        var hasVideo = demo.video && demo.video.length > 0;
         var shotHtml = hasShot
           ? '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=window.placeholderHTML(\'' + cat.icon + '\')" onload="window.handleScreenshot(this)">'
           : '<div class="media-placeholder"><div class="icon">' + cat.icon + '</div><span class="hint">截图待添加</span></div>';
+        var playHtml = hasVideo ? '<button class="card-play-btn" onclick="event.preventDefault();window.playVideo(\'' + demo.video + '\')"><span class="circle"></span></button>' : '';
 
         var statusHtml = demo.status === 'online'
           ? '<span class="card-status-badge"><span class="dot"></span>可体验</span>' : '';
@@ -397,7 +468,7 @@
 
         card.innerHTML =
           '<a href="' + demo.url + '" target="_blank" rel="noopener" style="display:flex;flex-direction:column;height:100%;color:inherit;text-decoration:none">' +
-          '<div class="card-media">' + shotHtml +
+          '<div class="card-media">' + shotHtml + playHtml +
             '<span class="card-cat-badge">' + cat.icon + ' ' + cat.name + '</span>' + statusHtml +
           '</div>' +
           '<div class="card-body">' +
