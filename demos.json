@@ -94,6 +94,18 @@
       "created": "2026-07"
     },
     {
+      "id": "culture-mobile-digital-human",
+      "title": "移动数字人",
+      "category": "culture-tourism",
+      "description": "空间自由与多维度交互能力，可深度赋能智能接待、动线指引、场景化导览等多元化服务场景。具备一站式建图部署、声源定位、多模态交互、形象定制等核心产品功能。",
+      "url": "https://aiui.xfyun.cn/solution/mobile-digital-person?chan=AIUI&way=menu",
+      "screenshot": "assets/screenshots/culture-mobile-digital-human.png",
+      "video": "assets/videos/mobile-digital-human.mp4",
+      "tags": ["数字人", "移动", "智能接待"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "foundation-voice-dictation",
       "title": "多语种实时语音听写",
       "category": "foundation",
