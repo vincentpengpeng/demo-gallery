@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>旌越科技 · 产品能力展示</title>
+<title>旌越科技 · AI 产品能力展示</title>
 <meta name="description" content="旌越科技 — 一站式预览旌越科技 AI 产品能力，涵盖教育、文旅及基础能力场景。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -60,7 +60,8 @@
   @media (max-width: 768px) { .hero-robot { display: none; } }
   .hero-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
   .hero-top { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
-  .hero-title-group { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+  .hero-title-group { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .hero-ai-icon { width: 32px; height: 32px; opacity: 0.6; }
   .hero h1 {
     font-family: "Outfit", sans-serif; font-size: 2.2rem; font-weight: 700;
     letter-spacing: -0.03em; line-height: 1.15;
@@ -126,10 +127,7 @@
   /* ========== Filter Tabs ========== */
   .filter-bar {
     display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap;
-    margin-bottom: 1.5rem; align-items: center;
-  }
-  .filter-ai-badge {
-    width: 24px; height: 24px; opacity: 0.35; flex-shrink: 0;
+    margin-bottom: 1.5rem;
   }
   .filter-btn {
     padding: 0.4rem 1rem; border-radius: 100px; border: 1.5px solid #e2e5ed;
@@ -316,7 +314,8 @@
   <div class="hero-inner">
     <div class="hero-top">
       <div class="hero-title-group">
-        <h1>产品能力展示</h1>
+        <img src="assets/brand-ai-pixel.png" alt="" class="hero-ai-icon">
+        <h1>AI 产品能力展示</h1>
         <div class="hero-stats">
           <div class="hero-stat">
             <div class="hero-stat-num" id="totalDemos">0</div>
@@ -345,7 +344,7 @@
 
 <!-- ===== Content ===== -->
 <div class="content">
-  <div class="filter-bar" id="filterBar"><img src="assets/brand-ai-pixel.png" alt="" class="filter-ai-badge"></div>
+  <div class="filter-bar" id="filterBar"></div>
   <div class="demo-grid" id="demoGrid"></div>
 </div>
 
