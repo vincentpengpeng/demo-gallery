@@ -82,6 +82,18 @@
       "created": "2026-07"
     },
     {
+      "id": "culture-transparent-translator",
+      "title": "多语言 AI 透明翻译屏",
+      "category": "culture-tourism",
+      "description": "业界首个搭载多模态降噪的透明终端，支持中、英、法、葡、俄、日、韩等37种语言实时识别翻译，解决公共服务窗口跨语言交流问题。",
+      "url": "",
+      "screenshot": "assets/screenshots/culture-transparent-translator.png",
+      "video": "assets/videos/transparent-translator.mp4",
+      "tags": ["多语种", "翻译", "透明屏"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "foundation-voice-dictation",
       "title": "多语种实时语音听写",
       "category": "foundation",
