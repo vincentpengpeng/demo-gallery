@@ -26,51 +26,6 @@
   ],
   "demos": [
     {
-      "id": "edu-admission-assistant",
-      "title": "智能招生助手",
-      "category": "education",
-      "description": "AI 驱动的智能招生咨询系统，支持招生政策问答、专业推荐、录取分数线查询、报考指导等一站式服务。",
-      "url": "https://gdut.aiadtech.com/",
-      "screenshot": "assets/screenshots/edu-admission-assistant.png",
-      "tags": ["招生咨询", "智能问答", "报考指导"],
-      "status": "online",
-      "created": "2026-07"
-    },
-    {
-      "id": "edu-ai-digital-teacher",
-      "title": "AI 数字教师",
-      "category": "education",
-      "description": "集AI配音、虚拟人视频生成、PPT生成视频等功能于一体，通过AI数字分身+智能体，赋能课程建设、数字助教、院校宣传视频生成等场景。",
-      "url": "https://www.xfzhizuo.cn/",
-      "screenshot": "assets/screenshots/edu-ai-digital-teacher.png",
-      "video": "assets/videos/ai-digital-teacher.mp4",
-      "tags": ["数字教师", "AI配音", "虚拟人"],
-      "status": "online",
-      "created": "2026-07"
-    },
-    {
-      "id": "edu-ai-party-school",
-      "title": "AI 党校",
-      "category": "education",
-      "description": "面向党校干部培训的 AI 智能助手 Demo，涵盖干部培训、科研咨政、数字化党建、涉外交流、教务管理等场景。",
-      "url": "demos/ai-party-school/",
-      "screenshot": "assets/screenshots/edu-ai-party-school.png",
-      "tags": ["党校培训", "AI助手", "干部教育"],
-      "status": "online",
-      "created": "2026-07"
-    },
-    {
-      "id": "edu-social-science-report",
-      "title": "AI 社科年报统计",
-      "category": "education",
-      "description": "AI 驱动的社科年报统计平台，支持学术交流、科研成果、项目经费、非项目经费四大类报表的智能生成与分析。",
-      "url": "demos/ai-social-science-report/",
-      "screenshot": "assets/screenshots/edu-social-science-report.png",
-      "tags": ["社科统计", "年报", "报表生成"],
-      "status": "online",
-      "created": "2026-07"
-    },
-    {
       "id": "culture-multilingual-guide",
       "title": "多语种 AI 导览助手",
       "category": "culture-tourism",
@@ -83,6 +38,17 @@
       "created": "2026-07"
     },
     {
+      "id": "edu-admission-assistant",
+      "title": "智能招生助手",
+      "category": "education",
+      "description": "AI 驱动的智能招生咨询系统，支持招生政策问答、专业推荐、录取分数线查询、报考指导等一站式服务。",
+      "url": "https://gdut.aiadtech.com/",
+      "screenshot": "assets/screenshots/edu-admission-assistant.png",
+      "tags": ["招生咨询", "智能问答", "报考指导"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "culture-expo-digital-human",
       "title": "AI 多语种数字人",
       "category": "culture-tourism",
@@ -90,6 +56,18 @@
       "url": "https://virtual-man.xfyun.cn/interact_web/common/screen/317582127745077248",
       "screenshot": "assets/screenshots/culture-ai-digital-human-expo.jpg",
       "tags": ["数字人", "展会", "多语种"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "edu-ai-digital-teacher",
+      "title": "AI 数字教师",
+      "category": "education",
+      "description": "集AI配音、虚拟人视频生成、PPT生成视频等功能于一体，通过AI数字分身+智能体，赋能课程建设、数字助教、院校宣传视频生成等场景。",
+      "url": "https://www.xfzhizuo.cn/",
+      "screenshot": "assets/screenshots/edu-ai-digital-teacher.png",
+      "video": "assets/videos/ai-digital-teacher.mp4",
+      "tags": ["数字教师", "AI配音", "虚拟人"],
       "status": "online",
       "created": "2026-07"
     },
@@ -114,6 +92,28 @@
       "screenshot": "assets/screenshots/culture-mobile-digital-human.png",
       "video": "assets/videos/mobile-digital-human.mp4",
       "tags": ["数字人", "移动", "智能接待"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "edu-ai-party-school",
+      "title": "AI 党校",
+      "category": "education",
+      "description": "面向党校干部培训的 AI 智能助手 Demo，涵盖干部培训、科研咨政、数字化党建、涉外交流、教务管理等场景。",
+      "url": "demos/ai-party-school/",
+      "screenshot": "assets/screenshots/edu-ai-party-school.png",
+      "tags": ["党校培训", "AI助手", "干部教育"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "edu-social-science-report",
+      "title": "AI 社科年报统计",
+      "category": "education",
+      "description": "AI 驱动的社科年报统计平台，支持学术交流、科研成果、项目经费、非项目经费四大类报表的智能生成与分析。",
+      "url": "demos/ai-social-science-report/",
+      "screenshot": "assets/screenshots/edu-social-science-report.png",
+      "tags": ["社科统计", "年报", "报表生成"],
       "status": "online",
       "created": "2026-07"
     },
