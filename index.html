@@ -371,7 +371,11 @@
   window.playVideo = function(url) {
     var overlay = document.getElementById('videoOverlay');
     var wrap = document.getElementById('videoWrap');
-    wrap.innerHTML = '<iframe src="' + url + '" allowfullscreen allow="autoplay"></iframe>';
+    if (url.indexOf('.mp4') > -1 || url.indexOf('.webm') > -1) {
+      wrap.innerHTML = '<video controls autoplay style="width:100%;height:100%;background:#000;border-radius:12px"><source src="' + url + '" type="video/mp4"></video>';
+    } else {
+      wrap.innerHTML = '<iframe src="' + url + '" allowfullscreen allow="autoplay"></iframe>';
+    }
     overlay.classList.add('show');
     document.body.style.overflow = 'hidden';
   };
