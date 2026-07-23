@@ -332,21 +332,38 @@
 
   /* ========== Footer ========== */
   .footer {
-    border-top: 1px solid #eaebf2; margin-top: 2rem;
-    padding: 2rem; text-align: center;
+    border-top: 1px solid #eaebf2; margin-top: 3rem;
+    padding: 2.5rem 2rem 1.5rem; background: #fff;
   }
-  .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
-  .footer-brand { display: flex; align-items: center; gap: 0.5rem; }
-  .footer-brand img { height: 18px; width: auto; opacity: 0.25; }
-  .footer-info { font-size: 0.72rem; color: #8b8fa3; line-height: 1.7; text-align: left; }
+  .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 2.5rem; flex-wrap: wrap; }
+  .footer-col { flex: 1; min-width: 180px; }
+  .footer-col:last-child { flex: 0 0 auto; }
+  .footer-brand { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
+  .footer-brand img { height: 22px; width: auto; }
+  .footer-brand-name { font-size: 0.9rem; font-weight: 600; color: #1a1a2e; }
+  .footer-addr { font-size: 0.75rem; color: #8b8fa3; line-height: 1.7; }
+  .footer-col-title { font-size: 0.75rem; font-weight: 600; color: #1a1a2e; margin-bottom: 0.6rem; letter-spacing: 0.03em; }
+  .footer-contact-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: #5a5d72; line-height: 1.8; }
+  .footer-contact-item .icon { width: 14px; text-align: center; flex-shrink: 0; color: #818cf8; font-size: 0.7rem; }
+  .footer-contact-item a { color: #5a5d72; transition: color 0.15s; }
+  .footer-contact-item a:hover { color: #818cf8; }
   .footer-qr { text-align: center; }
-  .footer-qr img { width: 70px; height: 70px; border-radius: 6px; border: 1px solid #eaebf2; margin: 0 auto; }
-  .footer-qr-label { font-size: 0.6rem; color: #b0b4c7; margin-top: 0.3rem; }
-  .footer-copy { font-size: 0.7rem; color: #b0b4c7; width: 100%; text-align: center; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #eaebf2; }
+  .footer-qr img { width: 80px; height: 80px; border-radius: 8px; border: 1px solid #eaebf2; }
+  .footer-qr-label { font-size: 0.65rem; color: #b0b4c7; margin-top: 0.35rem; letter-spacing: 0.02em; }
+  .footer-bottom {
+    margin-top: 1.5rem; padding-top: 1rem;
+    border-top: 1px solid #eaebf2;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .footer-copy { font-size: 0.7rem; color: #b0b4c7; }
+  .footer-links { display: flex; gap: 1rem; }
+  .footer-links a { font-size: 0.7rem; color: #b0b4c7; transition: color 0.15s; }
+  .footer-links a:hover { color: #818cf8; }
 
   @media (max-width: 768px) {
-    .footer-inner { flex-direction: column; align-items: center; text-align: center; }
-    .footer-info { text-align: center; }
+    .footer-inner { flex-direction: column; gap: 1.5rem; }
+    .footer-col:last-child { flex: 1; }
+    .footer-bottom { flex-direction: column; text-align: center; }
   }
 </style>
 </head>
@@ -415,16 +432,34 @@
 <!-- ===== Footer ===== -->
 <footer class="footer">
   <div class="footer-inner">
-    <div class="footer-brand"><img src="assets/logo.png" alt="旌越科技"></div>
-    <div class="footer-info">
-      广州旌越科技有限公司<br>
-      广州市海珠区阅江西路218号 广州国际媒体港西港10层
+    <div class="footer-col">
+      <div class="footer-brand">
+        <img src="assets/logo.png" alt="旌越科技">
+        <span class="footer-brand-name">广州旌越科技有限公司</span>
+      </div>
+      <div class="footer-addr">
+        广州市海珠区阅江西路218号<br>
+        广州国际媒体港西港10层
+      </div>
     </div>
-    <div class="footer-qr">
-      <img src="assets/qrcode.jpg" alt="公众号">
-      <div class="footer-qr-label">扫码关注</div>
+    <div class="footer-col">
+      <div class="footer-col-title">联系方式</div>
+      <div class="footer-contact-item"><span class="icon">📞</span>13925104679</div>
+      <div class="footer-contact-item"><span class="icon">✉</span><a href="mailto:sypeng9@iflytek.com">sypeng9@iflytek.com</a></div>
     </div>
+    <div class="footer-col">
+      <div class="footer-qr">
+        <img src="assets/qrcode.jpg" alt="公众号">
+        <div class="footer-qr-label">扫码关注公众号</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
     <div class="footer-copy" id="footerText"></div>
+    <div class="footer-links">
+      <a href="https://www.iflytek.com" target="_blank" rel="noopener">科大讯飞</a>
+      <a href="https://www.xfyun.cn" target="_blank" rel="noopener">讯飞开放平台</a>
+    </div>
   </div>
 </footer>
 
