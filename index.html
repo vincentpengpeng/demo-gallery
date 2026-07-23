@@ -72,9 +72,89 @@
   .hero-stat-num { font-family: "Outfit", sans-serif; font-size: 1.4rem; font-weight: 700; color: #fff; line-height: 1; }
   .hero-stat-label { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-top: 0.15rem; }
   .hero-stat-divider { width: 1px; background: rgba(255,255,255,0.08); }
-  .hero-intro {
-    display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
-    padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);
+.hero-intro {
+    margin-top: 1.5rem; padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+  }
+  .hero-intro::before {
+    content: ''; position: absolute; top: -1px; left: 0;
+    width: 3rem; height: 2px;
+    background: linear-gradient(90deg, #818cf8, transparent);
+    border-radius: 2px;
+  }
+  .hero-tagline {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.2rem 0.8rem 0.2rem 0.6rem;
+    border-radius: 100px;
+    background: rgba(129,140,248,0.08);
+    border: 1px solid rgba(129,140,248,0.12);
+    font-size: 0.7rem; font-weight: 500; color: #a5b4fc;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .hero-tagline .dot {
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 50%; background: #818cf8;
+    flex-shrink: 0;
+  }
+  .hero-positioning {
+    max-width: 680px;
+  }
+  .hero-positioning .lead {
+    display: block;
+    font-family: "Outfit", sans-serif;
+    font-size: 1.05rem; font-weight: 600;
+    color: #e8eaf0;
+    line-height: 1.6; margin-bottom: 0.3rem;
+  }
+  .hero-positioning .lead em {
+    font-style: normal;
+    background: linear-gradient(135deg, #a5b4fc, #818cf8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-positioning .body {
+    display: block;
+    font-size: 0.82rem; color: rgba(255,255,255,0.45);
+    line-height: 1.7; letter-spacing: 0.01em;
+  }
+  .hero-divider {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin: 1.2rem 0 0.8rem; max-width: 400px;
+  }
+  .hero-divider .line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(129,140,248,0.2), transparent);
+  }
+  .hero-divider .diamond {
+    width: 5px; height: 5px;
+    transform: rotate(45deg);
+    background: rgba(129,140,248,0.3);
+    flex-shrink: 0;
+  }
+  .hero-motto {
+    font-size: 0.75rem; color: rgba(255,255,255,0.35);
+    letter-spacing: 0.03em; line-height: 1.6;
+  }
+  .hero-motto span {
+    display: inline-block;
+    padding: 0 0.4rem;
+    position: relative;
+  }
+  .hero-motto span + span::before {
+    content: '·'; position: absolute; left: -0.15rem;
+    color: rgba(255,255,255,0.15);
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 1.5rem 1rem 1.2rem; }
+    .hero-top { flex-direction: column; align-items: flex-start; }
+    .hero-title-group { flex-direction: column; align-items: flex-start; }
+    .hero-stats { width: 100%; justify-content: flex-start; gap: 1.2rem; }
+    .hero h1 { font-size: 1.5rem; }
+    .hero-stat-num { font-size: 1.1rem; }
+    .hero-positioning .lead { font-size: 0.92rem; }
+    .hero-positioning .body { font-size: 0.75rem; }
   }
   .hero-intro .tagline {
     font-size: 0.75rem; color: #818cf8; font-weight: 600; letter-spacing: 0.02em;
@@ -333,9 +413,17 @@
       </div>
     </div>
     <div class="hero-intro">
-      <span class="tagline">科大讯飞集团旗下子公司</span>
-      <span class="mission">专注文旅、教育产业 AI 赋能 · 用技术守护文化，推动人工智能向善</span>
-      <span class="vision">以 AI 大模型为引擎，打造「AI + 行业」全景式解决方案</span>
+      <div class="hero-tagline"><span class="dot"></span>科大讯飞集团旗下子公司</div>
+      <div class="hero-positioning">
+        <span class="lead">专注文旅、教育产业 <em>AI 赋能</em>，<br>基于多模态多模型的 <em>AI 应用创新解决方案</em> 服务商</span>
+        <span class="body">打造「AI+行业」全景式解决方案，以 AI 构建文旅、教育智慧新生态，<br>让每座城市拥抱智能，畅享未来。</span>
+      </div>
+      <div class="hero-divider">
+        <span class="line"></span><span class="diamond"></span><span class="line"></span>
+      </div>
+      <div class="hero-motto">
+        <span>技术守护文化</span><span>推动人工智能向善</span><span>切实造福大众</span>
+      </div>
     </div>
   </div>
 </header>
