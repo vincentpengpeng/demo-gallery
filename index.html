@@ -106,44 +106,27 @@
     font-family: "Outfit", sans-serif;
     font-size: 1.05rem; font-weight: 600;
     color: #e8eaf0;
-    line-height: 1.6; margin-bottom: 0.3rem;
+    line-height: 1.6;
   }
   .hero-positioning .lead em {
     font-style: normal;
     background: linear-gradient(135deg, #a5b4fc, #818cf8);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .hero-positioning .body {
-    display: block;
-    font-size: 0.82rem; color: rgba(255,255,255,0.45);
-    line-height: 1.7; letter-spacing: 0.01em;
-  }
-  .hero-divider {
-    display: flex; align-items: center; gap: 0.75rem;
-    margin: 1.2rem 0 0.8rem; max-width: 400px;
-  }
-  .hero-divider .line {
-    flex: 1; height: 1px;
-    background: linear-gradient(90deg, rgba(129,140,248,0.2), transparent);
-  }
-  .hero-divider .diamond {
-    width: 5px; height: 5px;
-    transform: rotate(45deg);
-    background: rgba(129,140,248,0.3);
-    flex-shrink: 0;
-  }
   .hero-motto {
-    font-size: 0.75rem; color: rgba(255,255,255,0.35);
-    letter-spacing: 0.03em; line-height: 1.6;
+    margin-top: 1.2rem;
+    font-family: "Outfit", sans-serif;
+    font-size: 1rem; font-weight: 600;
+    color: #e0e2f0;
+    letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
   }
   .hero-motto span {
-    display: inline-block;
-    padding: 0 0.4rem;
     position: relative;
   }
   .hero-motto span + span::before {
-    content: '·'; position: absolute; left: -0.15rem;
-    color: rgba(255,255,255,0.15);
+    content: '·'; margin-right: 1rem;
+    color: rgba(255,255,255,0.2); font-weight: 300;
   }
 
   @media (max-width: 768px) {
@@ -154,15 +137,8 @@
     .hero h1 { font-size: 1.5rem; }
     .hero-stat-num { font-size: 1.1rem; }
     .hero-positioning .lead { font-size: 0.92rem; }
-    .hero-positioning .body { font-size: 0.75rem; }
+    .hero-motto { font-size: 0.85rem; }
   }
-  .hero-intro .tagline {
-    font-size: 0.75rem; color: #818cf8; font-weight: 600; letter-spacing: 0.02em;
-    white-space: nowrap; padding: 0.2rem 0.7rem; border-radius: 100px;
-    background: rgba(129,140,248,0.1); border: 1px solid rgba(129,140,248,0.15);
-  }
-  .hero-intro .mission { font-size: 0.75rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
-  .hero-intro .vision { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
 
   @media (max-width: 768px) {
     .hero { padding: 1.5rem 1rem 1.2rem; }
@@ -415,11 +391,7 @@
     <div class="hero-intro">
       <div class="hero-tagline"><span class="dot"></span>科大讯飞集团旗下子公司</div>
       <div class="hero-positioning">
-        <span class="lead">专注文旅、教育产业 <em>AI 赋能</em>，<br>基于多模态多模型的 <em>AI 应用创新解决方案</em> 服务商</span>
-        <span class="body">打造「AI+行业」全景式解决方案，以 AI 构建文旅、教育智慧新生态，<br>让每座城市拥抱智能，畅享未来。</span>
-      </div>
-      <div class="hero-divider">
-        <span class="line"></span><span class="diamond"></span><span class="line"></span>
+        <span class="lead">专注文旅、教育产业 <em>AI 赋能</em>，基于多模态多模型的 <em>AI 应用创新解决方案</em> 服务商</span>
       </div>
       <div class="hero-motto">
         <span>技术守护文化</span><span>推动人工智能向善</span><span>切实造福大众</span>
