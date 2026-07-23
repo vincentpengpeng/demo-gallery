@@ -60,9 +60,9 @@
     },
     {
       "id": "culture-expo-digital-human",
-      "title": "AI 展会数字人",
+      "title": "AI 多语种数字人",
       "category": "culture-tourism",
-      "description": "面向展会/展厅场景的 AI 数字人交互 Demo，支持多轮对话、展品介绍、路线引导、多语种接待等一站式服务。",
+      "description": "面向展会、导览、接待等场景的AI数字人交互，支持多轮对话、展品介绍、路线引导、多语种接待等一站式服务。",
       "url": "https://virtual-man.xfyun.cn/interact_web/common/screen/317582127745077248",
       "screenshot": "assets/screenshots/culture-ai-digital-human-expo.jpg",
       "tags": ["数字人", "展会", "多语种"],
