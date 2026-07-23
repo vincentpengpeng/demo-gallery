@@ -59,6 +59,18 @@
       "created": "2026-07"
     },
     {
+      "id": "edu-ai-digital-teacher",
+      "title": "AI 数字教师",
+      "category": "education",
+      "description": "集AI配音、虚拟人视频生成、PPT生成视频等功能于一体，通过AI数字分身+智能体，赋能课程建设、数字助教、院校宣传视频生成等场景。",
+      "url": "https://www.xfzhizuo.cn/",
+      "screenshot": "assets/screenshots/edu-ai-digital-teacher.png",
+      "video": "assets/videos/ai-digital-teacher.mp4",
+      "tags": ["数字教师", "AI配音", "虚拟人"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "culture-expo-digital-human",
       "title": "AI 多语种数字人",
       "category": "culture-tourism",
