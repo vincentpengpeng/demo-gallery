@@ -23,23 +23,31 @@
 
   /* ========== Navigation ========== */
   .top-nav {
-    position: fixed; top: 0; left: 0; right: 0; height: 56px;
-    background: rgba(10,10,30,0.95);
-    backdrop-filter: blur(20px);
+    position: fixed; top: 0; left: 0; right: 0; height: 60px;
+    background: rgba(10,10,30,0.92);
+    backdrop-filter: blur(24px);
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 2rem; z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
   }
-  .top-nav .brand { display: flex; align-items: center; gap: 12px; }
-  .top-nav .brand img { height: 24px; width: auto; filter: brightness(0) invert(1); }
-  .top-nav .brand-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.12); }
-  .top-nav .brand-text { font-family: "Outfit", sans-serif; font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.7); letter-spacing: 0.02em; }
+  .top-nav .brand { display: flex; align-items: center; gap: 14px; }
+  .top-nav .brand img { height: 30px; width: auto; }
+  .top-nav .brand-name {
+    font-family: "Outfit", "Noto Sans SC", sans-serif;
+    font-size: 1rem; font-weight: 600; color: #f0f0f8;
+    letter-spacing: 0.02em;
+  }
+  .top-nav .brand-name .accent {
+    color: #818cf8; font-weight: 700;
+  }
+  .top-nav .brand-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.08); }
   .top-nav .badge {
-    font-family: "Outfit", sans-serif; font-size: 0.6rem; padding: 0.25rem 0.7rem;
-    border-radius: 100px; background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08); color: rgba(255,255,255,0.45);
-    font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+    font-family: "Outfit", sans-serif; font-size: 0.65rem; padding: 0.3rem 0.85rem;
+    border-radius: 100px; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.35);
+    font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
   }
-  body { padding-top: 56px; }
+  body { padding-top: 60px; }
 
   /* ========== Compact Hero ========== */
   .hero {
@@ -83,15 +91,18 @@
     background: linear-gradient(90deg, #818cf8, transparent);
     border-radius: 2px;
   }
+  .hero-intro-row {
+    display: flex; align-items: center; gap: 1.5rem;
+  }
   .hero-tagline {
     display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 0.2rem 0.8rem 0.2rem 0.6rem;
+    padding: 0.35rem 1rem 0.35rem 0.75rem;
     border-radius: 100px;
     background: rgba(129,140,248,0.08);
     border: 1px solid rgba(129,140,248,0.12);
-    font-size: 0.7rem; font-weight: 500; color: #a5b4fc;
-    letter-spacing: 0.04em; text-transform: uppercase;
-    margin-bottom: 1rem;
+    font-size: 0.72rem; font-weight: 500; color: #a5b4fc;
+    letter-spacing: 0.03em;
+    white-space: nowrap; flex-shrink: 0;
   }
   .hero-tagline .dot {
     display: inline-block; width: 5px; height: 5px;
@@ -99,19 +110,18 @@
     flex-shrink: 0;
   }
   .hero-positioning {
-    max-width: 680px;
+    flex: 1; min-width: 0;
   }
   .hero-positioning .lead {
     display: block;
     font-family: "Outfit", sans-serif;
-    font-size: 1.05rem; font-weight: 600;
-    color: #e8eaf0;
-    line-height: 1.6;
+    font-size: 1rem; font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
   }
   .hero-positioning .lead em {
     font-style: normal;
-    background: linear-gradient(135deg, #a5b4fc, #818cf8);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    color: #e8eaf0; font-weight: 600;
   }
   .hero-motto {
     margin-top: 1.2rem;
@@ -136,18 +146,9 @@
     .hero-stats { width: 100%; justify-content: flex-start; gap: 1.2rem; }
     .hero h1 { font-size: 1.5rem; }
     .hero-stat-num { font-size: 1.1rem; }
+    .hero-intro-row { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
     .hero-positioning .lead { font-size: 0.92rem; }
     .hero-motto { font-size: 0.85rem; }
-  }
-
-  @media (max-width: 768px) {
-    .hero { padding: 1.5rem 1rem 1.2rem; }
-    .hero-top { flex-direction: column; align-items: flex-start; }
-    .hero-title-group { flex-direction: column; align-items: flex-start; }
-    .hero-stats { width: 100%; justify-content: flex-start; gap: 1.2rem; }
-    .hero h1 { font-size: 1.5rem; }
-    .hero-stat-num { font-size: 1.1rem; }
-    .hero-intro { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
   }
 
   /* ========== Company Intro Bar ========== */
@@ -357,8 +358,7 @@
 <nav class="top-nav">
   <div class="brand">
     <img src="assets/logo.png" alt="旌越科技">
-    <span class="brand-divider"></span>
-    <span class="brand-text">旌越科技</span>
+    <span class="brand-name"><span class="accent">旌越</span>科技</span>
   </div>
   <span class="badge">✦ Product Showcase</span>
 </nav>
@@ -389,9 +389,11 @@
       </div>
     </div>
     <div class="hero-intro">
-      <div class="hero-tagline"><span class="dot"></span>科大讯飞集团旗下子公司</div>
-      <div class="hero-positioning">
-        <span class="lead">专注文旅、教育产业 <em>AI 赋能</em>，基于多模态多模型的 <em>AI 应用创新解决方案</em> 服务商</span>
+      <div class="hero-intro-row">
+        <div class="hero-tagline"><span class="dot"></span>科大讯飞集团旗下子公司</div>
+        <div class="hero-positioning">
+          <span class="lead">专注文旅、教育产业 <em>AI 赋能</em>，基于多模态多模型的 <em>AI 应用创新解决方案</em> 服务商</span>
+        </div>
       </div>
       <div class="hero-motto">
         <span>技术守护文化</span><span>推动人工智能向善</span><span>切实造福大众</span>
