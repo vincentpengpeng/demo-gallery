@@ -458,30 +458,12 @@
         var hasUrl = demo.url && demo.url.length > 0 && demo.url !== 'https://';
 
         // If no URL but has video, clicking card plays video
-        var cardClick = '';
+var cardClick = '';
         if (!hasUrl && hasVideo) {
-          cardClick = 'onclick="window.playVideo(\'' + demo.video + '\')"';
+          cardClick = 'onclick="event.preventDefault();window.playVideo(\'' + demo.video + '\')"';
         }
 
-        var shotHtml = hasShot
-          ? '<img src="' + demo.screenshot + '" alt="' + demo.title + '" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=window.placeholderHTML(\'' + cat.icon + '\')" onload="window.handleScreenshot(this)">'
-          : '<div class="media-placeholder"><div class="icon">' + (hasVideo ? '🎬' : cat.icon) + '</div><span class="hint">' + (hasVideo ? '点击播放视频' : '截图待添加') + '</span></div>';
-        var playBtn = hasVideo ? ' <button class="card-play-btn" onclick="event.stopPropagation();window.playVideo(\'' + demo.video + '\')"><span class="circle"></span></button>' : '';
-        // Auto-show play button when no screenshot
-        var playAuto = hasVideo && !hasShot ? ' style="opacity:1"' : '';
-        if (playBtn) playBtn = playBtn.replace('class="card-play-btn"', 'class="card-play-btn"' + playAuto);
-
-        var statusHtml = demo.status === 'online'
-          ? '<span class="card-status-badge"><span class="dot"></span>可体验</span>' : '';
-
-        var tagsHtml = '';
-        if (demo.tags && demo.tags.length) {
-          tagsHtml = '<div class="card-tags">';
-          for (var t = 0; t < demo.tags.length; t++) tagsHtml += '<span>' + demo.tags[t] + '</span>';
-          tagsHtml += '</div>';
-        }
-
-        var linkUrl = hasUrl ? demo.url : 'javascript:void(0)';
+        var linkUrl = hasUrl ? demo.url : '#';
         card.innerHTML =
           '<a href="' + linkUrl + '" target="_blank" rel="noopener" style="display:flex;flex-direction:column;height:100%;color:inherit;text-decoration:none"' + cardClick + '>' +
           '<div class="card-media">' + shotHtml + playBtn +
