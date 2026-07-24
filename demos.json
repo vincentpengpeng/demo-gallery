@@ -83,15 +83,15 @@
       "status": "online",
       "created": "2026-07"
     },
-{
-      "id": "edu-ai-digital-teacher",
-      "title": "AI 数字教师",
-      "category": "education",
-      "description": "集AI配音、虚拟人视频生成、PPT生成视频等功能于一体，通过AI数字分身+智能体，赋能课程建设、数字助教、院校宣传视频生成等场景。",
-      "url": "https://www.xfzhizuo.cn/",
-      "screenshot": "assets/screenshots/edu-ai-digital-teacher.png",
-      "video": "assets/videos/ai-digital-teacher.mp4",
-      "tags": ["数字教师", "AI配音", "虚拟人"],
+    {
+      "id": "culture-mobile-digital-human",
+      "title": "移动数字人",
+      "category": "culture-tourism",
+      "description": "空间自由与多维度交互能力，可深度赋能智能接待、动线指引、场景化导览等多元化服务场景。具备一站式建图部署、声源定位、多模态交互、形象定制等核心产品功能。",
+      "url": "https://aiui.xfyun.cn/solution/mobile-digital-person?chan=AIUI&way=menu",
+      "screenshot": "assets/screenshots/culture-mobile-digital-human.png",
+      "video": "assets/videos/mobile-digital-human.mp4",
+      "tags": ["数字人", "移动", "智能接待"],
       "status": "online",
       "created": "2026-07"
     },
@@ -114,6 +114,39 @@
       "url": "demos/ai-party-school/",
       "screenshot": "assets/screenshots/edu-ai-party-school.png",
       "tags": ["党校培训", "AI助手", "干部教育"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "edu-social-science-report",
+      "title": "AI 社科年报统计",
+      "category": "education",
+      "description": "AI 驱动的社科年报统计平台，支持学术交流、科研成果、项目经费、非项目经费四大类报表的智能生成与分析。",
+      "url": "demos/ai-social-science-report/",
+      "screenshot": "assets/screenshots/edu-social-science-report.png",
+      "tags": ["社科统计", "年报", "报表生成"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "foundation-voice-dictation",
+      "title": "多语种实时语音听写",
+      "category": "foundation",
+      "description": "将短音频（≤60秒）精准识别成文字，支持65个语种、23种方言和1个民族语言，实时返回结果，达到边说边返回的效果，可提供公有云接口及私有化部署方案。",
+      "url": "https://www.xfyun.cn/services/voicedictation",
+      "screenshot": "assets/screenshots/foundation-voice-dictation.png",
+      "tags": ["语音识别", "多语种", "实时转写"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "foundation-online-tts",
+      "title": "在线语音合成",
+      "category": "foundation",
+      "description": "将文本转化为语音，提供众多特色的发音人（音库）供选择，合成音在音色、自然度等方面接近甚至超过人声，可提供公有云接口及私有化部署方案。",
+      "url": "https://www.xfyun.cn/services/online_tts",
+      "screenshot": "assets/screenshots/foundation-online-tts.png",
+      "tags": ["语音合成", "TTS", "音库"],
       "status": "online",
       "created": "2026-07"
     }
