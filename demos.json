@@ -118,6 +118,17 @@
       "created": "2026-07"
     },
     {
+      "id": "edu-ai-classroom",
+      "title": "AI 智能课堂",
+      "category": "education",
+      "description": "清华开源的多智能体 AI 课堂系统，一键生成沉浸式交互课件，支持多智能体讨论、白板、测验、互动模拟等功能。",
+      "url": "https://ai-classroom-jingyue.vercel.app/",
+      "screenshot": "assets/screenshots/edu-ai-classroom.png",
+      "tags": ["智能课堂", "多智能体", "课件生成"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "foundation-voice-dictation",
       "title": "多语种实时语音听写",
       "category": "foundation",
