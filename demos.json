@@ -96,6 +96,17 @@
       "created": "2026-07"
     },
     {
+      "id": "culture-ai-museum",
+      "title": "AI 博物馆",
+      "category": "culture-tourism",
+      "description": "面向东莞市博物馆的 AI 智慧文旅系统，包含 AI 数字人导览助手（游客端）与智能策展系统（管理端），支持智能问答、策展方案生成、知识图谱分析、公众共创投票等一站式服务。",
+      "url": "demos/ai-museum/",
+      "screenshot": "assets/screenshots/culture-ai-museum.png",
+      "tags": ["博物馆", "数字人", "策展", "东莞市博物馆", "AI导览"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "edu-ai-classroom",
       "title": "AI 智能课堂",
       "category": "education",

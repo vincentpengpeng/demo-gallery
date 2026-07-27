@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>策展实验室 · 智能策展系统</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  body {
+    background: #f5f4f0;
+    color: #1a1a1a;
+    display: flex;
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d0cec8; border-radius: 2px; }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: 220px;
+    background: #ffffff;
+    border-right: 1px solid #e8e6e0;
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-brand {
+    padding: 20px 18px;
+    border-bottom: 1px solid #e8e6e0;
+  }
+  .sidebar-brand .logo { display: flex; align-items: center; gap: 10px; }
+  .sidebar-brand .logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #c99a6a, #a87d52);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #ffffff;
+  }
+  .sidebar-brand .logo-text { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .sidebar-brand .logo-sub { font-size: 10px; color: #9a9a9a; margin-top: 2px; letter-spacing: 1px; }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .sidebar-nav .nav-label { font-size: 10px; color: #b0aeb0; padding: 12px 18px 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .sidebar-nav .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 18px;
+    font-size: 13px; color: #6a6a6a;
+    cursor: pointer; transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar-nav .nav-item:hover { color: #1a1a1a; background: #f5f4f0; }
+  .sidebar-nav .nav-item.active { color: #1a1a1a; background: #faf8f4; border-left-color: #c99a6a; }
+  .sidebar-nav .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+  .sidebar-nav .nav-item .nav-badge { margin-left: auto; font-size: 10px; padding: 1px 7px; border-radius: 8px; background: #f0eeea; color: #6a6a6a; }
+  .sidebar-nav .nav-item.active .nav-badge { background: #c99a6a; color: #ffffff; }
+  .sidebar-footer { padding: 16px 18px; border-top: 1px solid #e8e6e0; font-size: 11px; color: #b0aeb0; }
+
+  /* ===== Main ===== */
+  .main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    height: 52px; background: #ffffff; border-bottom: 1px solid #e8e6e0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-title { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+  .topbar-breadcrumb { font-size: 12px; color: #b0aeb0; }
+  .topbar-breadcrumb span { color: #6a6a6a; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-right .status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6a6a6a; }
+  .topbar-right .status .dot { width: 6px; height: 6px; border-radius: 50%; background: #4a8a5a; }
+  .topbar-right .avatar { width: 30px; height: 30px; border-radius: 50%; background: #f0eeea; border: 1px solid #e0deda; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6a6a6a; }
+
+  /* ===== Tab Bar ===== */
+  .tab-bar { display: flex; gap: 0; background: #ffffff; border-bottom: 1px solid #e8e6e0; padding: 0 28px; flex-shrink: 0; }
+  .tab-btn {
+    padding: 12px 22px; font-size: 13px; font-weight: 500;
+    color: #9a9a9a; background: none; border: none; cursor: pointer;
+    position: relative; transition: color 0.15s; font-family: inherit;
+  }
+  .tab-btn:hover { color: #6a6a6a; }
+  .tab-btn.active { color: #1a1a1a; }
+  .tab-btn::after {
+    content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 0; height: 2px; background: #c99a6a; transition: width 0.2s; border-radius: 1px;
+  }
+  .tab-btn.active::after { width: 70%; }
+
+  /* ===== Content ===== */
+  .content { flex: 1; padding: 24px 28px; overflow-y: auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ===== Stats Row ===== */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: #ffffff; border: 1px solid #e8e6e0; border-radius: 8px; padding: 16px 18px; }
+  .stat-card .stat-label { font-size: 11px; color: #9a9a9a; margin-bottom: 6px; }
+  .stat-card .stat-value { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+  .stat-card .stat-change { font-size: 11px; margin-top: 4px; }
+  .stat-card .stat-change.up { color: #4a8a5a; }
+  .stat-card .stat-change.down { color: #8a4a4a; }
+
+  /* ===== Section ===== */
+  .section-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+  /* ===== Cards ===== */
+  .card { background: #ffffff; border: 1px solid #e8e6e0; border-radius: 8px; overflow: hidden; }
+  .card-header { padding: 14px 18px; border-bottom: 1px solid #e8e6e0; display: flex; justify-content: space-between; align-items: center; }
+  .card-header .ch-title { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+  .card-header .ch-action { font-size: 11px; color: #9a9a9a; cursor: pointer; }
+  .card-header .ch-action:hover { color: #c99a6a; }
+  .card-body { padding: 18px; }
+
+  /* ===== Table ===== */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table th { text-align: left; padding: 10px 14px; font-weight: 500; color: #6a6a6a; border-bottom: 1px solid #e8e6e0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  table td { padding: 10px 14px; border-bottom: 1px solid #f0eeea; color: #4a4a4a; }
+  table tr:hover td { background: #faf8f4; }
+  table td .tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; }
+  table td .tag.blue { background: #eef2f8; color: #5a7a9a; }
+  table td .tag.green { background: #eef4ee; color: #4a7a5a; }
+  table td .tag.amber { background: #f8f2ea; color: #b8845a; }
+  table td .tag.purple { background: #f2eef8; color: #7a5a9a; }
+  table td .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+  table td .status-dot.green { background: #4a8a5a; }
+  table td .status-dot.amber { background: #c99a6a; }
+
+  /* ===== Form ===== */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: #6a6a6a; margin-bottom: 5px; }
+  .form-input { width: 100%; padding: 8px 12px; background: #faf8f4; border: 1px solid #e0deda; border-radius: 6px; color: #1a1a1a; font-size: 13px; outline: none; font-family: inherit; }
+  .form-input:focus { border-color: #c99a6a; }
+  .form-input::placeholder { color: #c0beb8; }
+  textarea.form-input { resize: none; min-height: 72px; }
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+  .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #c99a6a; color: #ffffff; }
+  .btn-outline { background: transparent; border: 1px solid #e0deda; color: #6a6a6a; }
+  .btn-outline:hover { border-color: #c99a6a; color: #c99a6a; }
+  .btn-sm { padding: 5px 12px; font-size: 11px; }
+  .chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 11px; padding: 3px 10px; background: #faf8f4; border: 1px solid #e0deda; border-radius: 4px; color: #6a6a6a; }
+  .chip.active { border-color: #c99a6a; color: #c99a6a; }
+  .result-item { padding: 12px 0; border-bottom: 1px solid #f0eeea; }
+  .result-item:last-child { border-bottom: none; }
+  .result-item .ri-label { font-size: 11px; color: #9a9a9a; margin-bottom: 4px; }
+  .result-item .ri-value { font-size: 13px; color: #1a1a1a; line-height: 1.5; }
+  .result-item .ri-value strong { color: #c99a6a; font-weight: 600; }
+
+  /* ===== TAB 2: Flow Steps (CLICKABLE) ===== */
+  .flow-row { display: flex; align-items: flex-start; gap: 0; margin-bottom: 20px; }
+  .flow-node { flex: 1; text-align: center; }
+  .flow-node .fn-box {
+    padding: 16px 8px;
+    background: #ffffff; border: 1px solid #e8e6e0;
+    border-radius: 8px; cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .flow-node .fn-box:hover { border-color: #c99a6a; background: #faf8f4; transform: translateY(-2px); }
+  .flow-node .fn-box.active { border-color: #c99a6a; background: #fdf8f2; }
+  .flow-node .fn-box .click-hint {
+    position: absolute; bottom: 4px; right: 6px;
+    font-size: 9px; color: #d0cec8;
+  }
+  .flow-node .fn-box:hover .click-hint { color: #9a9a9a; }
+  .flow-node .fn-num { font-size: 11px; color: #9a9a9a; font-weight: 600; margin-bottom: 4px; }
+  .flow-node .fn-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+  .flow-node .fn-desc { font-size: 11px; color: #6a6a6a; line-height: 1.5; }
+  .flow-node .fn-metric { margin-top: 8px; font-size: 11px; color: #9a9a9a; }
+  .flow-node .fn-metric strong { color: #c99a6a; }
+  .flow-arrow { flex: 0 0 28px; display: flex; align-items: center; justify-content: center; color: #d0cec8; font-size: 16px; padding-top: 20px; }
+
+  /* ===== Detail Panel (expandable) ===== */
+  .detail-panel {
+    background: #faf8f4; border: 1px solid #e8e6e0; border-radius: 8px;
+    margin-top: 16px; overflow: hidden;
+    display: none;
+  }
+  .detail-panel.open { display: block; }
+  .detail-panel .dp-header {
+    padding: 14px 18px; border-bottom: 1px solid #e8e6e0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .detail-panel .dp-header .dp-title { font-size: 14px; font-weight: 600; color: #c99a6a; }
+  .detail-panel .dp-header .dp-close { cursor: pointer; font-size: 12px; color: #9a9a9a; padding: 2px 8px; border-radius: 4px; }
+  .detail-panel .dp-header .dp-close:hover { background: #f0eeea; color: #6a6a6a; }
+  .detail-panel .dp-body { padding: 18px; }
+
+  /* ===== Knowledge Graph ===== */
+  .kg-container {
+    position: relative;
+    width: 100%; height: 400px;
+    background: #fcfcfa;
+    border-radius: 8px; border: 1px solid #e8e6e0;
+    overflow: hidden;
+  }
+  .kg-container svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .kg-node {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .kg-node:hover { transform: translate(-50%, -50%) scale(1.1); }
+  .kg-node .kg-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid;
+  }
+  .kg-node .kg-label {
+    font-size: 10px; color: #6a6a6a; margin-top: 4px;
+    white-space: nowrap; text-align: center;
+    background: rgba(252,252,250,0.92); padding: 1px 6px; border-radius: 3px;
+  }
+  .kg-node.center .kg-dot { width: 20px; height: 20px; background: #c99a6a; border-color: #c99a6a; }
+  .kg-node.center .kg-label { font-size: 12px; color: #c99a6a; font-weight: 600; }
+  .kg-node.l1 .kg-dot { background: rgba(90,138,186,0.25); border-color: #5a8aba; }
+  .kg-node.l2 .kg-dot { background: rgba(74,138,90,0.25); border-color: #4a8a5a; }
+  .kg-node.l3 .kg-dot { background: rgba(200,154,106,0.25); border-color: #c99a6a; }
+  .kg-node.l4 .kg-dot { background: rgba(138,90,186,0.25); border-color: #8a5aba; }
+
+  .kg-legend {
+    position: absolute; bottom: 12px; right: 12px;
+    background: rgba(255,255,255,0.95); border: 1px solid #e8e6e0;
+    border-radius: 6px; padding: 10px 14px; z-index: 3;
+  }
+  .kg-legend .lg-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #6a6a6a; margin-bottom: 4px; }
+  .kg-legend .lg-item:last-child { margin-bottom: 0; }
+  .kg-legend .lg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ===== Flow Detail Items ===== */
+  .flow-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .flow-detail-item { padding: 14px; background: #ffffff; border: 1px solid #e8e6e0; border-radius: 8px; }
+  .flow-detail-item .fd-step { font-size: 10px; color: #b0aeb0; letter-spacing: 1px; margin-bottom: 4px; }
+  .flow-detail-item .fd-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+  .flow-detail-item .fd-desc { font-size: 12px; color: #6a6a6a; line-height: 1.6; }
+
+  /* ===== TAB 3 ===== */
+  .coop-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .vote-card { padding: 14px; background: #ffffff; border: 1px solid #e8e6e0; border-radius: 8px; margin-bottom: 10px; transition: border-color 0.15s; }
+  .vote-card:hover { border-color: #d0cec8; }
+  .vote-card.top { border-color: #e8ddd0; }
+  .vote-card .vc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .vote-card .vc-title { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+  .vote-card .vc-rank { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: #f0eeea; color: #9a9a9a; }
+  .vote-card.top .vc-rank { background: #f8f2ea; color: #c99a6a; }
+  .vote-card .vc-desc { font-size: 11px; color: #6a6a6a; line-height: 1.5; margin-bottom: 8px; }
+  .vote-card .vc-footer { display: flex; justify-content: space-between; align-items: center; }
+  .vote-card .vc-votes { font-size: 12px; color: #9a9a9a; }
+  .vote-card .vc-votes strong { color: #c99a6a; }
+  .vote-bar { height: 3px; background: #f0eeea; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .vote-bar .fill { height: 100%; background: #c99a6a; border-radius: 2px; }
+  .live-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 10px; background: #eef4ee; border: 1px solid #d8e0d8; border-radius: 4px; color: #4a7a5a; }
+  .live-tag .pulse { width: 5px; height: 5px; border-radius: 50%; background: #4a8a5a; animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .footer { padding: 12px 28px; border-top: 1px solid #e8e6e0; font-size: 11px; color: #b0aeb0; text-align: center; flex-shrink: 0; }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .two-col, .coop-two-col { grid-template-columns: 1fr; }
+    .flow-row { flex-direction: column; align-items: stretch; }
+    .flow-arrow { transform: rotate(90deg); padding: 4px 0; }
+    .flow-detail-grid { grid-template-columns: 1fr; }
+    .topbar, .tab-bar { padding: 0 16px; overflow-x: auto; }
+    .content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">
+      <div class="logo-icon">策</div>
+      <div>
+        <div class="logo-text">策展实验室</div>
+        <div class="logo-sub">CURATION LAB</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">核心功能</div>
+    <div class="nav-item active" data-side="tab1">
+      <span class="nav-icon">🤖</span> 策展合伙人
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item" data-side="tab2">
+      <span class="nav-icon">🔄</span> 策展流程
+    </div>
+    <div class="nav-item" data-side="tab3">
+      <span class="nav-icon">👥</span> 公众共创
+    </div>
+    <div class="nav-label">数据管理</div>
+    <div class="nav-item" data-side="tab4">
+      <span class="nav-icon">🏛️</span> 藏品库
+      <span class="nav-badge">8.6k</span>
+    </div>
+    <div class="nav-item" data-side="tab5">
+      <span class="nav-icon">📊</span> 数据看板
+    </div>
+    <div class="nav-label">系统</div>
+    <div class="nav-item" data-side="tab6">
+      <span class="nav-icon">⚙️</span> 系统设置
+    </div>
+  </nav>
+  <div class="sidebar-footer">广州旌越科技有限公司</div>
+</aside>
+
+<!-- ===== Main Area ===== -->
+<div class="main-area">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">策展实验室</span>
+      <span class="topbar-breadcrumb">/ <span>东莞市博物馆 · 智能策展系统</span></span>
+    </div>
+    <div class="topbar-right">
+      <span class="status"><span class="dot"></span> 系统运行中</span>
+      <span class="avatar">PM</span>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="tab1">🤖 AI·策展合伙人</button>
+    <button class="tab-btn" data-tab="tab2">🔄 智能策展闭环流程</button>
+    <button class="tab-btn" data-tab="tab3">👥 公众共创·策展角</button>
+    <button class="tab-btn" data-tab="tab4">🏛️ 藏品库</button>
+    <button class="tab-btn" data-tab="tab5">📊 数据看板</button>
+    <button class="tab-btn" data-tab="tab6">⚙️ 系统设置</button>
+  </nav>
+
+  <div class="content">
+
+    <!-- ===== TAB 1: AI·策展合伙人 ===== -->
+    <div class="tab-panel active" id="tab1">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">已生成策展方案</div><div class="stat-value">86</div><div class="stat-change up">↑ 本月新增 15</div></div>
+        <div class="stat-card"><div class="stat-label">关联藏品数</div><div class="stat-value">8,640</div><div class="stat-change up">↑ 东莞市博物馆馆藏</div></div>
+        <div class="stat-card"><div class="stat-label">隐性关联发现</div><div class="stat-value">186</div><div class="stat-change up">↑ 策展人认可率 91%</div></div>
+        <div class="stat-card"><div class="stat-label">平均生成耗时</div><div class="stat-value">7.8min</div><div class="stat-change down">↓ 较传统效率提升 72%</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="ch-title">策展方案生成</span><span class="ch-action">清空</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>展览主题</label>
+              <input class="form-input" type="text" value="莞邑遗珍 · 东莞市博物馆藏文物精品展" placeholder="请输入展览主题">
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>年代范围</label><input class="form-input" type="text" value="新石器时代 — 明清" placeholder="年代范围"></div>
+              <div class="form-group"><label>地域</label><input class="form-input" type="text" value="东莞、岭南" placeholder="地域"></div>
+            </div>
+            <div class="form-group">
+              <label>策展关键词</label>
+              <textarea class="form-input" placeholder="输入策展方向关键词">东莞历史、岭南文化、莞城文物、明清书画、岭南石刻、民俗文物</textarea>
+            </div>
+            <div class="form-group">
+              <label>关联馆藏资源</label>
+              <div class="chip-list">
+                <span class="chip active">东莞市博物馆</span>
+                <span class="chip active">可园博物馆</span>
+                <span class="chip">东莞蚝岗遗址博物馆</span>
+                <span class="chip">广东海上丝绸之路博物馆</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="btn btn-primary">生成策展方案</button>
+              <button class="btn btn-outline">保存草稿</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="ch-title">生成结果</span><span class="ch-action">导出方案</span></div>
+          <div class="card-body" style="padding:0 18px;">
+            <div class="result-item">
+              <div class="ri-label">展览主题定位</div>
+              <div class="ri-value"><strong>「莞邑遗珍 — 东莞市博物馆藏文物精品展」</strong></div>
+            </div>
+            <div class="result-item">
+              <div class="ri-label">策展叙事结构</div>
+              <div class="ri-value">
+                第一单元 · 史前遗韵 — 蚝岗贝丘与先秦文明<br>
+                第二单元 · 岭南名邦 — 东莞古代历史文化<br>
+                第三单元 · 翰墨流芳 — 馆藏明清书画精品<br>
+                第四单元 · 民俗万象 — 东莞传统工艺与民俗
+              </div>
+            </div>
+            <div class="result-item">
+              <div class="ri-label">展品匹配结果</div>
+              <div class="ri-value">已匹配 <strong>63</strong> 件关联藏品，其中 <strong>16</strong> 件为隐性关联展品</div>
+            </div>
+            <div class="result-item" style="border-bottom:none;">
+              <div class="ri-label">推荐展品标签</div>
+              <div class="chip-list">
+                <span class="chip active">明万历青花龙纹瓷碗</span>
+                <span class="chip active">清康熙五彩人物故事瓶</span>
+                <span class="chip">东汉陶俑</span>
+                <span class="chip">明仿宋赵孟頫行书轴</span>
+                <span class="chip">清象牙雕人物故事摆件</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 2: 智能策展闭环流程 (CLICKABLE) ===== -->
+    <div class="tab-panel" id="tab2">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">知识图谱节点</div><div class="stat-value">8,640</div><div class="stat-change up">↑ 覆盖 86 个关联维度</div></div>
+        <div class="stat-card"><div class="stat-label">隐性关联数</div><div class="stat-value">186</div><div class="stat-change up">↑ 月度新增 22 条</div></div>
+        <div class="stat-card"><div class="stat-label">方案生成版本</div><div class="stat-value">3-5</div><div class="stat-change">每方案可选版本数</div></div>
+        <div class="stat-card"><div class="stat-label">方案采纳率</div><div class="stat-value">91%</div><div class="stat-change up">↑ 策展人满意度</div></div>
+      </div>
+
+      <!-- 可点击的流程节点 -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header">
+          <span class="ch-title">策展闭环流程 · 点击节点查看详情</span>
+          <span class="ch-action" style="cursor:default;font-size:11px;color:#9a9a9a;">💡 点击展开详情</span>
+        </div>
+        <div class="card-body">
+          <div class="flow-row">
+            <div class="flow-node" data-step="1">
+              <div class="fn-box">
+                <div class="fn-num">STEP 01</div>
+                <div class="fn-title">知识图谱构建</div>
+                <div class="fn-desc">结构化梳理东莞市博物馆<br>藏品信息与数据底座</div>
+                <div class="fn-metric">8,640 节点 · <strong>86</strong> 维度</div>
+                <div class="click-hint">点击展开 →</div>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" data-step="2">
+              <div class="fn-box">
+                <div class="fn-num">STEP 02</div>
+                <div class="fn-title">隐性关联挖掘</div>
+                <div class="fn-desc">算法推演跨时空、跨品类<br>文物潜在联系</div>
+                <div class="fn-metric">186 关联 · 认可率 <strong>91%</strong></div>
+                <div class="click-hint">点击展开 →</div>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" data-step="3">
+              <div class="fn-box">
+                <div class="fn-num">STEP 03</div>
+                <div class="fn-title">智能方案生成</div>
+                <div class="fn-desc">自动匹配展品组合<br>输出策展方案初稿</div>
+                <div class="fn-metric">3-5 版本 · 耗时 <strong>7.8min</strong></div>
+                <div class="click-hint">点击展开 →</div>
+              </div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" data-step="4">
+              <div class="fn-box">
+                <div class="fn-num">STEP 04</div>
+                <div class="fn-title">人机共创决策</div>
+                <div class="fn-desc">策展人介入筛选优化<br>融入人文思考</div>
+                <div class="fn-metric">采纳率 <strong>91%</strong></div>
+                <div class="click-hint">点击展开 →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Detail Panel: 知识图谱 (STEP 1) ===== -->
+      <div class="detail-panel open" id="dp-step1">
+        <div class="dp-header">
+          <span class="dp-title">📊 STEP 01 · 知识图谱构建 — 东莞市博物馆藏品知识图谱</span>
+          <span class="dp-close" onclick="closeDetail('dp-step1')">✕ 收起</span>
+        </div>
+        <div class="dp-body">
+          <div style="margin-bottom:14px;font-size:12px;color:#6a6a6a;line-height:1.6;">
+            东莞市博物馆馆藏 <strong style="color:#c99a6a;">8,640</strong> 件藏品已全量结构化标注，覆盖 <strong style="color:#c99a6a;">86</strong> 个关联维度，构建完成的标准化知识图谱底座如下：
+          </div>
+          <!-- 知识图谱可视化 -->
+          <div class="kg-container" id="kg">
+            <svg>
+              <line x1="50%" y1="50%" x2="25%" y2="18%" stroke="#d0cec8" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <line x1="50%" y1="50%" x2="18%" y2="45%" stroke="#d0cec8" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <line x1="50%" y1="50%" x2="30%" y2="78%" stroke="#d0cec8" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <line x1="50%" y1="50%" x2="72%" y2="20%" stroke="#d0cec8" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <line x1="50%" y1="50%" x2="78%" y2="50%" stroke="#d0cec8" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <line x1="50%" y1="50%" x2="68%" y2="80%" stroke="#d0cec8" stroke-width="1.5" stroke-dasharray="3 2"/>
+              <!-- 二级连线 -->
+              <line x1="25%" y1="18%" x2="10%" y2="8%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="25%" y1="18%" x2="18%" y2="5%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="25%" y1="18%" x2="35%" y2="6%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="18%" y1="45%" x2="6%" y2="35%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="18%" y1="45%" x2="8%" y2="55%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="30%" y1="78%" x2="18%" y2="88%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="30%" y1="78%" x2="35%" y2="92%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="72%" y1="20%" x2="62%" y2="8%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="72%" y1="20%" x2="82%" y2="6%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="78%" y1="50%" x2="90%" y2="38%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="78%" y1="50%" x2="92%" y2="58%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="68%" y1="80%" x2="60%" y2="92%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="68%" y1="80%" x2="78%" y2="90%" stroke="#e0deda" stroke-width="1" stroke-dasharray="2 2"/>
+            </svg>
+            <!-- 中心节点 -->
+            <div class="kg-node center" style="left:50%;top:50%;">
+              <div class="kg-dot"></div>
+              <div class="kg-label">东莞市博物馆</div>
+            </div>
+            <!-- 一级节点 -->
+            <div class="kg-node l1" style="left:25%;top:18%;">
+              <div class="kg-dot"></div>
+              <div class="kg-label">文物藏品 (4,280)</div>
+            </div>
+            <div class="kg-node l2" style="left:18%;top:45%;">
+              <div class="kg-dot"></div>
+              <div class="kg-label">历史背景</div>
+            </div>
+            <div class="kg-node l3" style="left:30%;top:78%;">
+              <div class="kg-dot"></div>
+              <div class="kg-label">展览记录</div>
+            </div>
+            <div class="kg-node l1" style="left:72%;top:20%;">
+              <div class="kg-dot"></div>
+              <div class="kg-label">学术研究</div>
+            </div>
+            <div class="kg-node l2" style="left:78%;top:50%;">
+              <div class="kg-dot"></div>
+              <div class="kg-label">数字化资源</div>
+            </div>
+            <div class="kg-node l4" style="left:68%;top:80%;">
+              <div class="kg-dot"></div>
+              <div class="kg-label">合作交流</div>
+            </div>
+            <!-- 二级节点 -->
+            <div class="kg-node" style="left:10%;top:8%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(90,138,186,0.2);border-color:#3a5a7a;"></div><div class="kg-label" style="font-size:9px;">陶瓷</div></div>
+            <div class="kg-node" style="left:18%;top:5%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(90,138,186,0.2);border-color:#3a5a7a;"></div><div class="kg-label" style="font-size:9px;">书画</div></div>
+            <div class="kg-node" style="left:35%;top:6%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(90,138,186,0.2);border-color:#3a5a7a;"></div><div class="kg-label" style="font-size:9px;">玉器</div></div>
+            <div class="kg-node" style="left:6%;top:35%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(74,138,90,0.2);border-color:#3a5a4a;"></div><div class="kg-label" style="font-size:9px;">莞城沿革</div></div>
+            <div class="kg-node" style="left:8%;top:55%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(74,138,90,0.2);border-color:#3a5a4a;"></div><div class="kg-label" style="font-size:9px;">岭南文化</div></div>
+            <div class="kg-node" style="left:18%;top:88%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(200,154,106,0.2);border-color:#7a6a4a;"></div><div class="kg-label" style="font-size:9px;">历年特展</div></div>
+            <div class="kg-node" style="left:35%;top:92%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(200,154,106,0.2);border-color:#7a6a4a;"></div><div class="kg-label" style="font-size:9px;">常设展览</div></div>
+            <div class="kg-node" style="left:62%;top:8%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(90,138,186,0.2);border-color:#3a5a7a;"></div><div class="kg-label" style="font-size:9px;">考古报告</div></div>
+            <div class="kg-node" style="left:82%;top:6%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(90,138,186,0.2);border-color:#3a5a7a;"></div><div class="kg-label" style="font-size:9px;">学术论文</div></div>
+            <div class="kg-node" style="left:90%;top:38%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(74,138,90,0.2);border-color:#3a5a4a;"></div><div class="kg-label" style="font-size:9px;">数字文物库</div></div>
+            <div class="kg-node" style="left:92%;top:58%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(74,138,90,0.2);border-color:#3a5a4a;"></div><div class="kg-label" style="font-size:9px;">3D 扫描</div></div>
+            <div class="kg-node" style="left:60%;top:92%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(138,90,186,0.2);border-color:#5a3a7a;"></div><div class="kg-label" style="font-size:9px;">馆际合作</div></div>
+            <div class="kg-node" style="left:78%;top:90%;"><div class="kg-dot" style="width:8px;height:8px;background:rgba(138,90,186,0.2);border-color:#5a3a7a;"></div><div class="kg-label" style="font-size:9px;">学术交流</div></div>
+            <!-- 图例 -->
+            <div class="kg-legend">
+              <div class="lg-item"><span class="lg-dot" style="background:#c99a6a;"></span> 核心节点</div>
+              <div class="lg-item"><span class="lg-dot" style="background:#5a8aba;"></span> 藏品/学术</div>
+              <div class="lg-item"><span class="lg-dot" style="background:#4a8a5a;"></span> 历史/数字化</div>
+              <div class="lg-item"><span class="lg-dot" style="background:#8a5aba;"></span> 合作交流</div>
+            </div>
+          </div>
+          <div style="margin-top:14px;font-size:12px;color:#6a6a6a;line-height:1.6;">
+            📌 知识图谱涵盖 <strong style="color:#c99a6a;">陶瓷、书画、玉器、金属器、石刻、民俗文物</strong> 等六大类别，构建了"文物—年代—出土地—工艺—纹样—流传经历"的多维关联网络。
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Detail Panel: 隐性关联挖掘 (STEP 2) ===== -->
+      <div class="detail-panel" id="dp-step2">
+        <div class="dp-header">
+          <span class="dp-title">🔍 STEP 02 · 隐性关联挖掘 — 东莞市博物馆跨时空关联发现</span>
+          <span class="dp-close" onclick="closeDetail('dp-step2')">✕ 收起</span>
+        </div>
+        <div class="dp-body">
+          <div style="margin-bottom:14px;font-size:12px;color:#6a6a6a;line-height:1.6;">
+            基于图神经网络算法，已从东莞市博物馆知识图谱中挖掘出 <strong style="color:#c99a6a;">186</strong> 条隐性关联关系，策展人认可率达 <strong style="color:#c99a6a;">91%</strong>。
+          </div>
+          <div class="flow-detail-grid">
+            <div class="flow-detail-item">
+              <div class="fd-step">关联 #1</div>
+              <div class="fd-title">长沙窑与波斯玻璃器纹样对比</div>
+              <div class="fd-desc">唐代长沙窑青釉褐彩纹样与波斯玻璃器装饰语言存在文化传播链，揭示海上丝绸之路的文化交流。</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">关联 #2</div>
+              <div class="fd-title">明清东莞书画与岭南画派渊源</div>
+              <div class="fd-desc">馆藏明清书画作品与岭南画派创始人居廉、居巢之间存在师承与风格影响关系。</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">关联 #3</div>
+              <div class="fd-title">蚝岗贝丘与环珠江口史前文化</div>
+              <div class="fd-desc">东莞蚝岗遗址出土文物与香港、深圳、珠海等环珠江口地区的史前贝丘遗址存在文化同源性。</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">关联 #4</div>
+              <div class="fd-title">莞香贸易与海上丝绸之路</div>
+              <div class="fd-desc">东莞莞香（沉香）在明清时期通过广州港远销东南亚与阿拉伯地区，与海上丝绸之路贸易网络紧密关联。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Detail Panel: 智能方案生成 (STEP 3) ===== -->
+      <div class="detail-panel" id="dp-step3">
+        <div class="dp-header">
+          <span class="dp-title">📋 STEP 03 · 智能方案生成 — 策展方案输出</span>
+          <span class="dp-close" onclick="closeDetail('dp-step3')">✕ 收起</span>
+        </div>
+        <div class="dp-body">
+          <div style="margin-bottom:14px;font-size:12px;color:#6a6a6a;line-height:1.6;">
+            基于知识图谱与隐性关联分析结果，AI 自动匹配展品组合并生成策展方案，支持多版本对比与灵活调整。
+          </div>
+          <div class="two-col" style="gap:14px;">
+            <div class="flow-detail-item">
+              <div class="fd-step">方案 A</div>
+              <div class="fd-title">莞邑遗珍 · 通史陈列</div>
+              <div class="fd-desc">以东莞历史发展时间为序，从史前蚝岗到明清莞城，系统展示馆藏文物精品。<br>展品数量：42 件 · 展线：280m</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">方案 B</div>
+              <div class="fd-title">器以载道 · 专题特展</div>
+              <div class="fd-desc">以"器物"为核心，按陶瓷、书画、玉器、民俗等门类进行专题式策展。<br>展品数量：38 件 · 展线：240m</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">方案 C</div>
+              <div class="fd-title">海丝遗韵 · 东莞与海上丝绸之路</div>
+              <div class="fd-desc">以东莞在海上丝绸之路中的角色为叙事主线，串联外销瓷、莞香、贸易等相关文物。<br>展品数量：35 件 · 展线：220m</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">方案 D</div>
+              <div class="fd-title">匠作岭南 · 东莞传统工艺</div>
+              <div class="fd-desc">聚焦东莞本土传统工艺，展示莞草编织、龙舟制作、醒狮扎作等非物质文化遗产。<br>展品数量：30 件 · 展线：200m</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Detail Panel: 人机共创 (STEP 4) ===== -->
+      <div class="detail-panel" id="dp-step4">
+        <div class="dp-header">
+          <span class="dp-title">🤝 STEP 04 · 人机共创决策 — 策展人协同优化</span>
+          <span class="dp-close" onclick="closeDetail('dp-step4')">✕ 收起</span>
+        </div>
+        <div class="dp-body">
+          <div style="margin-bottom:14px;font-size:12px;color:#6a6a6a;line-height:1.6;">
+            策展人基于 AI 生成的方案进行筛选、修改与优化，融入人文思考与策展理念。当前采纳率 <strong style="color:#c99a6a;">91%</strong>，平均每方案优化迭代 <strong style="color:#c99a6a;">2.3</strong> 次后定稿。
+          </div>
+          <div class="two-col" style="gap:14px;">
+            <div class="flow-detail-item">
+              <div class="fd-step">策展人反馈</div>
+              <div class="fd-title">AI 建议采纳率</div>
+              <div class="fd-desc">策展人采纳 AI 推荐的展品组合方案比例达 91%，其中隐性关联推荐采纳率 78%。</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">优化记录</div>
+              <div class="fd-title">人机协同迭代</div>
+              <div class="fd-desc">策展人在 AI 方案基础上平均进行 2.3 次调整，主要优化方向为叙事逻辑与展品替换。</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">效率对比</div>
+              <div class="fd-title">策展效率提升</div>
+              <div class="fd-desc">传统策展平均耗时 28 天，AI 辅助策展缩短至 7.8 天，效率提升 72%。</div>
+            </div>
+            <div class="flow-detail-item">
+              <div class="fd-step">典型案例</div>
+              <div class="fd-title">"莞邑遗珍"策展方案</div>
+              <div class="fd-desc">AI 推荐 47 件展品，策展人保留 38 件、替换 6 件、新增 3 件，最终方案定稿采纳率 81%。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部详细说明 -->
+      <div class="flow-detail-grid" style="margin-top:20px;">
+        <div class="flow-detail-item" style="cursor:pointer;border-color:#e8e6e0;" onclick="openDetail('dp-step1')">
+          <div class="fd-step">STEP 01</div>
+          <div class="fd-title">知识图谱构建</div>
+          <div class="fd-desc">东莞市博物馆 8,640 件藏品结构化标注，覆盖 86 个关联维度。</div>
+        </div>
+        <div class="flow-detail-item" style="cursor:pointer;border-color:#e8e6e0;" onclick="openDetail('dp-step2')">
+          <div class="fd-step">STEP 02</div>
+          <div class="fd-title">隐性关联挖掘</div>
+          <div class="fd-desc">基于图神经网络跨时空挖掘文物关联，已发现 186 条隐性关联。</div>
+        </div>
+        <div class="flow-detail-item" style="cursor:pointer;border-color:#e8e6e0;" onclick="openDetail('dp-step3')">
+          <div class="fd-step">STEP 03</div>
+          <div class="fd-title">智能方案生成</div>
+          <div class="fd-desc">自动匹配展品组合，输出展览大纲、动线规划、展签文案初稿。</div>
+        </div>
+        <div class="flow-detail-item" style="cursor:pointer;border-color:#e8e6e0;" onclick="openDetail('dp-step4')">
+          <div class="fd-step">STEP 04</div>
+          <div class="fd-title">人机共创决策</div>
+          <div class="fd-desc">策展人介入筛选优化，采纳率 91%，效率提升 72%。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 3: 公众共创·策展角 ===== -->
+    <div class="tab-panel" id="tab3">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">总投票数</div><div class="stat-value">2,156</div><div class="stat-change up">↑ 今日 +68</div></div>
+        <div class="stat-card"><div class="stat-label">策展方案</div><div class="stat-value">6</div><div class="stat-change">本期征集方案数</div></div>
+        <div class="stat-card"><div class="stat-label">待落地</div><div class="stat-value">2</div><div class="stat-change up">↑ 投票通过</div></div>
+        <div class="stat-card"><div class="stat-label">参与观众</div><div class="stat-value">1,436</div><div class="stat-change up">↑ 较上期 +28%</div></div>
+      </div>
+
+      <div class="coop-two-col">
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <span class="ch-title">实时策展生成</span>
+              <span class="live-tag"><span class="pulse"></span> 生成中</span>
+            </div>
+            <div class="card-body">
+              <div style="margin-bottom:10px;font-size:12px;color:#6a6a6a;">
+                当前主题：<span style="color:#1a1a1a;">东莞市博物馆 · 岭南民俗文化展</span>
+              </div>
+              <div class="chip-list" style="margin-bottom:12px;">
+                <span class="chip active">龙舟</span>
+                <span class="chip active">莞草编织</span>
+                <span class="chip active">醒狮</span>
+                <span class="chip">千角灯</span>
+                <span class="chip">东莞腊味</span>
+              </div>
+              <div style="font-size:12px;color:#6a6a6a;line-height:1.6;margin-bottom:10px;">
+                AI 正在从东莞市博物馆知识图谱中匹配展品组合...<br>
+                已发现 <strong style="color:#c99a6a;">32</strong> 件关联藏品，<strong style="color:#c99a6a;">8</strong> 条隐性叙事线
+              </div>
+              <div style="height:4px;background:#f0eeea;border-radius:2px;overflow:hidden;">
+                <div style="height:100%;width:68%;background:#c99a6a;border-radius:2px;"></div>
+              </div>
+              <div style="text-align:right;font-size:11px;color:#9a9a9a;margin-top:4px;">68%</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="ch-title">历史方案记录</span><span class="ch-action">查看全部</span></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>方案名称</th><th>主题</th><th>票数</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr><td>龙舟竞渡 · 东莞龙舟文化展</td><td><span class="tag amber">龙舟</span></td><td>486</td><td><span class="status-dot green"></span> 已落地</td></tr>
+                  <tr><td>莞草青青 · 东莞传统编织工艺</td><td><span class="tag blue">编织</span></td><td>352</td><td><span class="status-dot amber"></span> 投票中</td></tr>
+                  <tr><td>狮舞莞邑 · 岭南醒狮文化展</td><td><span class="tag amber">醒狮</span></td><td>298</td><td><span class="status-dot amber"></span> 投票中</td></tr>
+                  <tr><td>灯影千年 · 东莞千角灯艺术</td><td><span class="tag purple">灯彩</span></td><td>186</td><td><span class="status-dot green"></span> 已落地</td></tr>
+                  <tr><td>莞味寻踪 · 东莞传统饮食文化</td><td><span class="tag green">饮食</span></td><td>124</td><td><span class="status-dot"></span> 待审核</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="ch-title">人气方案排行</span><span class="ch-action">投票截止: 2026-08-15</span></div>
+            <div class="card-body" style="padding:10px 18px;">
+              <div class="vote-card top">
+                <div class="vc-header"><span class="vc-title">「龙舟竞渡 · 东莞龙舟文化展」</span><span class="vc-rank">#1</span></div>
+                <div class="vc-desc">以东莞龙舟习俗为主线，展示龙舟模型、龙头雕刻、竞渡服饰等特色藏品，结合 VR 体验划龙舟。</div>
+                <div class="vc-footer"><span class="vc-votes">❤️ <strong>486</strong> 票</span><button class="btn btn-primary btn-sm">已投票</button></div>
+                <div class="vote-bar"><div class="fill" style="width:100%;"></div></div>
+              </div>
+              <div class="vote-card">
+                <div class="vc-header"><span class="vc-title">「莞草青青 · 东莞传统编织工艺」</span><span class="vc-rank">#2</span></div>
+                <div class="vc-desc">从莞草种植到编织技艺，展示东莞传统草编工艺的历史与传承，设置互动体验区。</div>
+                <div class="vc-footer"><span class="vc-votes">❤️ <strong>352</strong> 票</span><button class="btn btn-outline btn-sm">投票</button></div>
+                <div class="vote-bar"><div class="fill" style="width:72%;"></div></div>
+              </div>
+              <div class="vote-card">
+                <div class="vc-header"><span class="vc-title">「狮舞莞邑 · 岭南醒狮文化展」</span><span class="vc-rank">#3</span></div>
+                <div class="vc-desc">融合醒狮扎作技艺、武术套路、节庆民俗，打造沉浸式醒狮文化体验空间。</div>
+                <div class="vc-footer"><span class="vc-votes">❤️ <strong>298</strong> 票</span><button class="btn btn-outline btn-sm">投票</button></div>
+                <div class="vote-bar"><div class="fill" style="width:61%;"></div></div>
+              </div>
+              <div class="vote-card" style="margin-bottom:0;">
+                <div class="vc-header"><span class="vc-title">「灯影千年 · 东莞千角灯艺术」</span><span class="vc-rank">#4</span></div>
+                <div class="vc-desc">展示东莞千角灯的制作技艺与传承故事，结合光影艺术打造沉浸式观展体验。</div>
+                <div class="vc-footer"><span class="vc-votes">❤️ <strong>186</strong> 票</span><button class="btn btn-outline btn-sm">投票</button></div>
+                <div class="vote-bar"><div class="fill" style="width:38%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 4: 藏品库 ===== -->
+    <div class="tab-panel" id="tab4">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">总藏品数</div><div class="stat-value">8,640</div><div class="stat-change up">↑ 较上月 +126</div></div>
+        <div class="stat-card"><div class="stat-label">已数字化</div><div class="stat-value">6,320</div><div class="stat-change up">↑ 数字化率 73%</div></div>
+        <div class="stat-card"><div class="stat-label">待整理</div><div class="stat-value">2,320</div><div class="stat-change down">↓ 较上月 -8%</div></div>
+        <div class="stat-card"><div class="stat-label">3D 扫描</div><div class="stat-value">486</div><div class="stat-change up">↑ 本月新增 32</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="ch-title">藏品分类统计</span><span class="ch-action">查看全部</span></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>陶瓷</span><span style="color:#c99a6a;">2,460 件</span></div><div style="height:6px;background:#f0eeea;border-radius:3px;overflow:hidden;"><div style="width:28%;height:100%;background:#c99a6a;border-radius:3px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>书画</span><span style="color:#5a8aba;">1,840 件</span></div><div style="height:6px;background:#f0eeea;border-radius:3px;overflow:hidden;"><div style="width:21%;height:100%;background:#5a8aba;border-radius:3px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>玉器</span><span style="color:#4a8a5a;">980 件</span></div><div style="height:6px;background:#f0eeea;border-radius:3px;overflow:hidden;"><div style="width:11%;height:100%;background:#4a8a5a;border-radius:3px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>金属器</span><span style="color:#8a5aba;">720 件</span></div><div style="height:6px;background:#f0eeea;border-radius:3px;overflow:hidden;"><div style="width:8%;height:100%;background:#8a5aba;border-radius:3px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>石刻</span><span style="color:#b8845a;">560 件</span></div><div style="height:6px;background:#f0eeea;border-radius:3px;overflow:hidden;"><div style="width:6%;height:100%;background:#b8845a;border-radius:3px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>民俗文物</span><span style="color:#5a7a9a;">2,080 件</span></div><div style="height:6px;background:#f0eeea;border-radius:3px;overflow:hidden;"><div style="width:24%;height:100%;background:#5a7a9a;border-radius:3px;"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="ch-title">最近入库</span><span class="ch-action">导入藏品</span></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>名称</th><th>分类</th><th>年代</th><th>状态</th></tr></thead><tbody>
+              <tr><td>清乾隆粉彩百鹿尊</td><td><span class="tag amber">陶瓷</span></td><td>清代</td><td><span class="status-dot green"></span> 已入库</td></tr>
+              <tr><td>明万历青花人物故事罐</td><td><span class="tag amber">陶瓷</span></td><td>明代</td><td><span class="status-dot green"></span> 已入库</td></tr>
+              <tr><td>清光绪年修东莞县志</td><td><span class="tag blue">书画</span></td><td>清代</td><td><span class="status-dot"></span> 待整理</td></tr>
+              <tr><td>民国象牙雕龙舟</td><td><span class="tag purple">民俗</span></td><td>民国</td><td><span class="status-dot amber"></span> 扫描中</td></tr>
+              <tr><td>新石器时代石斧</td><td><span class="tag green">石刻</span></td><td>新石器</td><td><span class="status-dot amber"></span> 鉴定中</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 5: 数据看板 ===== -->
+    <div class="tab-panel" id="tab5">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">月访问量</div><div class="stat-value">28.6k</div><div class="stat-change up">↑ 较上月 +12%</div></div>
+        <div class="stat-card"><div class="stat-label">今日游客</div><div class="stat-value">486</div><div class="stat-change up">↑ 同比 +8%</div></div>
+        <div class="stat-card"><div class="stat-label">策展方案数</div><div class="stat-value">86</div><div class="stat-change up">↑ 本月新增 15</div></div>
+        <div class="stat-card"><div class="stat-label">公众投票</div><div class="stat-value">2,156</div><div class="stat-change up">↑ 参与率 +32%</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="ch-title">策展效率对比</span><span class="ch-action">查看详情</span></div>
+          <div class="card-body">
+            <div style="display:flex;gap:24px;align-items:flex-end;height:160px;padding:10px 0;">
+              <div style="flex:1;text-align:center;">
+                <div style="height:100px;background:#e0deda;border-radius:6px 6px 0 0;position:relative;">
+                  <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:11px;color:#fff;">28天</div>
+                </div>
+                <div style="font-size:11px;color:#6a6a6a;margin-top:6px;">传统策展</div>
+              </div>
+              <div style="flex:1;text-align:center;">
+                <div style="height:28px;background:linear-gradient(135deg,#c99a6a,#b8845a);border-radius:6px 6px 0 0;position:relative;">
+                  <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:11px;color:#fff;">7.8天</div>
+                </div>
+                <div style="font-size:11px;color:#6a6a6a;margin-top:6px;">AI 辅助</div>
+              </div>
+              <div style="flex:1;text-align:center;">
+                <div style="height:28px;background:linear-gradient(135deg,#4a8a5a,#3a7a4a);border-radius:6px 6px 0 0;position:relative;">
+                  <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:11px;color:#fff;">-72%</div>
+                </div>
+                <div style="font-size:11px;color:#6a6a6a;margin-top:6px;">效率提升</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="ch-title">运营概览</span><span class="ch-action">导出报表</span></div>
+          <div class="card-body" style="padding:14px 18px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="padding:10px;background:#faf8f4;border-radius:6px;text-align:center;"><div style="font-size:18px;font-weight:700;color:#c99a6a;">86</div><div style="font-size:11px;color:#6a6a6a;">策展方案</div></div>
+              <div style="padding:10px;background:#faf8f4;border-radius:6px;text-align:center;"><div style="font-size:18px;font-weight:700;color:#5a8aba;">8,640</div><div style="font-size:11px;color:#6a6a6a;">藏品总数</div></div>
+              <div style="padding:10px;background:#faf8f4;border-radius:6px;text-align:center;"><div style="font-size:18px;font-weight:700;color:#4a8a5a;">91%</div><div style="font-size:11px;color:#6a6a6a;">采纳率</div></div>
+              <div style="padding:10px;background:#faf8f4;border-radius:6px;text-align:center;"><div style="font-size:18px;font-weight:700;color:#8a5aba;">12</div><div style="font-size:11px;color:#6a6a6a;">落地展览</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="card">
+          <div class="card-header"><span class="ch-title">系统运行状态</span><span class="ch-action">刷新</span></div>
+          <div class="card-body" style="padding:14px 18px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+              <div><div style="font-size:12px;color:#6a6a6a;">AI 策展服务</div><div style="font-size:13px;color:#4a8a5a;margin-top:2px;">● 运行正常</div></div>
+              <div><div style="font-size:12px;color:#6a6a6a;">知识图谱引擎</div><div style="font-size:13px;color:#4a8a5a;margin-top:2px;">● 运行正常</div></div>
+              <div><div style="font-size:12px;color:#6a6a6a;">数字人导览</div><div style="font-size:13px;color:#4a8a5a;margin-top:2px;">● 运行正常</div></div>
+              <div><div style="font-size:12px;color:#6a6a6a;">藏品数据库</div><div style="font-size:13px;color:#4a8a5a;margin-top:2px;">● 运行正常</div></div>
+              <div><div style="font-size:12px;color:#6a6a6a;">公众投票系统</div><div style="font-size:13px;color:#4a8a5a;margin-top:2px;">● 运行正常</div></div>
+              <div><div style="font-size:12px;color:#6a6a6a;">数据分析服务</div><div style="font-size:13px;color:#c99a6a;margin-top:2px;">● 负载偏高</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB 6: 系统设置 ===== -->
+    <div class="tab-panel" id="tab6">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><span class="ch-title">基本设置</span></div>
+        <div class="card-body">
+          <div class="form-group"><label>博物馆名称</label><input class="form-input" type="text" value="东莞市博物馆"></div>
+          <div class="form-row">
+            <div class="form-group"><label>系统语言</label>
+              <select class="form-input" style="appearance:auto;"><option>简体中文</option><option>English</option></select>
+            </div>
+            <div class="form-group"><label>数据更新频率</label>
+              <select class="form-input" style="appearance:auto;"><option>实时更新</option><option>每日更新</option><option>每周更新</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><span class="ch-title">AI 模型配置</span></div>
+        <div class="card-body">
+          <div class="form-group"><label>策展推荐模型</label><input class="form-input" type="text" value="星火大模型 V4.0"></div>
+          <div class="form-group"><label>数字人导览模型</label><input class="form-input" type="text" value="星火大模型 V4.0"></div>
+          <div class="form-row">
+            <div class="form-group"><label>温度参数</label><input class="form-input" type="text" value="0.7"></div>
+            <div class="form-group"><label>最大 Token</label><input class="form-input" type="text" value="2048"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="ch-title">系统信息</span></div>
+        <div class="card-body" style="padding:14px 18px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#6a6a6a;">
+            <div>系统版本：<span style="color:#1a1a1a;">v1.0.0</span></div>
+            <div>最后更新：<span style="color:#1a1a1a;">2026-07-27</span></div>
+            <div>数据库：<span style="color:#1a1a1a;">PostgreSQL 15</span></div>
+            <div>运行环境：<span style="color:#1a1a1a;">旌越云平台</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">广州旌越科技有限公司 · 策展实验室 v1.0</footer>
+</div>
+
+<script>
+  // ===== Tab切换 =====
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      // 高亮侧栏对应项
+      document.querySelectorAll('.sidebar .nav-item[data-side]').forEach(i => i.classList.remove('active'));
+      const sidemap = { tab1:'tab1', tab2:'tab2', tab3:'tab3', tab4:'tab4', tab5:'tab5', tab6:'tab6' };
+      const item = document.querySelector(`.sidebar .nav-item[data-side="${sidemap[btn.dataset.tab]}"]`);
+      if (item) item.classList.add('active');
+    });
+  });
+
+  // ===== 侧栏点击 =====
+  document.querySelectorAll('.sidebar .nav-item[data-side]').forEach(item => {
+    item.addEventListener('click', function() {
+      const tab = this.dataset.side;
+      const sidemap = { tab1:0, tab2:1, tab3:2, tab4:3, tab5:4, tab6:5 };
+      document.querySelectorAll('.sidebar .nav-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+      if (btn) btn.classList.add('active');
+      document.getElementById(tab).classList.add('active');
+    });
+  });
+
+  // ===== 流程节点点击 → 展开详情 =====
+  document.querySelectorAll('.flow-node[data-step]').forEach(node => {
+    node.addEventListener('click', function() {
+      const step = this.dataset.step;
+      const dpId = 'dp-step' + step;
+      document.querySelectorAll('.flow-node .fn-box').forEach(b => b.classList.remove('active'));
+      this.querySelector('.fn-box').classList.add('active');
+      document.querySelectorAll('.detail-panel').forEach(p => p.classList.remove('open'));
+      document.getElementById(dpId).classList.add('open');
+    });
+  });
+
+  // ===== 点击底部详情卡片也可展开 =====
+  function openDetail(id) {
+    document.querySelectorAll('.detail-panel').forEach(p => p.classList.remove('open'));
+    document.getElementById(id).classList.add('open');
+    const step = id.replace('dp-step', '');
+    document.querySelectorAll('.flow-node .fn-box').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.flow-node[data-step="${step}"] .fn-box`).classList.add('active');
+  }
+  function closeDetail(id) {
+    document.getElementById(id).classList.remove('open');
+    document.querySelectorAll('.flow-node .fn-box').forEach(b => b.classList.remove('active'));
+  }
+</script>
+</body>
+</html>
