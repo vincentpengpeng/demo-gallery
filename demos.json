@@ -160,6 +160,17 @@
       "tags": ["语音合成", "TTS", "多语种"],
       "status": "online",
       "created": "2026-07"
+    },
+    {
+      "id": "culture-ai-glasses",
+      "title": "多语种 AI 导览眼镜",
+      "category": "culture-tourism",
+      "description": "业内首款支持 4G 全网通独立通信的 AI 导览眼镜，集成北斗+GPS 双模定位。无需依赖手机，开机即用，多语种智能导览，让每一游客都能听懂中国故事。",
+      "url": "https://vincentpengpeng.github.io/ai-glasses/",
+      "screenshot": "assets/screenshots/culture-ai-glasses.png",
+      "tags": ["AI眼镜", "多语种", "4G全网通", "文旅"],
+      "status": "online",
+      "created": "2026-07"
     }
   ]
 }
