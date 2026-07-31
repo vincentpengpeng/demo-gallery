@@ -322,6 +322,17 @@
   var chatArea = document.getElementById('chatArea');
   var chatInput = document.getElementById('chatInput');
 
+  function renderMarkdown(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code style="background:rgba(255,255,255,0.15);padding:1px 5px;border-radius:3px;font-size:0.85em;">$1</code>')
+      .replace(/\n/g, '<br>');
+  }
+
   function addMsg(text, role) {
     var welcome = document.getElementById('welcomeMsg');
     if (welcome) welcome.style.display = 'none';
@@ -332,7 +343,7 @@
     av.textContent = role === 'bot' ? '🤖' : '👤';
     var bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.innerHTML = text;
+    bubble.innerHTML = role === 'bot' ? renderMarkdown(text) : text;
     div.appendChild(av);
     div.appendChild(bubble);
     chatArea.appendChild(div);
@@ -420,7 +431,7 @@
     chatArea.scrollTop = chatArea.scrollHeight;
 
     callAIStream(q, function(text) {
-      bubble.innerHTML = text.replace(/\n/g, '<br>');
+      bubble.innerHTML = renderMarkdown(text);
       chatArea.scrollTop = chatArea.scrollHeight;
     }).catch(function() {
       bubble.innerHTML = '抱歉，我暂时无法回答，请稍后再试～';
