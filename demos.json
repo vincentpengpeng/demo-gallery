@@ -182,6 +182,39 @@
       "tags": ["语音合成", "TTS", "多语种"],
       "status": "online",
       "created": "2026-07"
+    },
+    {
+      "id": "culture-goods-recommendation",
+      "title": "好物推荐智能体",
+      "category": "culture-tourism",
+      "description": "AI 驱动的景区好物推荐助手，通过对话了解游客偏好，智能推荐当地特产、文创和伴手礼，支持产品卡片展示、购买链接跳转。",
+      "url": "https://vincentpengpeng.github.io/goods-recommendation-agent/",
+      "screenshot": "assets/screenshots/culture-goods-recommendation.png",
+      "tags": ["好物推荐", "文旅", "AI对话"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "culture-travel-journal",
+      "title": "旅拍游记智能体",
+      "category": "culture-tourism",
+      "description": "AI 旅拍游记生成工具，根据旅行体验自动生成小红书、朋友圈、公众号、马蜂窝等平台风格的游记文案，支持一键复制。",
+      "url": "https://vincentpengpeng.github.io/travel-journal-agent/",
+      "screenshot": "assets/screenshots/culture-travel-journal.png",
+      "tags": ["游记生成", "文旅", "社交媒体"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
+      "id": "culture-tourism-marketing",
+      "title": "文旅营销智能体",
+      "category": "culture-tourism",
+      "description": "AI 文旅营销文案生成工具，支持多平台（小红书/抖音/公众号/携程/马蜂窝）营销文案创作，覆盖景点推介、活动推广、优惠促销等场景。",
+      "url": "https://vincentpengpeng.github.io/tourism-marketing-agent/",
+      "screenshot": "assets/screenshots/culture-tourism-marketing.png",
+      "tags": ["营销文案", "文旅", "内容生成"],
+      "status": "online",
+      "created": "2026-07"
     }
   ]
 }
