@@ -107,6 +107,17 @@
       "created": "2026-07"
     },
     {
+      "id": "culture-zhangjiajie-guide",
+      "title": "张家界多语种AI导游",
+      "category": "culture-tourism",
+      "description": "面向张家界国家森林公园的沉浸式多语种AI导游，支持中/英/韩/日四语界面切换、流式对话、图片识别讲解、快捷景点咨询，为游客提供全天候智能导览服务。",
+      "url": "https://github.com/vincentpengpeng/zhangjiajie-ai-guide",
+      "screenshot": "assets/screenshots/culture-zhangjiajie-guide.png",
+      "tags": ["多语种", "AI导游", "景区", "图片识别"],
+      "status": "online",
+      "created": "2026-07"
+    },
+    {
       "id": "culture-ai-museum",
       "title": "AI 博物馆",
       "category": "culture-tourism",
