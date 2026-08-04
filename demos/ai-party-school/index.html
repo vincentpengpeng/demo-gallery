@@ -68,7 +68,7 @@
   .nav-item.active .count { background: rgba(178,34,34,0.12); color: var(--primary); }
 
   /* Content Area */
-  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
   .content-header {
     padding: 20px 32px 0; flex-shrink: 0;
   }
@@ -101,11 +101,6 @@
   .banner-progress-item .bar { height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 6px; width: 100px; overflow: hidden; }
   .banner-progress-item .bar .fill { height: 100%; background: #FFD700; border-radius: 2px; width: 65%; }
 
-  /* Chat Area */
-  .chat-area { flex: 1; overflow-y: auto; padding: 0 32px 16px; }
-  .chat-area::-webkit-scrollbar { width: 4px; }
-  .chat-area::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 2px; }
-
   /* Messages */
   .msg { display: flex; gap: 10px; margin-bottom: 16px; max-width: 75%; animation: msgIn 0.3s ease; }
   @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -135,28 +130,64 @@
   }
   .quick-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-  /* Input */
-  .input-area {
-    padding: 12px 32px 20px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0;
-  }
+  /* Home Dashboard */
+  .home-view { display: flex; flex-direction: column; flex: 1; overflow-y: auto; padding: 24px 32px; }
+  .home-view::-webkit-scrollbar { width: 4px; }
+  .home-view::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 2px; }
+  .home-banner { margin-bottom: 24px; }
+  .home-section { margin-bottom: 24px; }
+  .home-section-title { font-size: 15px; font-weight: 600; font-family: var(--font-serif); color: var(--text); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+  .home-section-title .more { font-size: 12px; color: var(--text-secondary); font-weight: 400; cursor: pointer; font-family: var(--font-sans); }
+  .stats-row { display: flex; gap: 14px; }
+  .stat-card { flex: 1; background: var(--surface); border-radius: 10px; padding: 18px 16px; border: 1px solid var(--border); }
+  .stat-card .num { font-size: 24px; font-weight: 700; color: var(--text); }
+  .stat-card .num .unit { font-size: 13px; font-weight: 400; color: var(--text-secondary); }
+  .stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+  .stat-card .bar { height: 3px; background: #F0EDE8; border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .stat-card .bar .fill { height: 100%; background: var(--primary); border-radius: 2px; }
+  .learn-stack { display: flex; flex-direction: column; gap: 8px; }
+  .learn-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: 10px; padding: 14px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+  .learn-card:hover { border-color: var(--primary); }
+  .learn-card .icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .learn-card .icon.red { background: rgba(199,59,59,0.1); }
+  .learn-card .icon.blue { background: rgba(59,111,199,0.1); }
+  .learn-card .icon.gold { background: rgba(184,134,11,0.1); }
+  .learn-card .info { flex: 1; min-width: 0; }
+  .learn-card .info .title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .learn-card .info .desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .learn-card .arrow { font-size: 18px; color: var(--text-muted); }
+  .topic-grid { display: flex; flex-direction: column; gap: 8px; }
+  .topic-item { display: flex; align-items: center; gap: 10px; background: var(--surface); border-radius: 10px; padding: 12px 14px; border: 1px solid var(--border); cursor: pointer; }
+  .topic-item:hover { border-color: var(--primary); }
+  .topic-item .tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
+  .topic-item .tag.red { background: rgba(178,34,34,0.1); color: var(--primary); }
+  .topic-item .tag.gold { background: #F5EDD6; color: #8B6914; }
+  .topic-item .name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+  .topic-item .meta { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+
+  /* Chat View (hidden by default) */
+  .chat-view { display: none; flex-direction: column; flex: 1; min-height: 0; }
+  .chat-view.active { display: flex; }
+  .chat-view .content-header { flex-shrink: 0; padding-bottom: 12px; }
+  .chat-area { flex: 1; overflow-y: auto; padding: 0 32px 16px; min-height: 0; }
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 2px; }
+
+  /* Input Area */
+  .input-area { padding: 12px 32px 20px; border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
   .input-inner { display: flex; gap: 10px; align-items: center; background: var(--bg); border-radius: 10px; border: 1px solid var(--border); padding: 4px 4px 4px 16px; }
   .input-inner input { flex: 1; border: none; outline: none; font-size: 13px; font-family: var(--font-sans); background: transparent; color: var(--text); padding: 8px 0; }
   .input-inner input::placeholder { color: var(--text-muted); }
-  .input-inner .send-btn {
-    width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--primary); color: #fff;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-  }
+  .input-inner .send-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--primary); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .input-inner .send-btn:hover { background: var(--primary-dark); }
 
   @media (max-width: 768px) {
     .sidebar { display: none; }
-    .content-header { padding: 16px 16px 0; }
-    .banner { margin: 12px 16px; padding: 18px 20px; }
+    .home-view { padding: 16px; }
     .chat-area { padding: 0 16px 12px; }
     .input-area { padding: 12px 16px 16px; }
     .msg { max-width: 90%; }
-    .banner-progress { gap: 16px; }
-    .banner-progress-item .bar { width: 60px; }
+    .stats-row { flex-direction: column; }
   }
 </style>
 </head>
@@ -176,9 +207,14 @@
 <div class="main">
   <!-- Sidebar -->
   <div class="sidebar">
-    <div class="sidebar-header">AI 智能体</div>
+    <div class="sidebar-header">导航</div>
     <div class="sidebar-nav">
-      <div class="nav-item active" data-tab="0">
+      <div class="nav-item active" id="navHome">
+        <span class="icon">🏠</span> 首页
+      </div>
+      <div style="height:1px;background:var(--border);margin:8px 14px;"></div>
+      <div class="sidebar-header" style="padding-top:0;">AI 智能体</div>
+      <div class="nav-item" data-tab="0">
         <span class="icon">📚</span> 干部培训 <span class="count">2</span>
       </div>
       <div class="nav-item" data-tab="1">
@@ -198,55 +234,73 @@
 
   <!-- Content -->
   <div class="content">
-    <div class="content-header">
-      <h2>干部培训</h2>
-      <p>基于读懂中国语料库 · 智能教学辅助</p>
+    <!-- Home Dashboard -->
+    <div class="home-view" id="homeView">
+      <div class="home-banner">
+        <div class="banner" style="margin:0;">
+          <div class="banner-top">
+            <div>
+              <div class="banner-greeting">欢迎使用 AI 党校<small>已接入读懂中国语料库 · 覆盖 5 大教学场景</small></div>
+            </div>
+            <div class="banner-badge">AI 赋能</div>
+          </div>
+          <div class="banner-progress">
+            <div class="banner-progress-item"><div class="num">1,280<span class="unit">+</span></div><div class="label">语料文档</div><div class="bar"><div class="fill" style="width:85%"></div></div></div>
+            <div class="banner-progress-item"><div class="num">15<span class="unit">+</span></div><div class="label">培训场景</div><div class="bar"><div class="fill" style="width:70%"></div></div></div>
+            <div class="banner-progress-item"><div class="num">96<span class="unit">%</span></div><div class="label">回答准确率</div><div class="bar"><div class="fill" style="width:96%"></div></div></div>
+          </div>
+          <div class="quick-actions" style="margin-top:14px;">
+            <button class="quick-btn" onclick="switchToChat(0)">📚 备课辅助</button>
+            <button class="quick-btn" onclick="switchToChat(1)">📊 政策研究</button>
+            <button class="quick-btn" onclick="switchToChat(2)">🔴 党建方案</button>
+            <button class="quick-btn" onclick="switchToChat(3)">🌐 涉外交流</button>
+            <button class="quick-btn" onclick="switchToChat(4)">📋 教务管理</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-section">
+        <div class="home-section-title">学习进度 <span class="more">查看全部 ›</span></div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="num">34<span class="unit">%</span></div><div class="label">网络培训完成率</div><div class="bar"><div class="fill" style="width:34%"></div></div></div>
+          <div class="stat-card"><div class="num">60<span class="unit">%</span></div><div class="label">脱产培训完成率</div><div class="bar"><div class="fill" style="width:60%"></div></div></div>
+          <div class="stat-card"><div class="num">0</div><div class="label">培训证书</div><div class="bar"><div class="fill" style="width:0%"></div></div></div>
+        </div>
+      </div>
+
+      <div class="home-section">
+        <div class="home-section-title">定向学习 <span class="more">更多 ›</span></div>
+        <div class="learn-stack">
+          <div class="learn-card"><div class="icon red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C73B3B" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div class="info"><div class="title">常态学 · 加强作风建设</div><div class="desc">市委组织部培训 · 进行中</div></div><span class="arrow">›</span></div>
+          <div class="learn-card"><div class="icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6FC7" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div class="info"><div class="title">要我学 · 《习近平谈治国理政》</div><div class="desc">第四卷专题学习 · 更新至第8章</div></div><span class="arrow">›</span></div>
+          <div class="learn-card"><div class="icon gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div class="info"><div class="title">我要学 · 省党代会精神</div><div class="desc">学习贯彻省第十三次党代会精神</div></div><span class="arrow">›</span></div>
+        </div>
+      </div>
+
+      <div class="home-section">
+        <div class="home-section-title">专题学习 <span class="more">全部 ›</span></div>
+        <div class="topic-grid">
+          <div class="topic-item"><span class="tag red">必修</span><span class="name">习近平新时代中国特色社会主义思想</span><span class="meta">12 课时 · 更新中</span></div>
+          <div class="topic-item"><span class="tag red">必修</span><span class="name">党的二十大精神</span><span class="meta">8 课时 · 已学 60%</span></div>
+          <div class="topic-item"><span class="tag gold">专题</span><span class="name">双区建设与粤港澳大湾区</span><span class="meta">6 课时 · 推荐</span></div>
+          <div class="topic-item"><span class="tag gold">专题</span><span class="name">网上党校 · 干部能力提升</span><span class="meta">10 课时 · 新上线</span></div>
+          <div class="topic-item"><span class="tag gold">专题</span><span class="name">干部助企行 · 服务企业培训</span><span class="meta">5 课时 · 进行中</span></div>
+        </div>
+      </div>
     </div>
 
-    <!-- Banner -->
-    <div class="banner">
-      <div class="banner-top">
-        <div>
-          <div class="banner-greeting">欢迎使用 AI 党校<small>已接入读懂中国语料库 · 覆盖 5 大教学场景</small></div>
-        </div>
-        <div class="banner-badge">AI 赋能</div>
+    <!-- Chat View -->
+    <div class="chat-view" id="chatView">
+      <div class="content-header" style="padding-bottom:12px;">
+        <h2 id="chatTitle">干部培训</h2>
+        <p>基于读懂中国语料库 · 智能教学辅助</p>
       </div>
-      <div class="banner-progress">
-        <div class="banner-progress-item">
-          <div class="num">1,280<span class="unit">+</span></div>
-          <div class="label">语料文档</div>
-          <div class="bar"><div class="fill" style="width:85%"></div></div>
+      <div class="chat-area" id="chatArea"></div>
+      <div class="input-area">
+        <div class="input-inner">
+          <input type="text" placeholder="输入你的需求，AI 将基于读懂中国语料库为您服务..." readonly>
+          <button class="send-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
         </div>
-        <div class="banner-progress-item">
-          <div class="num">15<span class="unit">+</span></div>
-          <div class="label">培训场景</div>
-          <div class="bar"><div class="fill" style="width:70%"></div></div>
-        </div>
-        <div class="banner-progress-item">
-          <div class="num">96<span class="unit">%</span></div>
-          <div class="label">回答准确率</div>
-          <div class="bar"><div class="fill" style="width:96%"></div></div>
-        </div>
-      </div>
-      <div class="quick-actions">
-        <button class="quick-btn" onclick="switchTab(0)">📚 备课辅助</button>
-        <button class="quick-btn" onclick="switchTab(1)">📊 政策研究</button>
-        <button class="quick-btn" onclick="switchTab(2)">🔴 党建方案</button>
-        <button class="quick-btn" onclick="switchTab(3)">🌐 涉外交流</button>
-        <button class="quick-btn" onclick="switchTab(4)">📋 教务管理</button>
-      </div>
-    </div>
-
-    <!-- Chat Area -->
-    <div class="chat-area" id="chatArea"></div>
-
-    <!-- Input -->
-    <div class="input-area">
-      <div class="input-inner">
-        <input type="text" placeholder="输入你的需求，AI 将基于读懂中国语料库为您服务..." readonly>
-        <button class="send-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        </button>
       </div>
     </div>
   </div>
@@ -285,7 +339,6 @@ const conversations = [
     { role: 'assistant', text: '已为您生成教材编写立项申请书模板：<br><br><b>教材编写立项申请书</b><br><br><b>一、教材名称：</b>（请填写）<br><b>二、编写背景与依据：</b>（阐述教材编写的政策依据和现实需求）<br><b>三、教材定位与目标：</b>（说明适用班次、预期教学目标）<br><b>四、内容框架：</b>（分章节概要说明主要内容）<br><b>五、编写团队：</b>（主编、副主编、参编人员及分工）<br><b>六、进度安排：</b>（大纲审定→初稿编写→统稿→审校→出版）<br><b>七、经费预算：</b>（编写费、审稿费、出版费等）<br><span class="divider"></span><span class="highlight">文档草稿已生成</span><span class="sub">请根据实际情况补充完善，提交教材处审批</span>' },
   ],
 ];
-
 const TAB_NAMES = ['干部培训', '科研咨政', '数字化党建', '涉外交流', '教务管理'];
 let currentTab = 0;
 
@@ -295,7 +348,7 @@ function renderChat(tabIndex) {
   area.innerHTML = '';
   msgs.forEach(m => {
     const div = document.createElement('div');
-    div.className = `msg ${m.role}`;
+    div.className = 'msg ' + m.role;
     const avatar = document.createElement('div');
     avatar.className = 'msg-avatar';
     avatar.textContent = m.role === 'user' ? '你' : 'AI';
@@ -309,22 +362,33 @@ function renderChat(tabIndex) {
   area.scrollTop = area.scrollHeight;
 }
 
-function switchTab(idx) {
-  if (idx === currentTab) return;
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.nav-item[data-tab="${idx}"]`).classList.add('active');
-  document.querySelector('.content-header h2').textContent = TAB_NAMES[idx];
+function showHome() {
+  document.getElementById('homeView').style.display = 'flex';
+  document.getElementById('chatView').classList.remove('active');
+  document.getElementById('navHome').classList.add('active');
+  document.querySelectorAll('.nav-item[data-tab]').forEach(b => b.classList.remove('active'));
+}
+
+function switchToChat(idx) {
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('chatView').classList.add('active');
+  document.getElementById('navHome').classList.remove('active');
+  document.querySelectorAll('.nav-item[data-tab]').forEach(b => b.classList.remove('active'));
+  document.querySelector('.nav-item[data-tab="' + idx + '"]').classList.add('active');
+  document.getElementById('chatTitle').textContent = TAB_NAMES[idx];
   currentTab = idx;
   renderChat(currentTab);
 }
 
-document.querySelectorAll('.nav-item').forEach(btn => {
-  btn.addEventListener('click', () => {
-    switchTab(parseInt(btn.dataset.tab));
+document.getElementById('navHome').addEventListener('click', showHome);
+
+document.querySelectorAll('.nav-item[data-tab]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    switchToChat(parseInt(this.dataset.tab));
   });
 });
 
-renderChat(0);
+showHome();
 </script>
 </body>
 </html>
