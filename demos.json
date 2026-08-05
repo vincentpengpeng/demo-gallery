@@ -32,7 +32,7 @@
       "description": "面向景区/博物馆的多语种 AI 智能导览助手（小程序 + H5），支持多语种语音交互、路线指引、景点讲解、智能问答等一站式服务。",
       "url": "https://ai-h5.zjjdaxiagu.com/home",
       "screenshot": "assets/screenshots/culture-multilingual-guide.png",
-      "video": "https://pub-28e5bd9be5bb4919aa8466fe90b8abcd.r2.dev/multilingual-guide.mp4",
+      "video": "assets/videos/multilingual-guide.mp4",
       "tags": ["多语种", "导览", "景区"],
       "status": "online",
       "created": "2026-07"
@@ -55,7 +55,7 @@
       "description": "面向展会、导览、接待等场景的AI数字人交互，支持多轮对话、展品介绍、路线引导、多语种接待等一站式服务。",
       "url": "https://virtual-man.xfyun.cn/interact_web/common/screen/317582127745077248",
       "screenshot": "assets/screenshots/culture-ai-digital-human-expo.jpg",
-      "video": "https://pub-28e5bd9be5bb4919aa8466fe90b8abcd.r2.dev/multilingual-digital-human.mp4",
+      "video": "assets/videos/multilingual-digital-human.mp4",
       "tags": ["数字人", "展会", "多语种"],
       "status": "online",
       "created": "2026-07"
@@ -78,7 +78,7 @@
       "description": "集AI配音、虚拟人视频生成、PPT生成视频等功能于一体，通过AI数字分身+智能体，赋能课程建设、数字助教、院校宣传视频生成等场景。",
       "url": "https://www.xfzhizuo.cn/",
       "screenshot": "assets/screenshots/edu-ai-digital-teacher.png",
-      "video": "https://pub-28e5bd9be5bb4919aa8466fe90b8abcd.r2.dev/ai-digital-teacher.mp4",
+      "video": "assets/videos/ai-digital-teacher.mp4",
       "tags": ["数字教师", "AI配音", "虚拟人"],
       "status": "online",
       "created": "2026-07"
@@ -90,7 +90,7 @@
       "description": "业界首个搭载多模态降噪的透明终端，支持中、英、法、葡、俄、日、韩等37种语言实时识别翻译，解决公共服务窗口跨语言交流问题。",
       "url": "https://aiui.xfyun.cn/solution/transparent-screen?chan=AIUI&way=menu",
       "screenshot": "assets/screenshots/culture-transparent-translator.png",
-      "video": "https://pub-28e5bd9be5bb4919aa8466fe90b8abcd.r2.dev/transparent-translator.mp4",
+      "video": "assets/videos/transparent-translator.mp4",
       "tags": ["多语种", "翻译", "透明屏"],
       "status": "online",
       "created": "2026-07"
@@ -102,7 +102,7 @@
       "description": "空间自由与多维度交互能力，可深度赋能智能接待、动线指引、场景化导览等多元化服务场景。具备一站式建图部署、声源定位、多模态交互、形象定制等核心产品功能。",
       "url": "https://aiui.xfyun.cn/solution/mobile-digital-person?chan=AIUI&way=menu",
       "screenshot": "assets/screenshots/culture-mobile-digital-human.png",
-      "video": "https://pub-28e5bd9be5bb4919aa8466fe90b8abcd.r2.dev/mobile-digital-human.mp4",
+      "video": "assets/videos/mobile-digital-human.mp4",
       "tags": ["数字人", "移动", "智能接待"],
       "status": "online",
       "created": "2026-07"
