@@ -1,0 +1,22 @@
+# 密钥（绝不提交）
+backend/.env
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# 数据库（本地数据不提交）
+*.db
+backend/uploads/
+
+# 日志/临时
+*.log
+.DS_Store
+Thumbs.db

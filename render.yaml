@@ -1,0 +1,30 @@
+# Render 部署配置（后端）
+# 使用方式：Render 上新建 Web Service，连接 GitHub 仓库，Root Directory 填 backend，
+# 环境变量从 Render Dashboard 配置（不要提交 .env）
+services:
+  - type: web
+    name: zhen-tan-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    envVars:
+      - key: ARK_API_KEY
+        sync: false
+      - key: ARK_BASE_URL
+        value: https://ark.cn-beijing.volces.com/api/plan/v3
+      - key: ARK_MODEL
+        value: ark-code-latest
+      - key: OCR_API_KEY
+        sync: false
+      - key: OCR_BASE_URL
+        value: https://ark.cn-beijing.volces.com/api/v3
+      - key: OCR_MODEL
+        value: deepseek-v4-1-flash-260910
+      - key: SERPAPI_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_REPO
+        value: vincentpengpeng/demo-gallery
+      - key: GITHUB_BRANCH
+        value: master

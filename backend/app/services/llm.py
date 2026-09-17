@@ -1,0 +1,348 @@
+# -*- coding: utf-8 -*-
+"""火山引擎 Ark LLM 服务：主张拆解、关键词生成、信源评价、报告生成。
+
+未配置 ARK_API_KEY 时自动降级为规则/演示模式，保证系统可离线跑通全流程。
+"""
+import json
+import re
+from typing import Optional
+
+from ..config import settings, LLM_ENABLED
+
+
+class LLMService:
+    def __init__(self):
+        self._client = None
+        self._ocr_client = None
+        if LLM_ENABLED:
+            from openai import OpenAI
+            self._client = OpenAI(
+                api_key=settings.ark_api_key,
+                base_url=settings.ark_base_url,
+                timeout=90,          # 推理模型任务较长，放宽超时
+                max_retries=1,
+            )
+        if settings.ocr_api_key:
+            from openai import OpenAI
+            self._ocr_client = OpenAI(
+                api_key=settings.ocr_api_key,
+                base_url=settings.ocr_base_url or "https://ark.cn-beijing.volces.com/api/v3",
+                timeout=90,
+                max_retries=1,
+            )
+
+    @property
+    def enabled(self) -> bool:
+        return self._client is not None
+
+    @property
+    def ocr_enabled(self) -> bool:
+        return self._ocr_client is not None
+
+    def chat_json(self, system: str, user: str, fallback: dict, max_tokens: int = 1500) -> dict:
+        """调用 Ark，要求返回 JSON；失败或未配置时返回 fallback。"""
+        if not self._client:
+            return fallback
+        # 推理模型 reasoning tokens 占用波动大：空输出时重试一次
+        for attempt in range(2):
+            try:
+                resp = self._client.chat.completions.create(
+                    model=settings.ark_model,
+                    messages=[
+                        {"role": "system", "content": system + " 只输出 JSON，不要输出其他文字。"},
+                        {"role": "user", "content": user},
+                    ],
+                    temperature=0.2,
+                    max_tokens=max_tokens,
+                    response_format={"type": "json_object"},
+                )
+                text = resp.choices[0].message.content or ""
+                if not text.strip():
+                    # 输出为空（reasoning 占满）→ 重试
+                    if attempt == 0:
+                        continue
+                    return fallback
+                parsed = self._safe_parse(text)
+                if parsed:
+                    return parsed
+            except Exception:
+                pass
+        return fallback
+
+    def _safe_parse(self, text: str) -> Optional[dict]:
+        try:
+            return json.loads(text)
+        except Exception:
+            m = re.search(r"\{.*\}", text, re.S)
+            if m:
+                try:
+                    return json.loads(m.group(0))
+                except Exception:
+                    return None
+            return None
+
+    # ---------- 多模态 OCR：图片文字识别 ----------
+    def ocr_image(self, image_bytes: bytes, image_format: str = "png") -> str:
+        """识别图片中的文字（deepseek-v4-1-flash 多模态，base64 直传，标准版 api/v3）。"""
+        client = self._ocr_client or self._client
+        if not client:
+            return ""
+        import base64
+        b64 = base64.b64encode(image_bytes).decode()
+        mime = "image/png" if image_format == "png" else "image/jpeg"
+        model = settings.ocr_model if self._ocr_client else settings.ark_model
+        try:
+            resp = client.responses.create(
+                model=model,
+                input=[
+                    {"role": "user", "content": [
+                        {"type": "input_text",
+                         "text": "请识别这张图片中的所有文字，逐行原样输出，不要翻译不要总结不要添加额外说明。"},
+                        {"type": "input_image",
+                         "image_url": f"data:{mime};base64,{b64}"},
+                    ]}
+                ],
+                timeout=90,
+            )
+            texts = []
+            for o in (resp.output or []):
+                if getattr(o, "type", "") == "message":
+                    for c in (getattr(o, "content", None) or []):
+                        if getattr(c, "type", "") == "output_text":
+                            texts.append(getattr(c, "text", "") or "")
+            return "\n".join(t for t in texts if t)
+        except Exception:
+            return ""
+
+    # ---------- 自动翻译：中英互译 ----------
+    def translate(self, text: str, target: str = "zh") -> str:
+        """把 text 翻译成目标语言（zh=中文, en=英文）；失败返回空字符串。"""
+        if not self._client or not text.strip():
+            return ""
+        if target == "en":
+            system = "你是专业翻译。把用户提供的内容翻译成准确、自然的英文，只输出译文，不要任何解释。"
+            user = f"原文：\n{text}\n\n请翻译成英文。"
+        else:
+            system = "你是专业翻译。把用户提供的外文内容翻译成准确、流畅的中文，只输出译文，不要任何解释。"
+            user = f"原文：\n{text}\n\n请翻译成中文。"
+        try:
+            resp = self._client.chat.completions.create(
+                model=settings.ark_model,
+                messages=[{"role": "system", "content": system},
+                          {"role": "user", "content": user}],
+                temperature=0.2,
+                max_tokens=2000,
+            )
+            return (resp.choices[0].message.content or "").strip()
+        except Exception:
+            return ""
+
+    def translate_to_chinese(self, text: str) -> str:
+        """兼容旧调用：外文 → 中文。"""
+        return self.translate(text, "zh")
+
+    def translate_to_english(self, text: str) -> str:
+        """中文 → 英文。"""
+        return self.translate(text, "en")
+
+    # ---------- 环节2：价值初筛（LLM 判断） ----------
+    def screen_clue(self, title: str, raw_text: str, translated: str = "") -> dict:
+        """判断线索是否值得进入核查。
+
+        从中国立场出发，判断线索是否：①涉及中国相关议题；②含可核查的事实主张；
+        ③属于外媒涉华不当/虚假表述高发领域（军事对峙、疫情、人权、香港、台湾、
+        新疆、经济数据等）。返回 passed/score/reason/focus。
+        """
+        system = (
+            "你是价值初筛分析员，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+            "请从中国立场出发判断这条线索是否值得进入事实核查：\n"
+            "1. 是否涉及中国相关议题（人物、机构、事件、领土、政策、数据、军事等与中方相关）；\n"
+            "2. 是否包含可核查的事实主张（有具体的时间地点人物数字事件，而非纯观点或情绪）；\n"
+            "3. 是否属于外媒涉华不当表述高发领域（如军事对抗、疫情、人权、香港、台湾、"
+            "新疆、经济与数据、内政干涉等）。\n"
+            "判定标准：以上 3 点任一点成立即应进入核查；即使标题/原文未直接出现'中国/China'"
+            "字样，只要内容实质涉及中国（如'Chinese'、'Beijing'、'Chinese aircraft'、"
+            "'off North Korea' 涉中军事活动等），也应判定为通过。\n"
+            "只输出JSON：{\"passed\":true|false,\"score\":0-100,\"reason\":\"一句话判断理由\","
+            "\"focus\":\"线索涉及的主要议题方向，如：涉华军事活动\"}"
+        )
+        user = (
+            f"标题：{title}\n原文：{raw_text}\n"
+            f"翻译：{translated if translated else '（无）'}\n"
+            "请输出判断JSON。"
+        )
+        fallback = {"passed": False, "score": 30,
+                    "reason": "LLM 初筛未启用，请人工判断是否进入核查。",
+                    "focus": ""}
+        return self.chat_json(system, user, fallback, max_tokens=500)
+
+    # ---------- 环节3：主张拆解 ----------
+    def decompose_claims(self, raw_text: str, translated: str = "") -> dict:
+        system = (
+            "你是专业的事实核查分析员，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+            "请从中国立场出发，把海外涉华信息拆解为独立的事实主张（fact）、"
+            "观点表达（view）和情绪表达（emotion），重点识别其中可能存在的"
+            "事实错误、夸大歪曲、断章取义、旧闻新用、缺乏语境等不当表述。\n"
+            "对每个事实主张提取要素：人物、地点、时间、事件。"
+            "同时生成用于多语种检索的中文和英文关键词。\n"
+            "【关键词语言要求】keywords.zh 必须是纯中文（用中文表达检索词，"
+            "如'加拿大军机 中国战机 贴近飞行'），keywords.en 必须是纯英文"
+            "（如'Canadian surveillance plane Chinese fighter intercept'），"
+            "严禁把英文关键词原样放进 zh，也不要把中文关键词放进 en。\n"
+            "注意：拆解时保持客观，如实呈现原文表述，不添油加醋；"
+            "是否'不当/虚假'由后续核查环节用证据判定，拆解环节只负责准确拆分与标注。"
+            "结论分类定义：真实/基本真实/缺乏语境/误导/基本错误/虚假/尚待核实/无法核查。"
+        )
+        user = f"原文：\n{raw_text}\n\n翻译：\n{translated}\n\n请输出JSON：{{\"claims\":[{{\"text\":\"...\",\"type\":\"fact|view|emotion\",\"elements\":{{\"人物\":\"\",\"地点\":\"\",\"时间\":\"\",\"事件\":\"\"}}}}],\"keywords\":{{\"zh\":\"...\",\"en\":\"...\"}}}}"
+        fallback = self._rule_decompose(raw_text)
+        return self.chat_json(system, user, fallback, max_tokens=2000)
+
+    def _rule_decompose(self, text: str) -> dict:
+        """无 LLM 时的规则降级：粗拆句子。"""
+        sentences = re.split(r"[。！？!?；;\n]", text)
+        claims = []
+        for s in sentences:
+            s = s.strip()
+            if not s or len(s) < 4:
+                continue
+            claims.append({
+                "text": s,
+                "type": "fact",
+                "elements": {"人物": "", "地点": "", "时间": "", "事件": s[:50]},
+            })
+        if not claims:
+            claims = [{"text": text, "type": "fact",
+                       "elements": {"人物": "", "地点": "", "时间": "", "事件": text[:50]}}]
+        return {
+            "claims": claims[:6],
+            "keywords": {"zh": text[:40], "en": text[:40]},
+        }
+
+    # ---------- 环节6：交叉验证（证据与主张关系判定） ----------
+    def classify_evidence_batch(self, claims: list, evidence: list) -> dict:
+        """批量判定每条证据与主张的关系与可信度。
+
+        关系：支持 / 反驳 / 背景 / 待确认
+        可信度：高 / 较高 / 中 / 较低 / 低
+        返回 {"results": [{"evidence_id": id, "relation": "...", "reliability": "...", "reason": "..."}]}
+        """
+        system = (
+            "你是事实核查证据分析师，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+            "从中国立场出发，根据给定的主张列表，逐条判定每条证据与主张的关系。\n"
+            "关系定义：支持=证据直接佐证某条主张；反驳=证据推翻或否定某条主张；"
+            "背景=提供背景信息但不直接支持或反驳；待确认=无法判断关系。\n"
+            "同时评估证据可信度（高/较高/中/较低/低）。\n"
+            "注意：转载自同一来源的报道不应视为独立证据。\n"
+            "注意：判定关系须基于证据内容与事实逻辑，不因信源国别预设结论；"
+            "若外媒表述与可核实事实不符（如日期、地点、数据、语境错位），应如实判定为反驳或标注缺口。\n"
+            "只输出JSON。"
+        )
+        user = (
+            f"主张列表：{json.dumps(claims, ensure_ascii=False)}\n"
+            f"证据列表：{json.dumps(evidence, ensure_ascii=False, default=str)}\n"
+            "对每条证据输出：{\"results\":[{\"evidence_id\":1,\"relation\":\"支持|反驳|背景|待确认\","
+            "\"reliability\":\"高|较高|中|较低|低\",\"reason\":\"一句话理由\"}]}"
+        )
+        fallback = {
+            "results": [
+                {"evidence_id": e.get("id"), "relation": "待确认",
+                 "reliability": "中", "reason": "LLM判定未启用，待人工确认"}
+                for e in evidence
+            ]
+        }
+        return self.chat_json(system, user, fallback, max_tokens=4000)
+
+    # ---------- 环节7：信源评价 ----------
+    def evaluate_source(self, source: dict) -> dict:
+        system = (
+            "你是信源评价专家，服务对象是面向海外涉华信息核查的工作室。"
+            "评价须从中国立场出发，识别外媒在涉华议题上的不当、虚假、歪曲表述。\n"
+            "请按6个维度评价：\n"
+            "1. 接近事件程度：信源是直接报道一手事件，还是转述/转载（越接近一手越好）；\n"
+            "2. 专业性：采编流程、署名与核实机制、是否遵循新闻伦理；\n"
+            "3. 涉华表述准确性：对涉华事实的描述是否准确，有无夸大、歪曲、断章取义、"
+            "移花接木、旧闻新用等不当做法（这是核查的核心关注点）；\n"
+            "4. 立场与倾向性：信源在涉华议题上的立场倾向，是否使用偏见性框架"
+            "（如威胁论、崩溃论、对抗叙事等），是否以情绪化语言代替事实陈述；\n"
+            "5. 透明度：是否公开作者/机构、发布时间、信息来源与核实方法；\n"
+            "6. 时效性：报道时间与事件发生时间的关系，信息是否仍然有效。\n"
+            "每个维度给 高/较高/中/较低/低。同时给出综合评级（A/B/C）和一句话理由。"
+            "注意：综合评级是对'信源质量'的评价，不直接等于'是否虚假'；"
+            "表述不准确但方法规范的信源也应如实标注其质量问题。"
+        )
+        user = f"信源信息：{json.dumps(source, ensure_ascii=False)}\n输出JSON：{{\"dimensions\":{{\"接近事件程度\":\"\",\"专业性\":\"\",\"涉华表述准确性\":\"\",\"立场与倾向性\":\"\",\"透明度\":\"\",\"时效性\":\"\"}},\"grade\":\"A|B|C\",\"reason\":\"\"}}"
+        fallback = {"dimensions": {
+            "接近事件程度": "中", "专业性": "中", "涉华表述准确性": "中",
+            "立场与倾向性": "中", "透明度": "中", "时效性": "中"},
+            "grade": "B", "reason": "基于信源类型与可用信息给出的默认评价，建议人工复核。"}
+        return self.chat_json(system, user, fallback)
+
+    # ---------- 环节8：报告生成 ----------
+    def generate_report(self, case: dict, claims: list, evidence: list, evals: list) -> dict:
+        system = (
+            "你是专业的事实核查报告撰写员，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+            "报告从中国立场出发，聚焦外媒涉华表述中是否存在：事实错误、夸大歪曲、"
+            "断章取义、移花接木、旧闻新用、缺乏语境、误导性框架等问题。\n"
+            "必须同时呈现支持与反驳证据，标注证据缺口，并给出待确认事项。\n"
+            "重要方法底线：任何'不当/虚假'的判定必须基于可核实的证据，"
+            "证据不足时禁止强下结论，应输出'尚待核实'或'无法核查'，不得凭立场臆断。\n"
+            "结论只能从以下类别选择：真实/基本真实/缺乏语境/误导/基本错误/虚假/尚待核实/无法核查。\n"
+            "输出JSON，结构如下：\n"
+            "{\n"
+            "  \"preliminary_conclusion\": \"初步结论的完整表述（说明判断依据，指出外媒表述的具体问题）\",\n"
+            "  \"conclusion\": \"结论分类\",\n"
+            "  \"confidence\": \"高|中|低\",\n"
+            "  \"summary\": \"核查摘要（概述核查过程与关键发现，300字内）\",\n"
+            "  \"evidence_table\": [{\"name\":\"证据名称\",\"source\":\"来源机构\",\"date\":\"日期\",\"relation\":\"支持|反驳|背景|待确认\",\"reliability\":\"可信度\",\"url\":\"链接\",\"grade\":\"信源评级\"}],\n"
+            "  \"source_links\": [{\"title\":\"标题\",\"url\":\"链接\",\"source\":\"来源\"}],\n"
+            "  \"gaps\": [\"证据缺口描述\"],\n"
+            "  \"pending_items\": [\"待人工确认的事项\"]\n"
+            "}"
+        )
+        payload = {"主张": claims, "证据": evidence, "信源评价": evals}
+        user = (
+            f"案件信息：{json.dumps(case, ensure_ascii=False)}\n"
+            f"证据材料：{json.dumps(payload, ensure_ascii=False, default=str)}\n"
+            "请按指定JSON结构输出完整核查报告。"
+        )
+        fallback = self._rule_report(claims, evidence)
+        return self.chat_json(system, user, fallback, max_tokens=3000)
+
+    def _rule_report(self, claims, evidence) -> dict:
+        supports = [e for e in evidence if e.get("relation") == "支持"]
+        refutes = [e for e in evidence if e.get("relation") == "反驳"]
+        conclusion = "尚待核实"
+        if supports and not refutes:
+            conclusion = "基本真实"
+        elif refutes and not supports:
+            conclusion = "基本错误"
+        elif refutes and supports:
+            conclusion = "误导"
+        evidence_table = [
+            {"name": e.get("name", ""), "source": e.get("source_org", ""),
+             "date": e.get("publish_date", ""), "relation": e.get("relation", "待确认"),
+             "reliability": e.get("reliability", "中"), "url": e.get("url", ""),
+             "grade": ""}
+            for e in evidence
+        ]
+        source_links = [
+            {"title": e.get("name", ""), "url": e.get("url", ""), "source": e.get("source_org", "")}
+            for e in evidence if e.get("url")
+        ]
+        return {
+            "preliminary_conclusion": (
+                f"共拆解 {len(claims)} 项主张，收集 {len(evidence)} 条证据"
+                f"（支持 {len(supports)} 条、反驳 {len(refutes)} 条）。"
+                f"当前结论为'{conclusion}'。"
+            ),
+            "conclusion": conclusion,
+            "confidence": "中",
+            "summary": f"共拆解 {len(claims)} 项主张，收集 {len(evidence)} 条证据（支持 {len(supports)} 条、反驳 {len(refutes)} 条）。",
+            "evidence_table": evidence_table,
+            "source_links": source_links,
+            "gaps": ["当前为规则降级结论，建议配置 Ark API 后重新生成"],
+            "pending_items": ["建议人工复核完整证据链与来源链接有效性"],
+        }
+
+
+llm_service = LLMService()
