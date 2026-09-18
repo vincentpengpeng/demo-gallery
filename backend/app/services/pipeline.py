@@ -126,12 +126,15 @@ def run_decompose(case: models.Case, clue: models.Clue, db: Session) -> dict:
         db.delete(old)
     db.flush()
     for c in result.get("claims", []):
+        ctype = c.get("type", "fact")
+        # 核查主线：allegation（指控/定性表述）与 fact（事实主张）都参与检索
+        searchable = 1 if ctype in ("fact", "allegation") else 0
         db.add(models.Claim(
             case_id=case.id,
             text=c.get("text", ""),
-            claim_type=c.get("type", "fact"),
+            claim_type=ctype,
             elements=c.get("elements", {}),
-            searchable=1 if c.get("type") == "fact" else 0,
+            searchable=searchable,
         ))
     case.keywords = result.get("keywords", {"zh": "", "en": ""})
     case.stage = 3
@@ -221,7 +224,7 @@ def run_verify(case: models.Case, db: Session) -> dict:
 
     # LLM 批量判定每条证据与主张的关系（支持/反驳/背景/待确认）
     if evidence_items:
-        claims_payload = [{"text": c.text, "type": c.claim_type} for c in claims]
+        claims_payload = [{"id": c.id, "text": c.text, "type": c.claim_type} for c in claims]
         evidence_payload = [
             {"id": ev.id, "name": ev.name, "source_org": ev.source_org,
              "source_type": ev.source_type, "snippet": (ev.note or "")[:200]}
@@ -232,20 +235,54 @@ def run_verify(case: models.Case, db: Session) -> dict:
         except Exception as _e:
             classify = {"results": []}
             print(f"[run_verify] LLM classify error: {_e}", flush=True)
-        rel_map = {}
+        # 汇总：按证据分组，分别记录 对指控性主张(allegation)的关系 和 对事实主张(fact)的关系
+        claim_text_by_id = {c.id: c.text for c in claims}
+        ev_map: dict[int, dict] = {ev.id: {"allegation": [], "fact": [], "other": []}
+                                   for ev in evidence_items}
         for item in classify.get("results", []):
             eid = item.get("evidence_id")
-            if eid is not None:
-                try:
-                    rel_map[int(eid)] = item
-                except (TypeError, ValueError):
-                    pass
+            if eid is None:
+                continue
+            try:
+                eid = int(eid)
+            except (TypeError, ValueError):
+                continue
+            if eid not in ev_map:
+                continue
+            cid = item.get("claim_id")
+            ctype = "other"
+            for c in claims:
+                if c.id == cid:
+                    ctype = c.claim_type
+                    break
+            item["claim_text"] = claim_text_by_id.get(cid, "")
+            bucket = "allegation" if ctype == "allegation" else ("fact" if ctype == "fact" else "other")
+            ev_map[eid][bucket].append(item)
         for ev in evidence_items:
-            info = rel_map.get(ev.id, {})
-            ev.relation = info.get("relation", "待确认")
-            ev.reliability = info.get("reliability", "中")
-            if info.get("reason") and info.get("reason") != "LLM判定未启用，待人工确认":
-                ev.note = f"{ev.note} | 判定理由：{info['reason']}" if ev.note else f"判定理由：{info['reason']}"
+            buckets = ev_map[ev.id]
+            # 核查主线：优先取对指控性主张的关系；无指控关系时取对事实主张的关系
+            primary = buckets["allegation"] or buckets["fact"] or buckets["other"]
+            if primary:
+                # 若同一主张类型有多条判定，取更明确的（反驳 > 支持 > 背景 > 待确认）
+                order = {"反驳": 0, "支持": 1, "背景": 2, "待确认": 3}
+                primary.sort(key=lambda x: order.get(x.get("relation", "待确认"), 4))
+                info = primary[0]
+                ev.relation = info.get("relation", "待确认")
+                ev.reliability = info.get("reliability", "中")
+                parts = []
+                if buckets["allegation"]:
+                    rels = "、".join(f"指控「{r.get('claim_text', '')[:30] or '见主张'}」:{r.get('relation')}"
+                                     for r in buckets["allegation"][:3])
+                    parts.append(f"指控层面——{rels}")
+                if buckets["fact"]:
+                    rels = "、".join(f"事实「{r.get('claim_text', '')[:30] or '见主张'}」:{r.get('relation')}"
+                                     for r in buckets["fact"][:3])
+                    parts.append(f"事实层面——{rels}")
+                if parts:
+                    ev.note = f"{ev.note} | { '；'.join(parts) }" if ev.note else "；".join(parts)
+            else:
+                ev.relation = "待确认"
+                ev.reliability = "中"
     db.commit()
 
     # 计算独立信源数与关系统计
