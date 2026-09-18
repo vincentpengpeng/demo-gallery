@@ -29,6 +29,7 @@ export const api = {
   // 案件
   listCases: () => request('/cases'),
   getCase: (id) => request(`/cases/${id}`),
+  deleteCase: (id) => request(`/cases/${id}`, { method: 'DELETE' }),
 
   // 9 环节
   screening: (id) => request(`/cases/${id}/screening`, { method: 'POST' }),

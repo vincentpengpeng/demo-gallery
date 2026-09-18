@@ -27,6 +27,31 @@ def get_case(case_id: int, db: Session = Depends(get_db)):
     return schemas.case_to_detail(case, db)
 
 
+@router.delete("/{case_id}")
+def delete_case(case_id: int, db: Session = Depends(get_db)):
+    """删除核查任务及其关联的线索、主张、证据、报告、审核记录。
+
+    注意：运行中的自动流水线（status=running）不允许删除，避免后台线程写入已删除数据。
+    """
+    case = db.query(models.Case).filter_by(id=case_id).first()
+    if not case:
+        raise HTTPException(404, "案件不存在")
+    if case.status == "running":
+        raise HTTPException(409, "该案件正在自动核查中，请等待完成后删除")
+
+    clue = db.query(models.Clue).filter_by(id=case.clue_id).first()
+
+    # 报告（uselist=False，无 cascade）需手动删除
+    if case.report:
+        db.delete(case.report)
+    # claims/evidence/reviews 由 cascade="all, delete-orphan" 自动删除
+    db.delete(case)
+    if clue:
+        db.delete(clue)
+    db.commit()
+    return {"ok": True, "msg": f"案件 {case.case_no} 已删除"}
+
+
 @router.post("/{case_id}/screening")
 def do_screening(case_id: int, db: Session = Depends(get_db)):
     """环节2：价值初筛。"""

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { api, STAGES, mediaUrl } from '../api/client.js'
 import ConclusionBadge from '../components/ConclusionBadge.jsx'
 
 export default function CaseDetail() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const [caseData, setCaseData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -27,6 +28,21 @@ export default function CaseDetail() {
     }
   }
   useEffect(() => { load() }, [id])
+
+  async function handleDelete() {
+    const c = caseData
+    if (!c) return
+    if (!window.confirm(`确定删除案件 ${c.case_no}「${c.title.slice(0, 30)}」？\n将同时删除关联的线索、主张、证据、报告，且不可恢复。`)) return
+    setBusy(true)
+    try {
+      await api.deleteCase(id)
+      navigate('/tasks')
+    } catch (e) {
+      alert(`删除失败：${e.message}`)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   // 从线索中心跳转（?auto=1）：页面就绪后自动触发流水线并进入轮询
   useEffect(() => {
@@ -92,11 +108,23 @@ export default function CaseDetail() {
             {c.clue.published_at && <> · 发布时间 {c.clue.published_at}</>}
           </div>
         </div>
-        <span style={{
-          padding: '4px 14px', borderRadius: 12, fontSize: 13,
-          background: c.status === 'done' ? '#ecfdf5' : '#eff6ff',
-          color: c.status === 'done' ? '#059669' : '#2563eb',
-        }}>{c.stage_name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{
+            padding: '4px 14px', borderRadius: 12, fontSize: 13,
+            background: c.status === 'done' ? '#ecfdf5' : '#eff6ff',
+            color: c.status === 'done' ? '#059669' : '#2563eb',
+          }}>{c.stage_name}</span>
+          <button
+            onClick={handleDelete}
+            disabled={busy || c.status === 'running'}
+            title={c.status === 'running' ? '自动核查中，暂不能删除' : '删除案件'}
+            style={{
+              padding: '6px 14px', borderRadius: 8, fontSize: 13, cursor: 'pointer',
+              border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626',
+            }}>
+            {busy ? '删除中…' : '删除案件'}
+          </button>
+        </div>
       </div>
 
       {/* 9 环节流水线节点（当前环节脉冲动画） */}

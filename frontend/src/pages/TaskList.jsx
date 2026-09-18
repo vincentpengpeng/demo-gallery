@@ -6,12 +6,26 @@ import ConclusionBadge from '../components/ConclusionBadge.jsx'
 export default function TaskList() {
   const [cases, setCases] = useState([])
   const [filter, setFilter] = useState('all')
+  const [deleting, setDeleting] = useState(null)
   const [params] = useSearchParams()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    api.listCases().then(setCases).catch(() => {})
-  }, [])
+  const load = () => api.listCases().then(setCases).catch(() => {})
+  useEffect(() => { load() }, [])
+
+  const handleDelete = async (e, c) => {
+    e.stopPropagation()
+    if (!window.confirm(`确定删除案件 ${c.case_no}「${c.title.slice(0, 30)}」？\n将同时删除关联的线索、主张、证据、报告，且不可恢复。`)) return
+    setDeleting(c.id)
+    try {
+      await api.deleteCase(c.id)
+      await load()
+    } catch (err) {
+      alert(`删除失败：${err.message}`)
+    } finally {
+      setDeleting(null)
+    }
+  }
 
   const q = (params.get('q') || '').toLowerCase()
   let list = cases
@@ -54,6 +68,7 @@ export default function TaskList() {
               <th style={{ padding: '12px 16px' }}>负责人</th>
               <th style={{ padding: '12px 16px' }}>结论</th>
               <th style={{ padding: '12px 16px' }}>状态</th>
+              <th style={{ padding: '12px 16px' }}>操作</th>
             </tr>
           </thead>
           <tbody>
@@ -77,10 +92,23 @@ export default function TaskList() {
                     {c.status === 'done' ? '已结案' : `第${c.stage}/9环节`}
                   </span>
                 </td>
+                <td style={{ padding: '12px 16px' }}>
+                  <button
+                    onClick={(e) => handleDelete(e, c)}
+                    disabled={deleting === c.id || c.status === 'running'}
+                    title={c.status === 'running' ? '自动核查中，暂不能删除' : '删除案件'}
+                    style={{
+                      padding: '5px 12px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
+                      border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626',
+                      opacity: deleting === c.id ? 0.6 : 1,
+                    }}>
+                    {deleting === c.id ? '删除中…' : '删除'}
+                  </button>
+                </td>
               </tr>
             ))}
             {list.length === 0 && (
-              <tr><td colSpan={7} style={{ padding: 24, textAlign: 'center', color: '#9ca3af' }}>暂无案件</td></tr>
+              <tr><td colSpan={8} style={{ padding: 24, textAlign: 'center', color: '#9ca3af' }}>暂无案件</td></tr>
             )}
           </tbody>
         </table>
