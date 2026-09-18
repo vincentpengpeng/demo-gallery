@@ -289,29 +289,43 @@ export default function CaseDetail() {
 
       {/* 主张拆解 */}
       {c.claims.length > 0 && (
-        <Section title="事实主张拆解" sub="自动拆解核心主张，提取关键要素" fresh={true}>
-          {c.claims.map((cl, i) => (
-            <div key={i} style={{
-              background: '#f9fafb', borderRadius: 8, padding: 12, marginBottom: 10,
-              borderLeft: cl.type === 'fact' ? '3px solid #2563eb' : cl.type === 'view' ? '3px solid #d97706' : '3px solid #9ca3af',
-            }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span style={{
-                  fontSize: 11, padding: '2px 8px', borderRadius: 8,
-                  background: cl.type === 'fact' ? '#eff6ff' : cl.type === 'view' ? '#fef3c7' : '#f3f4f6',
-                  color: cl.type === 'fact' ? '#2563eb' : cl.type === 'view' ? '#b45309' : '#6b7280',
-                }}>
-                  {cl.type === 'fact' ? '事实主张' : cl.type === 'view' ? '观点表达' : '情绪表达'}
-                </span>
-                <span style={{ fontSize: 13 }}>{cl.text}</span>
-              </div>
-              {cl.elements && Object.entries(cl.elements).filter(([, v]) => v).length > 0 && (
-                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>
-                  要素：{Object.entries(cl.elements).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(' | ')}
+        <Section title="事实主张拆解" sub="自动拆解核心主张（指控表述为核查主线），提取关键要素" fresh={true}>
+          {c.claims.map((cl, i) => {
+            const typeMeta = {
+              allegation: { label: '指控表述', border: '#dc2626', bg: '#fef2f2', color: '#dc2626' },
+              fact: { label: '事实主张', border: '#2563eb', bg: '#eff6ff', color: '#2563eb' },
+              view: { label: '观点表达', border: '#d97706', bg: '#fef3c7', color: '#b45309' },
+              emotion: { label: '情绪表达', border: '#9ca3af', bg: '#f3f4f6', color: '#6b7280' },
+            }
+            const meta = typeMeta[cl.type] || typeMeta.fact
+            return (
+              <div key={i} style={{
+                background: '#f9fafb', borderRadius: 8, padding: 12, marginBottom: 10,
+                borderLeft: `3px solid ${meta.border}`,
+              }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{
+                    fontSize: 11, padding: '2px 8px', borderRadius: 8,
+                    background: meta.bg, color: meta.color, fontWeight: 600,
+                  }}>
+                    {meta.label}
+                    {cl.type === 'allegation' && ' ★'}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: cl.type === 'allegation' ? 600 : 400 }}>{cl.text}</span>
                 </div>
-              )}
-            </div>
-          ))}
+                {cl.elements && Object.entries(cl.elements).filter(([, v]) => v).length > 0 && (
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>
+                    要素：{Object.entries(cl.elements).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(' | ')}
+                  </div>
+                )}
+                {cl.type === 'allegation' && (
+                  <div style={{ fontSize: 11, color: '#dc2626', marginTop: 6 }}>
+                    ▲ 核查主线：本表述为对中方的指控/定性，将重点核查其是否有证据支撑
+                  </div>
+                )}
+              </div>
+            )
+          })}
           {c.keywords && (c.keywords.zh || c.keywords.en) && (
             <div style={{ fontSize: 12, color: '#374151', background: '#eff6ff', borderRadius: 8, padding: 10 }}>
               检索关键词：中文「{c.keywords.zh || '-'}」 · 英文「{c.keywords.en || '-'}」
@@ -369,6 +383,10 @@ export default function CaseDetail() {
           </table>
           <div style={{ marginTop: 8, fontSize: 11, color: '#9ca3af' }}>
             点击证据名称可跳转查看原网页（外部链接）
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: '#6b7280', background: '#f8fafc', borderRadius: 8, padding: '8px 12px', lineHeight: 1.6 }}>
+            判定说明：证据与「指控表述」（对中方的定性/比喻）和「事实主张」（政策/事件事实）分层判定。
+            官方文件等过程性证据可支持事实层（政策确实发布），但通常<b>不构成</b>对指控性表述的支持，除非其直接证明指控成立。
           </div>
           {c.verification_results && c.verification_results.warning && (
             <div style={{ marginTop: 10, background: '#fef3c7', color: '#b45309', fontSize: 12, padding: '8px 12px', borderRadius: 8 }}>
