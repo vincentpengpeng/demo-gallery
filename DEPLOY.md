@@ -1,7 +1,9 @@
 # 真探·海外涉华信息智能核查平台 — 部署操作手册
 
-> 代码已推送：`github.com/vincentpengpeng/demo-gallery` 分支 **`zhen-tan-platform`**
-> 部署方式：后端 Render（免费）+ 前端 Cloudflare Pages（免费），无自定义域名
+> 后端：Render（免费） → `https://zhen-tan-platform.onrender.com`
+> 前端：GitHub Pages（免费） → `https://vincentpengpeng.github.io/zhen-tan-platform/`
+> 前端仓库：`vincentpengpeng/zhen-tan-platform`（main=源码，gh-pages=构建产物）
+> 后端仓库：`vincentpengpeng/demo-gallery` 分支 `zhen-tan-platform`
 
 ---
 
@@ -51,44 +53,46 @@
 
 ---
 
-## 二、前端部署（Cloudflare Pages）
+## 二、前端部署（GitHub Pages）— 已完成
 
-### 1. 创建 Pages 项目
-1. 登录 [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages → Create → Pages → Connect to Git**
-2. 选仓库 `vincentpengpeng/demo-gallery`，Branch 选 `zhen-tan-platform`
-3. 配置构建：
-   | 字段 | 值 |
-   |---|---|
-   | Framework preset | `Vite` |
-   | Build command | `npm run build` |
-   | Build output directory | `dist` |
-   | Root directory | `frontend` |
-4. 展开 **Environment variables**（构建时注入）：
-   | Key | 值 |
-   |---|---|
-   | `VITE_API_BASE` | `https://<你的后端域名>/api` |
+- 站点：`https://vincentpengpeng.github.io/zhen-tan-platform/`
+- 仓库：`vincentpengpeng/zhen-tan-platform`
+  - `main` 分支：完整源码
+  - `gh-pages` 分支：构建产物（`frontend/dist` 内容）
+- Pages 设置：Settings → Pages → Source = `gh-pages` 分支（已配置）
 
-   ⚠️ **必须带 `/api` 后缀**（后端路由全部是 `/api/*`）。例如：`https://zhen-tan-backend.onrender.com/api`
+### 前端更新流程
 
-5. **Save and Deploy**，等构建完成。
+```bash
+cd frontend
+# 设置构建参数（GitHub Pages 子路径 + 生产 API 地址）
+$env:VITE_BASE_PATH = "/zhen-tan-platform/"
+$env:VITE_API_BASE = "https://zhen-tan-platform.onrender.com/api"
+npm run build
 
-### 2. 验证前端
-- 打开分配的域名，如 `https://zhen-tan-platform.pages.dev`
-- 工作台应显示"Ark LLM 已启用 / Google 联网搜索已启用 / GitHub 图床已配置"等绿色徽标
-- 走一遍：线索中心 → 粘贴截图或外文 → 提交 → 观察 9 环节流水线
+# 推送构建产物到 gh-pages 分支（走代理）
+# 将 dist 内容推到 gh-pages 分支（可参考历史命令：临时目录 init + push HEAD:gh-pages）
+
+# 同时提交源码到 main 分支
+git add -A && git commit -m "更新" && git push origin main
+```
+
+推送后 GitHub Pages 自动重新部署（约 1-2 分钟生效）。
 
 ---
 
 ## 三、后续更新流程（你的协作工作流）
 
 ```bash
-# 本地改代码 → 验证 → commit
+# 后端（demo-gallery 仓库 zhen-tan-platform 分支）
 git add -A
 git commit -m "更新说明"
 # 推送（需要凭据时用 .env 里的 GITHUB_TOKEN）
 git push origin HEAD:refs/heads/zhen-tan-platform
 ```
-推送后：Render 自动重新部署后端，Cloudflare Pages 自动重新构建前端。无需手动点 Redeploy（两者都配置了自动部署）。
+推送后 Render 自动重新部署后端。
+
+前端更新见上文"前端更新流程"（构建 → 推 gh-pages → 推 main）。
 
 ---
 
