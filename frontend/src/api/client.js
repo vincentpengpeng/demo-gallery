@@ -4,7 +4,9 @@ const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '') || '/a
 
 export function mediaUrl(path) {
   if (!path) return ''
-  // 本地开发：/uploads 走 vite proxy；部署：拼后端地址
+  // 完整 URL（如 GitHub 图床 raw 地址 / http 链接）直接使用
+  if (/^https?:\/\//i.test(path)) return path
+  // 已带 /uploads 前缀的相对路径：本地开发走 vite proxy；部署拼后端地址
   const base = API_BASE === '/api' ? '' : API_BASE.replace(/\/api$/, '')
   return `${base}${path}`
 }

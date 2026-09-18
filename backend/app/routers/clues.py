@@ -31,12 +31,24 @@ async def create_clue(
     if media and media.filename:
         import os
         from ..config import BASE_DIR
+        from ..services.github_image import upload_image_to_github, GitHubImageHostError
+        # 先存临时文件，再上传 GitHub 图床（公开可访问 URL），避免依赖本地磁盘（重启丢失）
         upload_dir = BASE_DIR / "uploads"
         upload_dir.mkdir(exist_ok=True)
         ext = os.path.splitext(media.filename)[1] or ".bin"
-        media_path = str(upload_dir / f"{datetime.now().strftime('%Y%m%d%H%M%S')}{ext}")
-        with open(media_path, "wb") as f:
+        tmp_path = upload_dir / f"tmp_{datetime.now().strftime('%Y%m%d%H%M%S%f')}{ext}"
+        with open(tmp_path, "wb") as f:
             f.write(await media.read())
+        try:
+            # 上传 GitHub 图床，返回 raw URL；失败时回退本地路径并标记（前端可显示错误）
+            media_path = await upload_image_to_github(str(tmp_path))
+        except GitHubImageHostError as e:
+            media_path = f"/uploads/{tmp_path.name}"
+            print(f"[create_clue] GitHub 图床上传失败，回退本地：{e}", flush=True)
+        finally:
+            # 清理临时文件（图床已持有内容，本地不再保留）
+            if tmp_path.exists():
+                tmp_path.unlink()
 
     # 线索编号
     clue_no = f"CLUE-{datetime.now().strftime('%Y%m%d')}-{db.query(models.Clue).count() + 1:03d}"

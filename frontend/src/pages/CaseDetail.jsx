@@ -253,7 +253,7 @@ export default function CaseDetail() {
           </div>
           {c.clue.media_path && (
             <div style={{ width: 220 }}>
-              <img src={mediaUrl(`/uploads/${c.clue.media_path.split('\\').pop()}`)} alt="线索媒体"
+              <img src={mediaUrl(c.clue.media_path)} alt="线索媒体"
                 style={{ width: '100%', borderRadius: 8, border: '1px solid #e5e7eb' }} />
             </div>
           )}
