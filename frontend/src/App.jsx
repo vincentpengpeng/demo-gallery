@@ -8,6 +8,7 @@ import EvidenceLib from './pages/EvidenceLib.jsx'
 import HistoryCases from './pages/HistoryCases.jsx'
 import KnowledgeBase from './pages/KnowledgeBase.jsx'
 import Statistics from './pages/Statistics.jsx'
+import UserManagement from './pages/UserManagement.jsx'
 
 const NAV = [
   { path: '/', label: '工作台', end: true },
@@ -17,6 +18,7 @@ const NAV = [
   { path: '/history', label: '历史案例' },
   { path: '/knowledge', label: '知识库' },
   { path: '/stats', label: '数据统计' },
+  { path: '/users', label: '用户管理' },
 ]
 
 export default function App() {
@@ -86,6 +88,7 @@ export default function App() {
             <Route path="/history" element={<HistoryCases />} />
             <Route path="/knowledge" element={<KnowledgeBase />} />
             <Route path="/stats" element={<Statistics />} />
+            <Route path="/users" element={<UserManagement />} />
           </Routes>
         </main>
       </div>
