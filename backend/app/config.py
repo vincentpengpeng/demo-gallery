@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     ocr_base_url: str = "https://ark.cn-beijing.volces.com/api/v3"
     ocr_model: str = "deepseek-v4-1-flash-260910"
 
-    # 反向搜图 - SerpAPI Google Reverse Image
+    # 反向搜图 - SerpAPI Google Reverse Image（支持逗号分隔多 key，额度用完自动轮换）
     serpapi_api_key: str = ""
     # 图床 - GitHub（本地图片先传 GitHub 拿公开 URL，再交给 SerpAPI 识图）
     github_token: str = ""
@@ -36,6 +36,17 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./zhen_tan.db"
 
     backend_port: int = 8000
+
+    @property
+    def serpapi_keys(self) -> list[str]:
+        """SerpAPI 多 key 列表（逗号分隔；剔除空值、去重）。"""
+        keys = [k.strip() for k in (self.serpapi_api_key or "").split(",") if k.strip()]
+        seen, out = set(), []
+        for k in keys:
+            if k not in seen:
+                seen.add(k)
+                out.append(k)
+        return out
 
     class Config:
         env_file = BASE_DIR / ".env"

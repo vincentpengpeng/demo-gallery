@@ -47,30 +47,42 @@ async def _search_serpapi_google(query: str, count: int = 5, gl: str = "", hl: s
     """SerpAPI Google 网页搜索（主通道，与识图共用 key）。
 
     gl/hl：地域与语言参数（中文查询传 cn/zh-CN，保证中文结果质量）。
+    支持多 key 轮换：配置多个 key（逗号分隔）时，额度用尽的 key 自动跳过换下一个。
     """
-    params = {"engine": "google", "q": query, "num": count,
-              "api_key": settings.serpapi_api_key}
-    if gl:
-        params["gl"] = gl
-    if hl:
-        params["hl"] = hl
-    async with httpx.AsyncClient(timeout=25, trust_env=False) as client:
-        r = await client.get("https://serpapi.com/search.json", params=params)
-        r.raise_for_status()
-        data = r.json()
-    if "error" in data:
-        raise RuntimeError(data["error"])
-    results = []
-    for item in data.get("organic_results", [])[:count]:
-        results.append({
-            "title": item.get("title", ""),
-            "url": item.get("link", ""),
-            "snippet": item.get("snippet", ""),
-            "source": item.get("source", ""),
-            "date": item.get("date", ""),
-            "type": "搜索结果",
-        })
-    return results
+    keys = settings.serpapi_keys
+    if not keys:
+        raise RuntimeError("SerpAPI 未配置 api_key")
+    last_err = None
+    for key in keys:
+        params = {"engine": "google", "q": query, "num": count,
+                  "api_key": key}
+        if gl:
+            params["gl"] = gl
+        if hl:
+            params["hl"] = hl
+        try:
+            async with httpx.AsyncClient(timeout=25, trust_env=False) as client:
+                r = await client.get("https://serpapi.com/search.json", params=params)
+                r.raise_for_status()
+                data = r.json()
+            if "error" in data:
+                raise RuntimeError(data["error"])
+            results = []
+            for item in data.get("organic_results", [])[:count]:
+                results.append({
+                    "title": item.get("title", ""),
+                    "url": item.get("link", ""),
+                    "snippet": item.get("snippet", ""),
+                    "source": item.get("source", ""),
+                    "date": item.get("date", ""),
+                    "type": "搜索结果",
+                })
+            return results
+        except Exception as e:
+            last_err = e
+            print(f"[search] SerpAPI key({key[:8]}...) 调用失败：{e}，尝试下一个 key", flush=True)
+            continue
+    raise RuntimeError(f"SerpAPI 所有 key 均调用失败：{last_err}")
 
 
 async def _search_ddg(query: str, count: int = 5) -> list:
