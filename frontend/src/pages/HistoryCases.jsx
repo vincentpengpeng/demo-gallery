@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client.js'
+import ConclusionBadge from '../components/ConclusionBadge.jsx'
 
 export default function HistoryCases() {
   const [cases, setCases] = useState([])
@@ -25,9 +26,9 @@ export default function HistoryCases() {
           style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 16, marginBottom: 12, cursor: 'pointer' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 14, fontWeight: 600 }}>{c.case_no} · {c.title}</span>
-            <span style={{ fontSize: 12, color: '#059669', background: '#ecfdf5', padding: '3px 12px', borderRadius: 10 }}>
-              {c.final_conclusion || '已结案'}
-            </span>
+            {c.final_conclusion
+              ? <ConclusionBadge conclusion={c.final_conclusion} compact />
+              : <span style={{ fontSize: 12, color: '#059669', background: '#ecfdf5', padding: '3px 12px', borderRadius: 10 }}>已结案</span>}
           </div>
           <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>
             负责人 {c.assignee || '-'} · 创建时间 {c.created_at ? c.created_at.slice(0, 10) : '-'}
