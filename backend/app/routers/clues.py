@@ -50,8 +50,14 @@ async def create_clue(
             if tmp_path.exists():
                 tmp_path.unlink()
 
-    # 线索编号
-    clue_no = f"CLUE-{datetime.now().strftime('%Y%m%d')}-{db.query(models.Clue).count() + 1:03d}"
+    # 线索编号：取当天已用最大序号 + 1（避免删除数据后 count() 与既有编号冲突）
+    today = datetime.now().strftime('%Y%m%d')
+    clue_prefix = f"CLUE-{today}-"
+    clue_max = db.query(models.Clue).filter(
+        models.Clue.clue_no.like(f"{clue_prefix}%")
+    ).order_by(models.Clue.clue_no.desc()).first()
+    clue_seq = int(clue_max.clue_no.rsplit('-', 1)[-1]) + 1 if clue_max else 1
+    clue_no = f"{clue_prefix}{clue_seq:03d}"
     clue = models.Clue(
         clue_no=clue_no, title=title, content_type=content_type,
         raw_text=raw_text, translated_text=translated_text,
@@ -63,7 +69,14 @@ async def create_clue(
     db.add(clue)
     db.flush()
 
-    case_no = f"ZT-{datetime.now().strftime('%Y')}-{db.query(models.Case).count() + 1:04d}"
+    # 案件编号：取当年已用最大序号 + 1（同样避免删除后冲突）
+    year = datetime.now().strftime('%Y')
+    case_prefix = f"ZT-{year}-"
+    case_max = db.query(models.Case).filter(
+        models.Case.case_no.like(f"{case_prefix}%")
+    ).order_by(models.Case.case_no.desc()).first()
+    case_seq = int(case_max.case_no.rsplit('-', 1)[-1]) + 1 if case_max else 1
+    case_no = f"{case_prefix}{case_seq:04d}"
     case = models.Case(
         case_no=case_no, clue_id=clue.id,
         title=title or raw_text[:50] or f"线索{clue_no}",
