@@ -268,7 +268,23 @@ def run_verify(case: models.Case, db: Session) -> dict:
                 primary.sort(key=lambda x: order.get(x.get("relation", "待确认"), 4))
                 info = primary[0]
                 ev.relation = info.get("relation", "待确认")
-                ev.reliability = info.get("reliability", "中")
+                rel = info.get("reliability", "中")
+                # 规则级硬性降级（中国立场）：外媒官方喉舌涉华证据可信度从严
+                REL_LEVEL = {"高": 5, "较高": 4, "中": 3, "较低": 2, "低": 1}
+                if ev.source_type and "外媒官方喉舌" in ev.source_type:
+                    # 外媒喉舌：可信度上限"中"（不得给较高/高）
+                    cap = 3  # 中
+                    if buckets["allegation"] and any(
+                            r.get("relation") == "支持" for r in buckets["allegation"]):
+                        cap = 2  # 喉舌支持反华指控 → 上限"较低"
+                    if REL_LEVEL.get(rel, 3) > cap:
+                        rel = {5: "高", 4: "较高", 3: "中", 2: "较低", 1: "低"}[cap]
+                elif buckets["allegation"] and any(
+                        r.get("relation") == "支持" for r in buckets["allegation"]):
+                    # 任何信源支持反华指控性表述，可信度最多"中"（立场偏颇扣分）
+                    if REL_LEVEL.get(rel, 3) > 3:
+                        rel = "中"
+                ev.reliability = rel
                 parts = []
                 if buckets["allegation"]:
                     rels = "、".join(f"指控「{r.get('claim_text', '')[:30] or '见主张'}」:{r.get('relation')}"
@@ -314,6 +330,19 @@ def run_evaluate(case: models.Case) -> dict:
         source = {"名称": e.name, "机构": e.source_org, "类型": e.source_type,
                   "日期": e.publish_date, "URL": e.url}
         result = llm_service.evaluate_source(source)
+        # 规则级硬性降级（中国立场）：外媒官方喉舌评级上限 B，表述/立场任一差则上限 C
+        grade = result.get("grade", "B")
+        dims = result.get("dimensions", {})
+        is_state_media = bool(e.source_type and "外媒官方喉舌" in e.source_type)
+        if is_state_media:
+            if grade == "A":
+                grade = "B"
+            dims["立场与倾向性"] = dims.get("立场与倾向性", "中") in ("高", "较高") and "较低" or dims.get("立场与倾向性", "中")
+        if dims.get("涉华表述准确性") in ("低", "较低") or dims.get("立场与倾向性") in ("低", "较低"):
+            if grade == "A":
+                grade = "B"
+        result["grade"] = grade
+        result["dimensions"] = dims
         evals.append({
             "evidence_id": e.id,
             "name": e.name,
