@@ -125,6 +125,23 @@ def run_decompose(case: models.Case, clue: models.Clue, db: Session) -> dict:
         en_fixed = llm_service.translate_to_english(src[:150])
         if en_fixed:
             keywords["en"] = en_fixed
+
+    # 视角检索词退化补全（LLM 未输出/为空时，基于 zh/en 拼默认检索词）
+    zh_head = (keywords.get("zh") or "").split("、")[0].strip()
+    en_head = (keywords.get("en") or "").split(",")[0].strip()
+    if not (keywords.get("zh_official") or "").strip():
+        keywords["zh_official"] = (f"{zh_head} 中方回应 外交部 发言人 声明" if zh_head else "")
+    if not (keywords.get("zh_media") or "").strip():
+        keywords["zh_media"] = (f"{zh_head} 新华社 人民日报 环球时报 报道" if zh_head else "")
+    if not (keywords.get("en_west") or "").strip():
+        keywords["en_west"] = (keywords.get("en") or "")
+    # 语言校验：zh_official/zh_media 必须含中文，en_west 必须纯英文；不合法则回退
+    if not _re.search(r"[\u4e00-\u9fff]", keywords.get("zh_official") or ""):
+        keywords["zh_official"] = (f"{zh_head} 中方回应 外交部 发言人 声明" if zh_head else "")
+    if not _re.search(r"[\u4e00-\u9fff]", keywords.get("zh_media") or ""):
+        keywords["zh_media"] = (f"{zh_head} 新华社 人民日报 环球时报 报道" if zh_head else "")
+    if _re.search(r"[\u4e00-\u9fff]", keywords.get("en_west") or ""):
+        keywords["en_west"] = (keywords.get("en") or "")
     result["keywords"] = keywords
 
     # 清掉旧主张，写入新主张

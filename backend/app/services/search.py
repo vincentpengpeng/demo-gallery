@@ -159,45 +159,29 @@ async def _search_brave(query: str, count: int = 5) -> list:
 
 
 async def search_multilingual(keywords: dict, count: int = 8) -> list:
-    """多语种检索：SerpAPI Google 主通道 + 火山/DDG 兜底（并行、快速失败）。
+    """多语种检索：中方视角与西方视角双通道（并行、快速失败）。
 
-    中英关键词并行查询，且主动追加『中方官方信源定向检索』，
-    确保证据采集包含中方立场/回应，避免单方叙事（反驳证据主动检索，防确认偏误）。
-    type 字段区分『搜索结果』（可溯源）与『AI检索综述』（需人工核实）；
+    视角分流（解决"中方主张搜不出"）：
+    - 中方视角（zh_official 官方回应 / zh_media 媒体报道 / zh 主查询）：
+      火山方舟 Web Search（国内通道，中文/中方信源覆盖好）与 SerpAPI Google(cn) **并行**取并集；
+    - 西方视角（en_west 外媒指控 / en 主查询）：SerpAPI Google 优先，命中外媒/西方信源。
+
+    关键词缺失时自动退化（zh/en 兜底）；type 区分『搜索结果』与『AI检索综述』；
     视角标注 origin：cn_official（中国官方）/ cn_media（中国媒体）/ 其他。
     """
-    queries = []
-    if keywords.get("zh"):
-        queries.append(keywords["zh"])
-    if keywords.get("en"):
-        queries.append(keywords["en"])
+    zh = (keywords.get("zh") or "").strip()
+    en = (keywords.get("en") or "").strip()
+    zh_official = (keywords.get("zh_official") or "").strip()
+    zh_media = (keywords.get("zh_media") or "").strip()
+    en_west = (keywords.get("en_west") or "").strip()
 
-    # 主动追加中方立场定向检索（官方信源优先）
-    cn_official_queries = []
-    if keywords.get("zh"):
-        cn_official_queries.append(
-            f'{keywords["zh"].split("、")[0]} 外交部 国防部 发言人 回应')
-    if keywords.get("en"):
-        cn_official_queries.append(
-            f'{keywords["en"].split(",")[0].strip()} China MFA MOD spokesperson response')
-    cn_media_queries = []
-    if keywords.get("zh"):
-        cn_media_queries.append(
-            f'{keywords["zh"].split("、")[0]} 新华社 OR 人民日报 OR 环球时报 报道')
-    if keywords.get("en"):
-        cn_media_queries.append(
-            f'{keywords["en"].split(",")[0].strip()} Xinhua OR CGTN OR China Daily report')
-
-    if not queries and not cn_official_queries and not cn_media_queries:
+    if not (zh or en or zh_official or zh_media or en_west):
         return []
 
-    async def _query(q: str, n: int, gl: str = "", hl: str = "", official: bool = False) -> list:
+    async def _serpapi_or_fallback(q: str, n: int, gl: str = "", hl: str = "") -> list:
         # 优先级：SerpAPI Google → Brave → DDG → 火山 Web Search
         if settings.serpapi_api_key:
             try:
-                if official:
-                    # 官方信源定向：用机构+回应措辞（Google 对 site: 多域名支持不稳定）
-                    q = f"中国国防部 回应 {q}"
                 return await _search_serpapi_google(q, n, gl=gl, hl=hl)
             except Exception:
                 pass
@@ -214,16 +198,26 @@ async def search_multilingual(keywords: dict, count: int = 8) -> list:
             except Exception:
                 return []
 
-    # 组装检索任务：zh/en 主查询各 4 条，官方/媒体定向各 2 条
+    async def _query_cn(q: str, n: int) -> list:
+        """中方视角双通道：火山方舟 Web Search（国内通道）+ SerpAPI Google(cn) 并行取并集。"""
+        ark_res, goog_res = await asyncio.gather(
+            _search_ark_web(q, n),
+            _serpapi_or_fallback(q, n, gl="cn", hl="zh-CN"),
+        )
+        return list(ark_res) + list(goog_res)
+
+    # 组装检索任务：中方视角 3 组（官方/媒体走双通道，主查询走 Google(cn)），西方视角 2 组（Google 优先）
     tasks = []
-    if keywords.get("zh"):
-        tasks.append(_query(keywords["zh"], 4, gl="cn", hl="zh-CN"))
-    if keywords.get("en"):
-        tasks.append(_query(keywords["en"], 4))
-    for oq in cn_official_queries:
-        tasks.append(_query(oq, 2, gl="cn", hl="zh-CN", official=True))
-    for mq in cn_media_queries:
-        tasks.append(_query(mq, 2, gl="cn", hl="zh-CN"))
+    if zh_official:
+        tasks.append(_query_cn(zh_official, 3))
+    if zh_media:
+        tasks.append(_query_cn(zh_media, 3))
+    if zh:
+        tasks.append(_serpapi_or_fallback(zh, 4, gl="cn", hl="zh-CN"))
+    if en_west:
+        tasks.append(_serpapi_or_fallback(en_west, 4))
+    if en and en != en_west:
+        tasks.append(_serpapi_or_fallback(en, 3))
 
     results_lists = await asyncio.gather(*tasks)
 

@@ -193,15 +193,23 @@ class LLMService:
             "不得淡化或改写；事实主张（fact）用于核实'事实层'是否准确，"
             "而 allegation 用于核实'指控层'是否有证据支撑——两者必须分开拆解，不得混为一谈。\n"
             "对每个主张提取要素：人物/主体、地点、时间、事件。"
-            "同时生成用于多语种检索的中文和英文关键词，关键词须覆盖指控性表述的核心用语。\n"
-            "【关键词语言要求】keywords.zh 必须是纯中文（如'中国 边控 常态化治理工具 监狱 人权组织'），"
-            "keywords.en 必须是纯英文（如'China exit control prison human rights organization'），"
-            "严禁把英文关键词原样放进 zh，也不要把中文关键词放进 en。\n"
+            "同时生成用于多语种检索的关键词组，关键词须覆盖指控性表述的核心用语，并按检索视角拆分：\n"
+            "1. keywords.zh：中文综合检索词（纯中文），覆盖事件与指控核心；\n"
+            "2. keywords.en：英文综合检索词（纯英文），覆盖事件与指控核心；\n"
+            "3. keywords.zh_official：中文·中方官方回应检索词（纯中文），用于检索中方立场与官方回应，"
+            "必须包含中方回应/驳斥措辞（如'中方回应''驳斥''发言人''声明'），"
+            "例：'南海中菲撞船 中方回应 中国海警局声明'；\n"
+            "4. keywords.zh_media：中文·中方媒体报道检索词（纯中文），用于检索新华社/人民日报/环球时报等中方媒体"
+            "对事件的报道与立场，例：'南海中菲撞船 新华社 环球时报 报道'；\n"
+            "5. keywords.en_west：英文·西方外媒视角检索词（纯英文），用于检索外媒/西方信源对该事件的报道与指控表述，"
+            "例：'China coast guard ram Philippine boat condemn'。\n"
+            "【关键词语言要求】zh/zh_official/zh_media 必须是纯中文，en/en_west 必须是纯英文，"
+            "严禁把英文关键词原样放进中文组，也不要把中文关键词放进英文组。\n"
             "注意：拆解时保持客观，如实呈现原文表述，不添油加醋；"
             "是否'不当/虚假'由后续核查环节用证据判定，拆解环节只负责准确拆分与标注。"
             "结论分类定义：真实/基本真实/缺乏语境/误导/基本错误/虚假/尚待核实/无法核查。"
         )
-        user = f"原文：\n{raw_text}\n\n翻译：\n{translated}\n\n请输出JSON：{{\"claims\":[{{\"text\":\"...\",\"type\":\"allegation|fact|view|emotion\",\"elements\":{{\"人物/主体\":\"\",\"地点\":\"\",\"时间\":\"\",\"事件\":\"\",\"定性用语\":\"\"}}}}],\"keywords\":{{\"zh\":\"...\",\"en\":\"...\"}}}}"
+        user = f"原文：\n{raw_text}\n\n翻译：\n{translated}\n\n请输出JSON：{{\"claims\":[{{\"text\":\"...\",\"type\":\"allegation|fact|view|emotion\",\"elements\":{{\"人物/主体\":\"\",\"地点\":\"\",\"时间\":\"\",\"事件\":\"\",\"定性用语\":\"\"}}}}],\"keywords\":{{\"zh\":\"...\",\"en\":\"...\",\"zh_official\":\"...\",\"zh_media\":\"...\",\"en_west\":\"...\"}}}}"
         fallback = self._rule_decompose(raw_text)
         return self.chat_json(system, user, fallback, max_tokens=2500)
 
