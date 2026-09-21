@@ -24,6 +24,12 @@ STAGES = [
 DONE_STATUS = "done"
 STAGE_NAME = {s: n for n, s, _ in STAGES}
 
+# 可信度层级（数字越大越可信），供交叉验证与信源评价共用
+REL_LEVEL = {"高": 5, "较高": 4, "中": 3, "较低": 2, "低": 1}
+REL_LABEL = {5: "高", 4: "较高", 3: "中", 2: "较低", 1: "低"}
+# 信源评级（A/B/C）→ 可信度层级（A=高、B=中、C=较低）
+GRADE_TO_REL = {"A": 5, "B": 3, "C": 2}
+
 
 # ---------- 环节2：价值初筛 ----------
 SCREENING_KEYWORDS = ["中国", "China", "Chinese", "Beijing", "冲突", "抗议", "clash", "protest", "军演",
@@ -270,7 +276,6 @@ def run_verify(case: models.Case, db: Session) -> dict:
                 ev.relation = info.get("relation", "待确认")
                 rel = info.get("reliability", "中")
                 # 规则级硬性降级（中国立场）：外媒官方喉舌涉华证据可信度从严
-                REL_LEVEL = {"高": 5, "较高": 4, "中": 3, "较低": 2, "低": 1}
                 if ev.source_type and "外媒官方喉舌" in ev.source_type:
                     # 外媒喉舌：可信度上限"中"（不得给较高/高）
                     cap = 3  # 中
@@ -278,7 +283,7 @@ def run_verify(case: models.Case, db: Session) -> dict:
                             r.get("relation") == "支持" for r in buckets["allegation"]):
                         cap = 2  # 喉舌支持反华指控 → 上限"较低"
                     if REL_LEVEL.get(rel, 3) > cap:
-                        rel = {5: "高", 4: "较高", 3: "中", 2: "较低", 1: "低"}[cap]
+                        rel = REL_LABEL[cap]
                 elif buckets["allegation"] and any(
                         r.get("relation") == "支持" for r in buckets["allegation"]):
                     # 任何信源支持反华指控性表述，可信度最多"中"（立场偏颇扣分）
@@ -343,6 +348,13 @@ def run_evaluate(case: models.Case) -> dict:
                 grade = "B"
         result["grade"] = grade
         result["dimensions"] = dims
+        # 反向更新证据矩阵：信源评级 → 可信度层级（与交叉验证判定取更严一档，只降不升）
+        grade_level = GRADE_TO_REL.get(grade, 3)
+        cur_level = REL_LEVEL.get(e.reliability, 3)
+        if grade_level < cur_level:
+            e.reliability = REL_LABEL[grade_level]
+        if grade:
+            e.note = f"{e.note} | 信源评级：{grade}" if e.note else f"信源评级：{grade}"
         evals.append({
             "evidence_id": e.id,
             "name": e.name,
@@ -379,7 +391,27 @@ def run_report(case: models.Case, db: Session) -> dict:
     report.conclusion = result.get("conclusion", "尚待核实")
     report.confidence = result.get("confidence", "中")
     report.summary = result.get("summary", "")
-    report.evidence_table = result.get("evidence_table", [])
+    # 报告证据表与证据矩阵对齐：relation/reliability 以数据库判定（含信源评价反写）为准，
+    # 避免 LLM 生成的 evidence_table 与证据矩阵环节展示不一致；数据库有而表内缺的条目自动补全。
+    db_ev = {e.name: e for e in case.evidence}
+    aligned, seen = [], set()
+    for row in (result.get("evidence_table") or []):
+        name = row.get("name", "")
+        m = db_ev.get(name)
+        if m:
+            row["relation"] = m.relation
+            row["reliability"] = m.reliability
+        aligned.append(row)
+        if name:
+            seen.add(name)
+    for e in case.evidence:
+        if e.name not in seen:
+            aligned.append({
+                "name": e.name, "source": e.source_org, "date": e.publish_date,
+                "relation": e.relation, "reliability": e.reliability,
+                "url": e.url, "grade": "",
+            })
+    report.evidence_table = aligned
     report.source_links = result.get("source_links", [])
     report.gaps = result.get("gaps", [])
     report.pending_items = result.get("pending_items", [])
