@@ -240,39 +240,86 @@ async def search_multilingual(keywords: dict, count: int = 8) -> list:
             seen.add(key)
             uniq.append(item)
 
-    # 视角标注：识别中国官方/媒体信源 + 外媒官方喉舌（政府出资外宣媒体）
-    CN_OFFICIAL_DOMAINS = ["gov.cn", "mod.gov.cn", "fmprc.gov.cn", "12371.cn", "cctv.com"]
-    CN_MEDIA_DOMAINS = ["news.cn", "xinhuanet.com", "people.com.cn", "chinadaily.com.cn",
-                        "cgtn.com", "ecns.cn", "gmw.cn", "huanqiu.com", "globaltimes.cn",
-                        "china.com.cn", "cri.cn", "caixin.com", "yicai.com", "thepaper.cn",
-                        "hxny.com"]
-    CN_OFFICIAL_KEYWORDS = ["国防部", "外交部", "国务院", "国防部发言人", "外交部发言人", "中国海警"]
-    CN_MEDIA_KEYWORDS = ["新华社", "人民日报", "央视", "中国日报", "环球时报", "环球网",
-                         "光明网", "中国新闻网", "观察者", "澎湃", "中国网", "CGTN", "Global Times",
-                         "Xinhua", "People's Daily", "China Daily", "huanqiu"]
-    # 外媒官方喉舌：外国政府出资的对华外宣媒体（涉华报道常带对抗性框架，需特别标注）
-    FOREIGN_STATE_DOMAINS = ["voanews.com", "voachinese.com", "rfa.org", "dw.com", "rfi.fr",
-                             "rt.com", "voatibetan.com", "voacantonese.com", "radionz.co.nz",
-                             "cna.com.tw"]
-    FOREIGN_STATE_KEYWORDS = ["美国之音", "自由亚洲电台", "德国之声", "法国国际广播", "今日俄罗斯",
-                              "Voice of America", "Radio Free Asia", "Deutsche Welle",
-                              "Radio France Internationale", "Russia Today", "VOA", "RFA", "DW", "RT"]
+    # 视角标注：外媒官方喉舌 / 中方官方 / 中方媒体（用完整名称+域名精确匹配，禁止短缩写）
+    # —— 外媒官方喉舌：外国政府出资的对华外宣媒体，涉华报道常带对抗性框架，需特别标注
+    FOREIGN_STATE_MEDIA = {
+        "美国之音": ["voanews.com", "voachinese.com", "voatibetan.com", "voacantonese.com",
+                      "voaindonesia.com", "voice of america"],
+        "自由亚洲电台": ["rfa.org", "radio free asia"],
+        "德国之声": ["dw.com", "deutsche welle"],
+        "法国国际广播": ["rfi.fr", "radio france internationale", "rfi chinese"],
+        "今日俄罗斯": ["rt.com", "russia today"],
+        "自由欧洲电台": ["rferl.org", "radio free europe"],
+        "新西兰广播电台": ["radionz.co.nz"],
+        "台湾中央社": ["cna.com.tw"],
+        "美国之音中文网": ["voachinese.com"],
+    }
+    CN_OFFICIAL_MEDIA = {
+        "中国国务院": ["gov.cn", "www.gov.cn"],
+        "国防部": ["mod.gov.cn"],
+        "外交部": ["fmprc.gov.cn"],
+        "中共中央": ["12371.cn"],
+        "中央广电": ["cctv.com", "china central television"],
+    }
+    CN_MEDIA_LIST = {
+        "新华社": ["news.cn", "xinhuanet.com", "xinhua"],
+        "人民日报": ["people.com.cn", "people's daily", "people daily"],
+        "中国日报": ["chinadaily.com.cn", "china daily"],
+        "央视": ["cctv.com", "cgtn.com", "china global television network"],
+        "中国网": ["china.com.cn", "ecns.cn"],
+        "光明网": ["gmw.cn", "guangming"],
+        "环球时报": ["huanqiu.com", "globaltimes.com.cn", "global times"],
+        "中新网": ["chinanews.com.cn", "中国新闻网"],
+        "澎湃": ["thepaper.cn"],
+        "观察者": ["guancha.cn"],
+        "财新": ["caixin.com"],
+        "第一财经": ["yicai.com"],
+        "红星新闻": ["hxny.com"],
+        "参考消息": ["cankaoxiaoxi.com"],
+        "CGTN": ["cgtn.com"],
+    }
+    CN_OFFICIAL_NAMES = ["国防部", "外交部", "国务院", "发言人", "中国海警"]
+    CN_MEDIA_NAMES = ["新华社", "人民日报", "央视", "中国日报", "环球时报", "环球网",
+                      "光明网", "中国新闻网", "观察者", "澎湃", "中国网", "CGTN",
+                      "环球网", "参考消息", "财新", "第一财经"]
     for item in uniq:
         url = item.get("url", "").lower()
         src = item.get("source", "")
         title = item.get("title", "")
         text_low = (src + " " + title).lower()
-        if any(d in url for d in CN_OFFICIAL_DOMAINS) or \
-           any(k in text_low for k in CN_OFFICIAL_KEYWORDS):
-            item["origin"] = "cn_official"
-        elif any(d in url for d in CN_MEDIA_DOMAINS) or \
-             any(k.lower() in text_low for k in CN_MEDIA_KEYWORDS):
-            item["origin"] = "cn_media"
-        elif any(d in url for d in FOREIGN_STATE_DOMAINS) or \
-             any(k.lower() in text_low for k in FOREIGN_STATE_KEYWORDS):
-            item["origin"] = "foreign_state_media"
-        else:
-            item["origin"] = "other"
+        origin = None
+        # 1) 外媒官方喉舌（域名精确匹配，优先级最高，不受标题内容影响）
+        for name, keys in FOREIGN_STATE_MEDIA.items():
+            if any(k in url for k in keys):
+                origin = "foreign_state_media"
+                break
+        # 2) 中方官方（域名匹配）
+        if origin is None:
+            for name, keys in CN_OFFICIAL_MEDIA.items():
+                if any(k in url for k in keys):
+                    origin = "cn_official"
+                    break
+        # 3) 中方媒体（域名匹配——先于名称，避免"标题含中国海警/外交部"的外媒被误判）
+        if origin is None:
+            for name, keys in CN_MEDIA_LIST.items():
+                if any(k in url for k in keys):
+                    origin = "cn_media"
+                    break
+        # 4) 中方官方（域名未命中时才看名称）
+        if origin is None:
+            if any(k in text_low for k in CN_OFFICIAL_NAMES):
+                origin = "cn_official"
+        # 5) 中方媒体（域名未命中时才看名称）
+        if origin is None:
+            if any(k.lower() in text_low for k in CN_MEDIA_NAMES):
+                origin = "cn_media"
+        # 6) 外媒喉舌（域名未命中时才看名称，用完整名称不含缩写）
+        if origin is None:
+            for name, keys in FOREIGN_STATE_MEDIA.items():
+                if any(k in text_low for k in keys):
+                    origin = "foreign_state_media"
+                    break
+        item["origin"] = origin or "other"
 
     # 排序：中方官方 → 中方媒体 → 普通外媒/外媒官方喉舌（中方立场证据前置）
     uniq.sort(key=lambda x: 0 if x.get("origin") == "cn_official" else
