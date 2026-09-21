@@ -246,6 +246,7 @@ def run_verify(case: models.Case, db: Session) -> dict:
         db.refresh(ev)
 
     # LLM 批量判定每条证据与主张的关系（支持/反驳/背景/待确认）
+    classify_judged = 0
     if evidence_items:
         claims_payload = [{"id": c.id, "text": c.text, "type": c.claim_type} for c in claims]
         evidence_payload = [
@@ -258,6 +259,16 @@ def run_verify(case: models.Case, db: Session) -> dict:
         except Exception as _e:
             classify = {"results": []}
             print(f"[run_verify] LLM classify error: {_e}", flush=True)
+        # 统计实际被判定的证据数（判定未完成时在 warning 中透明提示，避免"全待确认"被误读为正常结果）
+        judged_ids = set()
+        for _item in classify.get("results", []):
+            _eid = _item.get("evidence_id")
+            if _eid is not None:
+                try:
+                    judged_ids.add(int(_eid))
+                except (TypeError, ValueError):
+                    pass
+        classify_judged = len(judged_ids)
         # 汇总：按证据分组，分别记录 对指控性主张(allegation)的关系 和 对事实主张(fact)的关系
         claim_text_by_id = {c.id: c.text for c in claims}
         ev_map: dict[int, dict] = {ev.id: {"allegation": [], "fact": [], "other": []}
@@ -328,15 +339,23 @@ def run_verify(case: models.Case, db: Session) -> dict:
     rel_counts = {}
     for e in evidence_items:
         rel_counts[e.relation] = rel_counts.get(e.relation, 0) + 1
+    # 组装提示：判定未完成 + 独立来源数量提示
+    _warn_parts = []
+    if classify_judged < len(evidence_items):
+        _warn_parts.append(
+            f"证据关系判定部分未完成（{len(evidence_items) - classify_judged}/{len(evidence_items)} 条未判定，"
+            "LLM 超时或失败），相关证据关系暂为'待确认'，建议人工补判后再定结论。"
+        )
+    _warn_parts.append(
+        "目前仅发现一个独立来源，暂不建议形成确定结论。"
+        if independent < 2 else "已发现多个独立来源，可进入信源评价。"
+    )
     result = {
         "claim_count": len(claim_texts),
         "evidence_count": len(evidence_items),
         "independent_count": independent,
         "relation_stats": rel_counts,
-        "warning": (
-            "目前仅发现一个独立来源，暂不建议形成确定结论。"
-            if independent < 2 else "已发现多个独立来源，可进入信源评价。"
-        ),
+        "warning": "；".join(_warn_parts),
     }
     case.verification_results = result
     case.stage = 6

@@ -39,8 +39,13 @@ class LLMService:
     def ocr_enabled(self) -> bool:
         return self._ocr_client is not None
 
-    def chat_json(self, system: str, user: str, fallback: dict, max_tokens: int = 1500) -> dict:
-        """调用 Ark，要求返回 JSON；失败或未配置时返回 fallback。"""
+    def chat_json(self, system: str, user: str, fallback: dict, max_tokens: int = 1500,
+                  timeout: Optional[float] = None) -> dict:
+        """调用 Ark，要求返回 JSON；失败或未配置时返回 fallback。
+
+        timeout：单次调用的超时秒数；None 时沿用 client 默认（90s）。
+        大输出任务（如证据批量判定）应显式传更长超时，避免推理未完成被中断。
+        """
         if not self._client:
             return fallback
         # 推理模型 reasoning tokens 占用波动大：空输出时重试一次
@@ -55,6 +60,7 @@ class LLMService:
                     temperature=0.2,
                     max_tokens=max_tokens,
                     response_format={"type": "json_object"},
+                    timeout=timeout,
                 )
                 text = resp.choices[0].message.content or ""
                 if not text.strip():
@@ -235,58 +241,76 @@ class LLMService:
         }
 
     # ---------- 环节6：交叉验证（证据与主张关系判定） ----------
-    def classify_evidence_batch(self, claims: list, evidence: list) -> dict:
+    def classify_evidence_batch(self, claims: list, evidence: list,
+                                batch_size: int = 4, timeout: float = 240) -> dict:
         """批量判定每条证据与主张的关系与可信度。
 
         关系：支持 / 反驳 / 背景 / 待确认
         可信度：高 / 较高 / 中 / 较低 / 低
         返回 {"results": [{"evidence_id": id, "claim_id": id, "relation": "...", "reliability": "...", "reason": "..."}]}
+
+        分批调用：每批最多 batch_size 条证据（约 24 组合/批），避免一次输出过长导致
+        推理超时；单批失败只影响该批，其余批次正常判定。大输出任务单独放宽超时（默认 240s）。
         """
-        system = (
-            "你是事实核查证据分析师，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
-            "核查核心是：**人权组织/外媒/学者等对中国的指控性、定性性表述是否有证据支撑**。\n"
-            "请逐条判定每条证据与**每一条主张**的关系（一个证据可对应多条主张，分别判定）。\n"
-            "关系定义：支持=证据直接佐证该主张；反驳=证据推翻或否定该主张；"
-            "背景=提供背景信息但不直接支持或反驳；待确认=无法判断关系。\n"
-            "【极其重要】务必区分两类主张：\n"
-            "1. 事实主张（type=fact，如'某政策于某日颁布'）：官方文件、官方新闻、过程性报道可直接判定为'支持'——"
-            "这只能证明'事实层'（政策/事件存在），**不代表**对指控性表述的支持。\n"
-            "2. 指控/定性主张（type=allegation，如'把边控变成常态化治理工具''边境是监狱'）："
-            "必须严格独立判定——官方发布政策文件这类证据，**对指控性表述通常判为'背景'或'待确认'**，"
-            "除非证据确实证明'常态化治理工具/监狱'这类定性成立；"
-            "若证据显示指控缺乏依据、属于夸大或与事实不符，应判为'反驳'。\n"
-            "同时评估证据可信度（高/较高/中/较低/低）。\n"
-            "【可信度硬性规则——从中国立场出发】\n"
-            "- **外媒官方喉舌**（美国之音VOA、自由亚洲电台RFA、德国之声DW、法国国际广播RFI、"
-            "今日俄罗斯RT等政府出资对外传播媒体，source_type 标注为'外媒官方喉舌'）："
-            "涉华报道立场偏颇、常用对抗性框架，**可信度上限为'中'**，除非证据内容经独立事实核验确凿无误，"
-            "也不得给'较高'或'高'。\n"
-            "- **立场信源支持反华指控**：若证据来自持反华立场的主体（外媒喉舌、外国使馆/官员声明、"
-            "人权组织声明）且其内容是在支持对中方的指控性表述，可信度**最多'较低'**——"
-            "因为其立场使其天然倾向于选择不利中方的表述，不能视为独立可靠证据。\n"
-            "- **中方官方/中方媒体**（gov.cn、外交部、国防部、新华社、人民日报等）："
-            "发布的事实性内容（政策、声明、时间地点等）可信度高或较高；但同样基于事实核验。\n"
-            "- 立场偏颇程度是可信度的重要扣分项：'涉华表述准确性'与'立场倾向'两维度任一为'低'，"
-            "可信度不得高于'较低'。\n"
-            "注意：转载自同一来源的报道不应视为独立证据。\n"
-            "注意：判定关系须基于证据内容与事实逻辑，不因信源国别预设结论；"
-            "若外媒表述与可核实事实不符（如日期、地点、数据、语境错位），应如实判定为反驳或标注缺口。\n"
-            "只输出JSON。"
-        )
-        user = (
-            f"主张列表：{json.dumps(claims, ensure_ascii=False)}\n"
-            f"证据列表：{json.dumps(evidence, ensure_ascii=False, default=str)}\n"
-            "对每条证据×每条主张组合输出：{\"results\":[{\"evidence_id\":1,\"claim_id\":1,\"relation\":\"支持|反驳|背景|待确认\","
-            "\"reliability\":\"高|较高|中|较低|低\",\"reason\":\"一句话理由\"}]}"
-        )
-        fallback = {
-            "results": [
+        if not evidence:
+            return {"results": []}
+        if not self._client:
+            return {"results": [
                 {"evidence_id": e.get("id"), "relation": "待确认",
                  "reliability": "中", "reason": "LLM判定未启用，待人工确认"}
                 for e in evidence
-            ]
-        }
-        return self.chat_json(system, user, fallback, max_tokens=4000)
+            ]}
+        all_results = []
+        for i in range(0, len(evidence), batch_size):
+            batch = evidence[i:i + batch_size]
+            system = (
+                "你是事实核查证据分析师，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+                "核查核心是：**人权组织/外媒/学者等对中国的指控性、定性性表述是否有证据支撑**。\n"
+                "请逐条判定**本次给出的每条证据**与**每一条主张**的关系（一个证据可对应多条主张，分别判定）。\n"
+                "关系定义：支持=证据直接佐证该主张；反驳=证据推翻或否定该主张；"
+                "背景=提供背景信息但不直接支持或反驳；待确认=无法判断关系。\n"
+                "【极其重要】务必区分两类主张：\n"
+                "1. 事实主张（type=fact，如'某政策于某日颁布'）：官方文件、官方新闻、过程性报道可直接判定为'支持'——"
+                "这只能证明'事实层'（政策/事件存在），**不代表**对指控性表述的支持。\n"
+                "2. 指控/定性主张（type=allegation，如'把边控变成常态化治理工具''边境是监狱'）："
+                "必须严格独立判定——官方发布政策文件这类证据，**对指控性表述通常判为'背景'或'待确认'**，"
+                "除非证据确实证明'常态化治理工具/监狱'这类定性成立；"
+                "若证据显示指控缺乏依据、属于夸大或与事实不符，应判为'反驳'。\n"
+                "同时评估证据可信度（高/较高/中/较低/低）。\n"
+                "【可信度硬性规则——从中国立场出发】\n"
+                "- **外媒官方喉舌**（美国之音VOA、自由亚洲电台RFA、德国之声DW、法国国际广播RFI、"
+                "今日俄罗斯RT等政府出资对外传播媒体，source_type 标注为'外媒官方喉舌'）："
+                "涉华报道立场偏颇、常用对抗性框架，**可信度上限为'中'**，除非证据内容经独立事实核验确凿无误，"
+                "也不得给'较高'或'高'。\n"
+                "- **立场信源支持反华指控**：若证据来自持反华立场的主体（外媒喉舌、外国使馆/官员声明、"
+                "人权组织声明）且其内容是在支持对中方的指控性表述，可信度**最多'较低'**——"
+                "因为其立场使其天然倾向于选择不利中方的表述，不能视为独立可靠证据。\n"
+                "- **中方官方/中方媒体**（gov.cn、外交部、国防部、新华社、人民日报等）："
+                "发布的事实性内容（政策、声明、时间地点等）可信度高或较高；但同样基于事实核验。\n"
+                "- 立场偏颇程度是可信度的重要扣分项：'涉华表述准确性'与'立场倾向'两维度任一为'低'，"
+                "可信度不得高于'较低'。\n"
+                "注意：转载自同一来源的报道不应视为独立证据。\n"
+                "注意：判定关系须基于证据内容与事实逻辑，不因信源国别预设结论；"
+                "若外媒表述与可核实事实不符（如日期、地点、数据、语境错位），应如实判定为反驳或标注缺口。\n"
+                "只输出JSON。"
+            )
+            user = (
+                f"主张列表：{json.dumps(claims, ensure_ascii=False)}\n"
+                f"本次证据列表（共{len(batch)}条，仅判定以下证据）："
+                f"{json.dumps(batch, ensure_ascii=False, default=str)}\n"
+                "对每条证据×每条主张组合输出：{\"results\":[{\"evidence_id\":1,\"claim_id\":1,\"relation\":\"支持|反驳|背景|待确认\","
+                "\"reliability\":\"高|较高|中|较低|低\",\"reason\":\"一句话理由\"}]}"
+            )
+            batch_fallback = {
+                "results": [
+                    {"evidence_id": e.get("id"), "relation": "待确认",
+                     "reliability": "中", "reason": "本批判定超时/失败，待人工确认"}
+                    for e in batch
+                ]
+            }
+            resp = self.chat_json(system, user, batch_fallback, max_tokens=4000, timeout=timeout)
+            all_results.extend(resp.get("results", []))
+        return {"results": all_results}
 
     # ---------- 环节7：信源评价 ----------
     def evaluate_source(self, source: dict) -> dict:
