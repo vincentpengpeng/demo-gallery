@@ -205,17 +205,21 @@ def run_verify(case: models.Case, db: Session) -> dict:
     claim_texts = [c.text for c in claims if c.searchable]
     evidence_items = []
 
+    def _cut(v: str, n: int) -> str:
+        """截断超长字段，防止 PostgreSQL VARCHAR 长度限制导致整环节回滚（如超长 Facebook/社媒链接）。"""
+        return (v or "")[:n]
+
     for i, s in enumerate(case.search_results or []):
         origin = s.get("origin", "")
         origin_label = {"cn_official": "·中方官方", "cn_media": "·中方媒体",
                         "foreign_state_media": "·外媒官方喉舌"}.get(origin, "")
         ev = models.Evidence(
             case_id=case.id,
-            name=s.get("title", f"证据{i+1}"),
-            source_org=s.get("source", ""),
-            source_type=f"{s.get('type', '搜索结果')}{origin_label}",
-            publish_date=s.get("date", ""),
-            url=s.get("url", ""),
+            name=_cut(s.get("title", f"证据{i+1}"), 200),
+            source_org=_cut(s.get("source", ""), 100),
+            source_type=_cut(f"{s.get('type', '搜索结果')}{origin_label}", 30),
+            publish_date=_cut(s.get("date", ""), 40),
+            url=_cut(s.get("url", ""), 500),
             relation="待确认",
             reliability="中",
             note=s.get("snippet", ""),
@@ -227,11 +231,11 @@ def run_verify(case: models.Case, db: Session) -> dict:
     for i, t in enumerate(case.trace_results or []):
         ev = models.Evidence(
             case_id=case.id,
-            name=t.get("matched_title", f"溯源结果{i+1}"),
-            source_org=t.get("matched_site", ""),
+            name=_cut(t.get("matched_title", f"溯源结果{i+1}"), 200),
+            source_org=_cut(t.get("matched_site", ""), 100),
             source_type="出处追踪",
-            publish_date=t.get("published_date", ""),
-            url=t.get("url", ""),
+            publish_date=_cut(t.get("published_date", ""), 40),
+            url=_cut(t.get("url", ""), 500),
             relation="待确认",
             reliability="中",
             note=t.get("note", ""),
