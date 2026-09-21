@@ -198,10 +198,18 @@ async def search_multilingual(keywords: dict, count: int = 8) -> list:
             except Exception:
                 return []
 
+    async def _safe_ark(q: str, n: int) -> list:
+        """火山方舟 Web Search 安全包裹：失败返回空，不影响 Google 通道（双通道任一可用即可）。"""
+        try:
+            return await _search_ark_web(q, n)
+        except Exception as _e:
+            print(f"[search] 火山 Web Search 失败：{_e}，仅使用 Google(cn) 结果", flush=True)
+            return []
+
     async def _query_cn(q: str, n: int) -> list:
         """中方视角双通道：火山方舟 Web Search（国内通道）+ SerpAPI Google(cn) 并行取并集。"""
         ark_res, goog_res = await asyncio.gather(
-            _search_ark_web(q, n),
+            _safe_ark(q, n),
             _serpapi_or_fallback(q, n, gl="cn", hl="zh-CN"),
         )
         return list(ark_res) + list(goog_res)
