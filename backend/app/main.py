@@ -32,6 +32,13 @@ app.include_router(media.router)
 def health():
     from .config import settings
     from .services.llm import llm_service
+    # PDF 导出依赖探针：确认 reportlab 是否安装及版本
+    pdf_status = "missing"
+    try:
+        import reportlab
+        pdf_status = reportlab.Version
+    except Exception:
+        pdf_status = "missing"
     return {
         "status": "ok",
         "llm_ark": llm_service.enabled,
@@ -41,6 +48,7 @@ def health():
         "image_host_github": bool(settings.github_token and settings.github_repo),
         "ocr_multimodal": llm_service.ocr_enabled,
         "ocr_model": settings.ocr_model,
+        "pdf_reportlab": pdf_status,
         "note": "全部能力均为真实数据；未配置的能力会在对应环节明确报错提示，不会返回演示数据。",
     }
 
