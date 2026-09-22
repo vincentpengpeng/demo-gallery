@@ -182,6 +182,7 @@ class LLMService:
                         {"type": "input_image", "image_url": f"data:{mime};base64,{b64}"},
                     ]},
                 ],
+                max_output_tokens=3000,
                 timeout=120,
             )
             texts = []
@@ -192,6 +193,11 @@ class LLMService:
                             texts.append(c.text)
             raw = "\n".join(texts)
             parsed = self._safe_parse(raw)
+            # 解析失败：剥离 markdown 代码块后重试一次（模型偶发带 ```json 包裹或多余说明）
+            if not parsed:
+                import re as _re
+                stripped = _re.sub(r"```(?:json)?", "", raw)
+                parsed = self._safe_parse(stripped)
             if not parsed:
                 return {"scene_description": "", "text_in_image": "", "authenticity_clues": [],
                         "suspected": "unclear", "reason": "图片分析输出解析失败", "transcript": ""}
