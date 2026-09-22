@@ -32,11 +32,15 @@ async def trace_image(media_path: str = "", source_link: str = "", image_url: st
     public_url = image_url
     upload_note = ""
     if not public_url and media_path:
-        try:
-            public_url = await upload_image_to_github(media_path)
-            upload_note = f"（已自动上传图床：{public_url[:60]}...）"
-        except GitHubImageHostError as e:
-            raise ReverseImageNotConfigured(str(e)) from e
+        if media_path.startswith(("http://", "https://")):
+            # media_path 已是公网 URL（如 GitHub 图床 raw），直接使用，不再重复上传
+            public_url = media_path
+        else:
+            try:
+                public_url = await upload_image_to_github(media_path)
+                upload_note = f"（已自动上传图床：{public_url[:60]}...）"
+            except GitHubImageHostError as e:
+                raise ReverseImageNotConfigured(str(e)) from e
     if not public_url:
         raise ReverseImageNotConfigured(
             "缺少图片地址：请在 .env 配置 GitHub 图床（GITHUB_TOKEN/GITHUB_REPO）以自动上传本地图片，"
