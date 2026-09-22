@@ -39,17 +39,18 @@ SCREENING_KEYWORDS = ["中国", "China", "Chinese", "Beijing", "冲突", "抗议
 
 
 def run_screening(case: models.Case, clue: models.Clue) -> dict:
-    # 纯图片线索（无文本）：先多模态理解——画面描述 + 图中文字 + 真实性线索，
-    # 生成转写文本补全 raw_text，让主张拆解/检索等下游环节可正常跑；结果并入初筛结果。
+    # 图片线索：多模态理解——画面描述 + 图中文字 + 真实性线索。
+    # 触发不依赖 raw_text 是否为空（前端可能已填 OCR 文字或占位文本）；
+    # 仅当原文为空时用生成的转写文本补全，让主张拆解/检索等下游环节可正常跑。
     image_analysis = None
-    if clue.content_type == "image" and not (clue.raw_text or "").strip():
+    if clue.content_type == "image":
         img_url = (clue.image_url or "").strip() or (clue.media_path or "").strip()
         if img_url:
             image_analysis = llm_service.analyze_image(img_url)
             transcript = (image_analysis.get("transcript") or "").strip()
-            if transcript:
+            if transcript and not (clue.raw_text or "").strip():
                 clue.raw_text = transcript
-                print(f"[run_screening] 纯图片线索已生成转写文本（{len(transcript)}字）", flush=True)
+                print(f"[run_screening] 图片线索已生成转写文本（{len(transcript)}字）", flush=True)
 
     text = (clue.raw_text or "") + " " + (clue.title or "")
 
