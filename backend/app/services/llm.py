@@ -347,6 +347,40 @@ class LLMService:
             "grade": "B", "reason": "基于信源类型与可用信息给出的默认评价，建议人工复核。"}
         return self.chat_json(system, user, fallback)
 
+    # ---------- 检索结果 LLM 批量初筛（一次调用，逐条判断相关/不相关） ----------
+    def filter_relevant(self, topic: dict, items: list) -> dict:
+        """LLM 批量初筛候选检索结果：一次调用判定每条是否与核查主题相关。
+
+        输入 topic：检索关键词（zh/en 等）；items：[{"id", "title", "source", "snippet", "url"}]
+        输出 {"results": [{"id": 1, "relevant": true, "reason": "一句话理由"}]}
+        相关判定强调"事件主体一致"，可剔除语义错配（如本案中菲碰撞 vs 中方内部旧闻）；
+        立场偏颇/外媒喉舌不视为不相关（仍是核查对象）。
+        """
+        system = (
+            "你是事实核查检索结果筛选员，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+            "任务：判断每一条候选检索结果是否与本次核查主题**相关**（一次全部判定，不要遗漏）。\n"
+            "相关判定要点：\n"
+            "1. **事件主体必须一致**：候选内容须涉及与核查主题相同的主体和事件；"
+            "如本案为中菲海警船碰撞，则'中国海警与中国海军舰艇相撞'（中方内部事件）、"
+            "'菲律宾与中国其他年份的旧冲突'等主体/时间不符的内容判为**不相关**；\n"
+            "2. 纯机构/商业/教育页面（学校、银行、基金、公司简介、政府无关部门等）判为**不相关**；\n"
+            "3. 事件报道、官方声明、媒体立场报道、转载、多源综述、背景分析均判为**相关**"
+            "（不同立场也保留，供证据矩阵对比呈现）；\n"
+            "4. 立场偏颇**不视为不相关**：外媒喉舌的对抗性报道正是核查对象，应判相关；\n"
+            "5. 拿不准时倾向保留（宁多勿漏），明显无关才判不相关。\n"
+            "只输出JSON：{\"results\":[{\"id\":1,\"relevant\":true,\"reason\":\"一句话理由\"}]}"
+        )
+        user = (
+            f"核查主题关键词：{json.dumps(topic, ensure_ascii=False)}\n"
+            f"候选检索结果（共{len(items)}条）：{json.dumps(items, ensure_ascii=False)}\n"
+            "请对每条输出 relevant 判定。"
+        )
+        fallback = {"results": [
+            {"id": it.get("id"), "relevant": True, "reason": "LLM初筛未启用/失败，默认保留"}
+            for it in items
+        ]}
+        return self.chat_json(system, user, fallback, max_tokens=3000)
+
     # ---------- 环节8：报告生成 ----------
     def generate_report(self, case: dict, claims: list, evidence: list, evals: list) -> dict:
         system = (

@@ -13,6 +13,7 @@ from html import unescape
 import httpx
 
 from ..config import settings, SEARCH_ENABLED
+from .llm import llm_service
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0 Safari/537.36")
@@ -286,30 +287,6 @@ async def search_multilingual(keywords: dict, count: int = 8) -> list:
                       "环球网", "参考消息", "财新", "第一财经"]
     # title 中仅认这些强官方信号词（避免标题含"中国海警"等对象词的外媒/百科被误判为中方官方）
     CN_OFFICIAL_TITLE_STRONG = ["外交部", "国防部", "国务院"]
-    # 相关性过滤词表：命中强相关词才保留，剔除学校/银行/基金等与事件无关的机构卡片噪声
-    # （宽松多词查询下 Google 会把仅沾"菲/邦"等字的机构页召回，如"富邦""狄邦"）
-    REL_CN = ["海警", "碰撞", "相撞", "冲撞", "撞上", "船只", "舰", "南海", "菲律宾", "中菲",
-              "中方", "回应", "驳斥", "谴责", "声明", "大使", "争议水域", "外交部"]
-    REL_EN_PAT = [r"\bcoast guard\b", r"\bramm", r"\bcollid", r"\bvessel", r"\bwarship\b",
-                  r"\bsouth china sea\b", r"\bphilippin", r"\bcondemn", r"\bspokesperson\b",
-                  r"\bstatement\b", r"\bmfa\b", r"\bforeign ministry\b"]
-
-    def _rel_score(item: dict) -> int:
-        """相关性评分：标题命中 ×2、摘要命中 ×1；英文词用词边界正则避免子串误伤（如 program 含 ram）。"""
-        t = (item.get("title") or "").lower()
-        s = (item.get("snippet") or "").lower()
-        score = 0
-        for k in REL_CN:
-            if k in t:
-                score += 2
-            elif k in s:
-                score += 1
-        for p in REL_EN_PAT:
-            if re.search(p, t):
-                score += 2
-            elif re.search(p, s):
-                score += 1
-        return score
 
     for item in uniq:
         url = item.get("url", "").lower()
@@ -355,15 +332,36 @@ async def search_multilingual(keywords: dict, count: int = 8) -> list:
             if any(k in title_low for k in CN_OFFICIAL_TITLE_STRONG):
                 origin = "cn_official"
         item["origin"] = origin or "other"
-        item["rel_score"] = _rel_score(item)
 
-    # 剔除明显不相关噪声（0 命中强相关词：学校/银行/基金等机构卡片）
-    uniq = [it for it in uniq if it.get("rel_score", 0) >= 1]
+    # LLM 批量初筛：一次调用判定每条候选是否与核查主题相关（替代纯关键词规则过滤，
+    # 可识别"事件主体不符"等语义错配，如本案中菲碰撞 vs 中方内部旧闻）。
+    # LLM 未启用/失败/判定为空时保留全部（宁多勿漏，交下游环节处理）。
+    if uniq:
+        _items = [
+            {"id": i, "title": (it.get("title") or "")[:150],
+             "source": (it.get("source") or "")[:60],
+             "snippet": (it.get("snippet") or "")[:200],
+             "url": (it.get("url") or "")[:200]}
+            for i, it in enumerate(uniq)
+        ]
+        try:
+            _rel = llm_service.filter_relevant(
+                {"zh": keywords.get("zh", ""), "en": keywords.get("en", "")}, _items)
+            _keep = set()
+            for _r in (_rel.get("results") or []):
+                _rid = _r.get("id")
+                try:
+                    _rid = int(_rid)
+                except (TypeError, ValueError):
+                    continue
+                if _r.get("relevant") is True:
+                    _keep.add(_rid)
+            if _keep:
+                uniq = [it for i, it in enumerate(uniq) if i in _keep]
+        except Exception as _e:
+            print(f"[search] LLM 初筛失败，保留全部：{_e}", flush=True)
 
-    # 排序：中方官方 → 中方媒体 → 普通外媒/外媒官方喉舌 优先；同级内按相关度降序
-    uniq.sort(key=lambda x: (
-        0 if x.get("origin") == "cn_official" else
-        (1 if x.get("origin") == "cn_media" else 2),
-        -x.get("rel_score", 0),
-    ))
+    # 排序：中方官方 → 中方媒体 → 普通外媒/外媒官方喉舌（中方立场证据前置），同级保持召回顺序
+    uniq.sort(key=lambda x: 0 if x.get("origin") == "cn_official" else
+              (1 if x.get("origin") == "cn_media" else 2))
     return uniq[:count]
