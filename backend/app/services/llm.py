@@ -173,32 +173,38 @@ class LLMService:
                 "}\n"
                 "要求：客观描述，不臆测；图中文字逐字提取不翻译；无把握时 suspected=unclear，宁保守勿乱下结论。"
             )
-            resp = client.responses.create(
-                model=model,
-                input=[
-                    {"role": "system", "content": [{"type": "input_text", "text": system}]},
-                    {"role": "user", "content": [
-                        {"type": "input_text", "text": "请分析这张图片的拍摄内容与真实性。"},
-                        {"type": "input_image", "image_url": f"data:{mime};base64,{b64}"},
-                    ]},
-                ],
-                max_output_tokens=3000,
-                timeout=120,
-            )
-            texts = []
-            for o in (resp.output or []):
-                if getattr(o, "type", "") == "message":
-                    for c in (getattr(o, "content", None) or []):
-                        if getattr(c, "type", "") == "output_text" and getattr(c, "text", ""):
-                            texts.append(c.text)
-            raw = "\n".join(texts)
-            parsed = self._safe_parse(raw)
-            # 解析失败：剥离 markdown 代码块后重试一次（模型偶发带 ```json 包裹或多余说明）
+            parsed = None
+            raw = ""
+            # 模型输出偶发不稳定（reasoning 可能挤占输出、或返回非 JSON）：最多重试 3 次
+            for attempt in range(3):
+                resp = client.responses.create(
+                    model=model,
+                    input=[
+                        {"role": "system", "content": [{"type": "input_text", "text": system}]},
+                        {"role": "user", "content": [
+                            {"type": "input_text", "text": "请分析这张图片的拍摄内容与真实性。"},
+                            {"type": "input_image", "image_url": f"data:{mime};base64,{b64}"},
+                        ]},
+                    ],
+                    max_output_tokens=6000,
+                    timeout=120,
+                )
+                texts = []
+                for o in (resp.output or []):
+                    if getattr(o, "type", "") == "message":
+                        for c in (getattr(o, "content", None) or []):
+                            if getattr(c, "type", "") == "output_text" and getattr(c, "text", ""):
+                                texts.append(c.text)
+                raw = "\n".join(texts)
+                parsed = self._safe_parse(raw)
+                if not parsed:
+                    import re as _re
+                    stripped = _re.sub(r"```(?:json)?", "", raw)
+                    parsed = self._safe_parse(stripped)
+                if parsed:
+                    break
             if not parsed:
-                import re as _re
-                stripped = _re.sub(r"```(?:json)?", "", raw)
-                parsed = self._safe_parse(stripped)
-            if not parsed:
+                print(f"[analyze_image] 解析失败，原始输出前300字：{raw[:300]}", flush=True)
                 return {"scene_description": "", "text_in_image": "", "authenticity_clues": [],
                         "suspected": "unclear", "reason": "图片分析输出解析失败", "transcript": ""}
             scene = (parsed.get("scene_description") or "").strip()
