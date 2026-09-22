@@ -65,12 +65,15 @@ def export_case_pdf(case_id: int, db: Session = Depends(get_db)):
     detail = schemas.case_to_detail(case, db)
     from fastapi.responses import Response
     from ..services.pdf_report import build_case_pdf
+    import urllib.parse
     pdf_bytes = build_case_pdf(detail.model_dump())
     filename = f"核查报告_{case.case_no or case_id}.pdf"
+    # Content-Disposition 头必须 Latin-1：filename* 的值需按 RFC 5987 做百分号编码，否则中文文件名报 UnicodeEncodeError
+    encoded = urllib.parse.quote(filename)
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename*=UTF-8\'\'{filename}'},
+        headers={"Content-Disposition": f"attachment; filename=\"report.pdf\"; filename*=UTF-8''{encoded}"},
     )
 
 
