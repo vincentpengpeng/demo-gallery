@@ -84,7 +84,13 @@ class LLMService:
                 try:
                     return json.loads(m.group(0))
                 except Exception:
-                    return None
+                    pass
+            # 模型偶发丢失首字符/首行（如开头缺 {）：补全后重试
+            for candidate in ("{" + text, "{\n" + text):
+                try:
+                    return json.loads(candidate)
+                except Exception:
+                    continue
             return None
 
     # ---------- 多模态 OCR：图片文字识别 ----------
@@ -574,6 +580,58 @@ class LLMService:
             "gaps": ["当前为规则降级结论，建议配置 Ark API 后重新生成"],
             "pending_items": ["建议人工复核完整证据链与来源链接有效性"],
         }
+
+    # ---------- 环节8（图片专用）：图片真实性核查报告 ----------
+    def generate_image_report(self, case: dict, image_analysis: dict, trace_results: list) -> dict:
+        """纯图片线索：基于多模态画面分析 + 反向识图溯源，综合判定图片真实性。
+
+        conclusion：真实 / 疑似AI生成 / 疑似PS拼接 / 疑似旧图新用 / 无法判断。
+        """
+        system = (
+            "你是图片真实性核查报告撰写员，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+            "请基于【图片多模态分析】与【反向识图溯源结果】，综合判定这张图片的真实性并输出核查报告。\n"
+            "结论类别（conclusion）只能从以下选择：真实 / 疑似AI生成 / 疑似PS拼接 / 疑似旧图新用 / 无法判断。\n"
+            "判定要点：\n"
+            "1. 以图片多模态分析的 suspected 为主线（real_scene→真实、ai_generated→疑似AI生成、"
+            "ps_edited→疑似PS拼接、old_image_reuse→疑似旧图新用、unclear→无法判断），"
+            "结合真实性疑点与判定理由展开；\n"
+            "2. 溯源结果用于佐证：如反查到讨论该图为AI生成/伪造的文章、官方辟谣、事件原始报道等，"
+            "应引用并支撑判定；注意区分'相似图'与'同一事件的其他报道'；\n"
+            "3. 溯源到官方媒体对同一救援/事件的真实报道，不能推翻图片本身的AI生成判定（两者可并存："
+            "事件真实≠这张图真实），报告应明确指出；\n"
+            "4. 证据不足或分析为 unclear 时，结论给'无法判断'并说明缺口，不臆断。\n"
+            "只输出JSON：\n"
+            "{\n"
+            "  \"preliminary_conclusion\": \"结论说明：先给图片真实性判定，再给溯源佐证与理由\",\n"
+            "  \"conclusion\": \"真实|疑似AI生成|疑似PS拼接|疑似旧图新用|无法判断\",\n"
+            "  \"confidence\": \"高|中|低\",\n"
+            "  \"summary\": \"核查摘要（250字内：画面内容、真实性疑点、溯源发现、判定）\",\n"
+            "  \"gaps\": [\"证据缺口\"],\n"
+            "  \"pending_items\": [\"待人工确认事项（如人工复核疑似拼接区域、联系发布者等）\"]\n"
+            "}"
+        )
+        user = (
+            f"案件信息：{json.dumps(case, ensure_ascii=False)}\n"
+            f"图片多模态分析：{json.dumps(image_analysis, ensure_ascii=False)}\n"
+            f"反向识图溯源结果：{json.dumps(trace_results, ensure_ascii=False)}\n"
+            "请输出图片真实性核查报告。"
+        )
+        _label = {"real_scene": "真实", "ai_generated": "疑似AI生成", "ps_edited": "疑似PS拼接",
+                  "old_image_reuse": "疑似旧图新用", "unclear": "无法判断"}
+        _conclusion = _label.get((image_analysis or {}).get("suspected"), "无法判断")
+        _summary = f"图片多模态分析：{_conclusion}"
+        if (image_analysis or {}).get("reason"):
+            _summary += f"；{image_analysis['reason']}"
+        _summary += f"；反向识图溯源 {len(trace_results)} 条"
+        fallback = {
+            "preliminary_conclusion": _summary,
+            "conclusion": _conclusion,
+            "confidence": "中",
+            "summary": _summary,
+            "gaps": ["图片元数据（拍摄时间/地点/设备）缺失，无法进一步验证"],
+            "pending_items": ["建议人工复核图片疑似处理区域"],
+        }
+        return self.chat_json(system, user, fallback, max_tokens=2500)
 
 
 llm_service = LLMService()

@@ -495,6 +495,50 @@ def run_report(case: models.Case, db: Session) -> dict:
     return result
 
 
+# ---------- 环节8（图片专用）：图片真实性核查报告 ----------
+def run_image_report(case: models.Case, db: Session) -> dict:
+    """纯图片线索：基于 多模态画面分析（screening_result.image_analysis）+ 反向识图溯源 综合判定图片真实性。
+
+    结论类别：真实 / 疑似AI生成 / 疑似PS拼接 / 疑似旧图新用 / 无法判断。
+    """
+    clue = db.query(models.Clue).filter_by(id=case.clue_id).first()
+    ia = (case.screening_result or {}).get("image_analysis") or {}
+    trace = case.trace_results or []
+    result = llm_service.generate_image_report(
+        {"case_no": case.case_no, "title": case.title,
+         "clue_title": (clue.title if clue else "")},
+        ia, trace,
+    )
+    # 持久化报告（复用 Report 表字段；结论存图片真实性判定）
+    report = db.query(models.Report).filter_by(case_id=case.id).first()
+    if not report:
+        report = models.Report(case_id=case.id)
+        db.add(report)
+    report.preliminary_conclusion = result.get("preliminary_conclusion", "")
+    report.conclusion = result.get("conclusion", "无法判断")
+    report.confidence = result.get("confidence", "中")
+    report.summary = result.get("summary", "")
+    report.evidence_table = [
+        {"name": t.get("matched_title", ""), "source": t.get("matched_site", ""),
+         "date": "", "relation": "溯源", "reliability": "", "url": t.get("url", ""),
+         "note": t.get("note", "")}
+        for t in trace if not t.get("warning")
+    ]
+    report.source_links = [
+        {"title": t.get("matched_title", ""), "url": t.get("url", ""),
+         "source": t.get("matched_site", "")}
+        for t in trace if t.get("url") and not t.get("warning")
+    ]
+    report.gaps = result.get("gaps", [])
+    report.pending_items = result.get("pending_items", [])
+
+    case.final_conclusion = report.conclusion
+    case.stage = 8
+    case.status = "reporting"
+    db.commit()
+    return result
+
+
 # ---------- 环节9：人工审核 ----------
 def run_review(case: models.Case, db: Session, reviewer: str, action: str, comment: str,
                check_items: list) -> dict:
@@ -542,13 +586,52 @@ async def run_auto_pipeline(case_id: int) -> dict:
         if not case:
             return {"ok": False, "msg": "案件不存在"}
         clue = db.query(models.Clue).filter_by(id=case.clue_id).first()
+        # 纯图片线索走"图片真实性核查"专用流程：不做主张拆解/文本检索/证据矩阵，
+        # 直接多模态画面分析（环节2 内完成）+ 反向识图出处追踪 + 图片核查报告
+        is_image = bool(clue and clue.content_type == "image")
 
-        # 环节2：价值初筛
+        # 环节2：价值初筛（纯图片线索：含多模态画面分析与真实性判定）
         r = run_screening(case, clue)
         case.running_log = log + [{"stage": 2, "name": "价值初筛", "ok": True, "detail": f"得分{r.get('score', 0)}，{'通过' if r.get('passed') else '暂缓'}"}]
         db.commit(); db.refresh(case)
         log.append({"stage": 2, "name": "价值初筛", "ok": True,
                     "detail": f"得分{r.get('score', 0)}，{'通过' if r.get('passed') else '暂缓'}"})
+
+        if is_image:
+            # 环节3/4：纯图片线索跳过主张拆解与多语种检索（无文本主张可拆、无需关键词搜索）
+            skip = {"stage": 3, "name": "主张拆解", "ok": True, "detail": "纯图片线索：跳过文本主张拆解，聚焦图片真实性核查"}
+            case.running_log = log + [skip, {"stage": 4, "name": "多语种检索", "ok": True, "detail": "纯图片线索：跳过文本检索"}]
+            db.commit(); db.refresh(case)
+            log.extend([skip, {"stage": 4, "name": "多语种检索", "ok": True, "detail": "纯图片线索：跳过文本检索"}])
+
+            # 环节5：出处追踪（反向识图，纯图片核心环节）
+            try:
+                r = await run_trace(case, clue)
+                case.running_log = log + [{"stage": 5, "name": "出处追踪", "ok": True, "detail": f"溯源 {len(r.get('results', []))} 条"}]
+                db.commit(); db.refresh(case)
+                log.append({"stage": 5, "name": "出处追踪", "ok": True,
+                            "detail": f"溯源 {len(r.get('results', []))} 条"})
+            except Exception as e:
+                db.rollback(); db.refresh(case)
+                case.running_log = log + [{"stage": 5, "name": "出处追踪", "ok": False, "detail": f"跳过：{str(e)[:80]}"}]
+                db.commit()
+                log.append({"stage": 5, "name": "出处追踪", "ok": False, "detail": f"跳过：{str(e)[:80]}"})
+
+            # 环节6/7：跳过交叉验证与信源评价（无文本证据池）
+            skip6 = {"stage": 6, "name": "交叉验证", "ok": True, "detail": "纯图片线索：跳过文本证据矩阵"}
+            skip7 = {"stage": 7, "name": "信源评价", "ok": True, "detail": "纯图片线索：跳过文本信源评价"}
+            case.running_log = log + [skip6, skip7]
+            db.commit(); db.refresh(case)
+            log.extend([skip6, skip7])
+
+            # 环节8：图片真实性核查报告（画面分析 + 溯源佐证 综合判定）
+            r = run_image_report(case, db)
+            case.running_log = log + [{"stage": 8, "name": "报告生成", "ok": True, "detail": f"图片判定：{r.get('conclusion', '')}"}]
+            db.commit(); db.refresh(case)
+            log.append({"stage": 8, "name": "报告生成", "ok": True,
+                        "detail": f"图片判定：{r.get('conclusion', '')}"})
+            return {"ok": True, "case_id": case_id, "stage": case.stage,
+                    "status": case.status, "log": log, "mode": "image"}
 
         # 环节3：主张拆解
         r = run_decompose(case, clue, db)
