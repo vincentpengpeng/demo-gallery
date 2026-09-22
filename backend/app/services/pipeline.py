@@ -202,9 +202,15 @@ async def run_trace(case: models.Case, clue: models.Clue) -> dict:
         case.status = "tracing"
         return result
     except Exception as e:
-        # 未配置或失败：记录提示信息，不落演示数据
+        # 未配置或失败：保留失败原因供前端可见（不静默返回 0 条，便于排查额度/配置问题）
         warning = str(e)
-        case.trace_results = []
+        case.trace_results = [{
+            "matched_title": "反向识图未执行",
+            "matched_site": "系统提示",
+            "url": "",
+            "note": f"{warning}（请检查 SERPAPI_API_KEY 额度/配置后重试）",
+            "warning": True,
+        }]
         case.stage = 5
         case.status = "tracing"
         return {"results": [], "mode": "error", "warning": warning}
