@@ -379,6 +379,8 @@ def run_evaluate(case: models.Case) -> dict:
         grade = result.get("grade", "B")
         dims = result.get("dimensions", {})
         is_state_media = bool(e.source_type and "外媒官方喉舌" in e.source_type)
+        # 火山方舟 Web Search：国内通道多源整合综述，非官方媒体但为中方立场信源，固定评级 B
+        is_volcano = bool(e.source_org and "火山方舟" in e.source_org)
         if is_state_media:
             if grade == "A":
                 grade = "B"
@@ -386,6 +388,10 @@ def run_evaluate(case: models.Case) -> dict:
         if dims.get("涉华表述准确性") in ("低", "较低") or dims.get("立场与倾向性") in ("低", "较低"):
             if grade == "A":
                 grade = "B"
+        if is_volcano:
+            # 火山方舟 Web Search：国内检索通道的多源整合综述，虽非官媒但为中方立场，评级固定 B
+            grade = "B"
+            dims["立场与倾向性"] = dims.get("立场与倾向性", "中")
         result["grade"] = grade
         result["dimensions"] = dims
         # 反向更新证据矩阵：信源评级 → 可信度层级（与交叉验证判定取更严一档，只降不升）
@@ -393,6 +399,9 @@ def run_evaluate(case: models.Case) -> dict:
         cur_level = REL_LEVEL.get(e.reliability, 3)
         if grade_level < cur_level:
             e.reliability = REL_LABEL[grade_level]
+        if is_volcano:
+            # 火山综述：B 级对应可信度"中"，与交叉验证判定归一（高降低升）
+            e.reliability = "中"
         if grade:
             e.note = f"{e.note} | 信源评级：{grade}" if e.note else f"信源评级：{grade}"
         evals.append({
