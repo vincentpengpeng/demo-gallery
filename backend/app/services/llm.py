@@ -120,6 +120,110 @@ class LLMService:
         except Exception:
             return ""
 
+    # ---------- 图片真实性核查：多模态图片理解 ----------
+    def analyze_image(self, image_url: str) -> dict:
+        """多模态分析图片：画面描述 + 图中文字 + 真实性线索，并生成供下游环节使用的转写文本。
+
+        输入：图片公网 URL（图床 raw / http 链接）。
+        输出：{"scene_description", "text_in_image", "authenticity_clues", "suspected",
+              "reason", "transcript"}
+        suspected：real_scene(真实现场图) / ai_generated(疑似AI生成) / ps_edited(疑似PS拼接) /
+                   old_image_reuse(疑似旧图新用) / unclear(无法判断)
+        """
+        client = self._ocr_client or self._client
+        if not client:
+            return {"scene_description": "", "text_in_image": "", "authenticity_clues": [],
+                    "suspected": "unclear", "reason": "多模态模型未配置", "transcript": ""}
+        try:
+            import httpx
+            async def _download(url: str) -> bytes:
+                async with httpx.AsyncClient(timeout=30, trust_env=False,
+                                             follow_redirects=True) as c:
+                    r = await c.get(url)
+                    r.raise_for_status()
+                    return r.content
+            try:
+                import asyncio
+                image_bytes = asyncio.run(_download(image_url))
+            except Exception:
+                image_bytes = b""
+            if not image_bytes:
+                return {"scene_description": "", "text_in_image": "", "authenticity_clues": [],
+                        "suspected": "unclear", "reason": "图片下载失败，无法分析", "transcript": ""}
+            import base64
+            b64 = base64.b64encode(image_bytes).decode()
+            mime = "image/png"
+            if image_bytes[:3] == b"\xff\xd8\xff":
+                mime = "image/jpeg"
+            elif image_bytes[:4] == b"GIF8":
+                mime = "image/gif"
+            elif image_bytes[:8] == b"\x89PNG\r\n\x1a\n":
+                mime = "image/png"
+            model = settings.ocr_model if self._ocr_client else settings.ark_model
+            system = (
+                "你是专业的图片真实性核查分析员，服务对象是核查外媒涉华不当、虚假表述的工作室。\n"
+                "请分析这张图片并只输出JSON，结构如下：\n"
+                "{\n"
+                "  \"scene_description\": \"画面内容客观描述（场景、主体、人物/船只/建筑、天气光线、"
+                "可见标识旗帜文字等，300字内，不臆测）\",\n"
+                "  \"text_in_image\": \"图中可见的所有文字/水印/标注，逐行原样提取；没有则为空字符串\",\n"
+                "  \"authenticity_clues\": [\"真实性疑点列表，如：AI生成痕迹（手指畸形/文字扭曲/纹理异常）、"
+                "PS拼接疑点（阴影方向不一致/边缘生硬）、水印覆盖、分辨率异常、画面内容与宣称时间地点场景不符等；"
+                "无则空数组\"],\n"
+                "  \"suspected\": \"real_scene|ai_generated|ps_edited|old_image_reuse|unclear\",\n"
+                "  \"reason\": \"判定理由一句话\"\n"
+                "}\n"
+                "要求：客观描述，不臆测；图中文字逐字提取不翻译；无把握时 suspected=unclear，宁保守勿乱下结论。"
+            )
+            resp = client.responses.create(
+                model=model,
+                input=[
+                    {"role": "system", "content": [{"type": "input_text", "text": system}]},
+                    {"role": "user", "content": [
+                        {"type": "input_text", "text": "请分析这张图片的拍摄内容与真实性。"},
+                        {"type": "input_image", "image_url": f"data:{mime};base64,{b64}"},
+                    ]},
+                ],
+                timeout=120,
+            )
+            texts = []
+            for o in (resp.output or []):
+                if getattr(o, "type", "") == "message":
+                    for c in (getattr(o, "content", None) or []):
+                        if getattr(c, "type", "") == "output_text" and getattr(c, "text", ""):
+                            texts.append(c.text)
+            raw = "\n".join(texts)
+            parsed = self._safe_parse(raw)
+            if not parsed:
+                return {"scene_description": "", "text_in_image": "", "authenticity_clues": [],
+                        "suspected": "unclear", "reason": "图片分析输出解析失败", "transcript": ""}
+            scene = (parsed.get("scene_description") or "").strip()
+            txt = (parsed.get("text_in_image") or "").strip()
+            clues = parsed.get("authenticity_clues") or []
+            if not isinstance(clues, list):
+                clues = []
+            suspected = parsed.get("suspected") or "unclear"
+            if suspected not in ("real_scene", "ai_generated", "ps_edited", "old_image_reuse", "unclear"):
+                suspected = "unclear"
+            # 转写文本：画面描述 + 图中文字，供主张拆解/检索等下游环节使用
+            transcript = scene
+            if txt:
+                transcript = f"{scene}\n图中文字：{txt}"
+            return {
+                "scene_description": scene,
+                "text_in_image": txt,
+                "authenticity_clues": clues,
+                "suspected": suspected,
+                "reason": (parsed.get("reason") or "").strip(),
+                "transcript": transcript,
+            }
+        except Exception:
+            return {"scene_description": "", "text_in_image": "", "authenticity_clues": [],
+                    "suspected": "unclear", "reason": "图片分析异常", "transcript": ""}
+            return "\n".join(t for t in texts if t)
+        except Exception:
+            return ""
+
     # ---------- 自动翻译：中英互译 ----------
     def translate(self, text: str, target: str = "zh") -> str:
         """把 text 翻译成目标语言（zh=中文, en=英文）；失败返回空字符串。"""

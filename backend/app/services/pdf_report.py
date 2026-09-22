@@ -145,6 +145,25 @@ def build_case_pdf(detail: dict) -> bytes:
         ("判定理由", scr.get("reason") or "-"),
     ]))
 
+    # ===== 二.五、图片真实性核查（纯图片线索） =====
+    ia = scr.get("image_analysis") or {}
+    if ia:
+        badge = {"real_scene": "真实现场图", "ai_generated": "疑似AI生成",
+                 "ps_edited": "疑似PS拼接", "old_image_reuse": "疑似旧图新用",
+                 "unclear": "无法判断"}.get(ia.get("suspected"), "无法判断")
+        story += _sec("图片真实性核查")
+        story.append(_kv_table([
+            ("判定", badge),
+            ("判定理由", ia.get("reason") or "-"),
+            ("画面内容", ia.get("scene_description") or "-"),
+            ("图中文字", ia.get("text_in_image") or "-"),
+        ]))
+        clues = ia.get("authenticity_clues") or []
+        if clues:
+            story.append(Paragraph("<b>真实性疑点：</b>", ST_BODY))
+            for i, cl in enumerate(clues, 1):
+                story.append(Paragraph(f"{i}. {_esc(cl)}", ST_SMALL))
+
     # ===== 三、主张拆解 =====
     story += _sec("三、主张拆解")
     claims = detail.get("claims") or []
