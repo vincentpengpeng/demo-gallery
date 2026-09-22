@@ -136,15 +136,13 @@ class LLMService:
                     "suspected": "unclear", "reason": "多模态模型未配置", "transcript": ""}
         try:
             import httpx
-            async def _download(url: str) -> bytes:
-                async with httpx.AsyncClient(timeout=30, trust_env=False,
-                                             follow_redirects=True) as c:
-                    r = await c.get(url)
-                    r.raise_for_status()
-                    return r.content
+            # 同步下载：analyze_image 可能在 async 流水线（运行中事件循环）内被调用，
+            # 不能用 asyncio.run（会报 RuntimeError），统一用同步 httpx.Client。
             try:
-                import asyncio
-                image_bytes = asyncio.run(_download(image_url))
+                with httpx.Client(timeout=30, follow_redirects=True, trust_env=False) as c:
+                    r = c.get(image_url)
+                    r.raise_for_status()
+                    image_bytes = r.content
             except Exception:
                 image_bytes = b""
             if not image_bytes:
