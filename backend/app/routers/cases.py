@@ -52,6 +52,28 @@ def delete_case(case_id: int, db: Session = Depends(get_db)):
     return {"ok": True, "msg": f"案件 {case.case_no} 已删除"}
 
 
+@router.get("/{case_id}/export-pdf")
+def export_case_pdf(case_id: int, db: Session = Depends(get_db)):
+    """导出案件详情全环节核查结果为 PDF 报告。
+
+    内容覆盖：案件信息、线索、价值初筛、主张拆解、多语种检索关键词、出处追踪、
+    证据矩阵、信源评价、核查报告、人工审核记录。
+    """
+    case = db.query(models.Case).filter_by(id=case_id).first()
+    if not case:
+        raise HTTPException(404, "案件不存在")
+    detail = schemas.case_to_detail(case, db)
+    from fastapi.responses import Response
+    from ..services.pdf_report import build_case_pdf
+    pdf_bytes = build_case_pdf(detail.model_dump())
+    filename = f"核查报告_{case.case_no or case_id}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename*=UTF-8\'\'{filename}'},
+    )
+
+
 @router.post("/{case_id}/screening")
 def do_screening(case_id: int, db: Session = Depends(get_db)):
     """环节2：价值初筛。"""
