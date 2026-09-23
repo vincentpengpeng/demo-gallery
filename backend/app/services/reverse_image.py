@@ -67,7 +67,16 @@ async def trace_image(media_path: str = "", source_link: str = "", image_url: st
                 r.raise_for_status()
                 data = r.json()
             if "error" in data:
-                raise RuntimeError(f"SerpAPI 返回错误：{data['error']}")
+                _err = str(data["error"])
+                if "hasn't returned any results" in _err or "no results" in _err.lower():
+                    # 正常空结果：Google 未收录/未找到该图匹配，非 key 故障，不触发轮换
+                    return {
+                        "results": [],
+                        "mode": "serpapi",
+                        "image_url": public_url,
+                        "warning": upload_note + " Google 反向识图未找到该图的匹配结果（可能为未收录图片，可尝试人工网页识图兜底）。",
+                    }
+                raise RuntimeError(f"SerpAPI 返回错误：{_err}")
             results = []
             items = data.get("image_results") or data.get("inline_images") or []
             for item in items[:8]:
