@@ -47,58 +47,66 @@ async def trace_image(media_path: str = "", source_link: str = "", image_url: st
             "或在线索提交时填写图片公开链接。"
         )
 
-    # 2) SerpAPI Google 识图（多 key 轮换：额度用尽的 key 自动跳过）
+    # 2) SerpAPI 反向识图（多引擎链 + 多 key 轮换）
+    #    引擎链：google_lens 精确匹配 → google_lens 视觉匹配 → google_reverse_image 兜底。
+    #    google_reverse_image 对部分图片会判定"无匹配"（而 Google 网页能搜到"外观匹配"），
+    #    google_lens(exact_matches/visual_matches) 覆盖更全（2026-09 实测精确匹配返回更丰富）。
     keys = settings.serpapi_keys
     if not keys:
         raise ReverseImageNotConfigured(
             "SerpAPI 未配置 api_key，无法反向识图。")
+    # (engine, 参数字典, 图片参数名)
+    ENGINE_CHAIN = [
+        ("google_lens", {"type": "exact_matches"}, "url"),
+        ("google_lens", {"type": "visual_matches"}, "url"),
+        ("google_reverse_image", {}, "image_url"),
+    ]
     last_err = None
     for key in keys:
-        try:
-            async with httpx.AsyncClient(timeout=35, trust_env=False) as client:
-                r = await client.get(
-                    "https://serpapi.com/search.json",
-                    params={
-                        "engine": "google_reverse_image",
-                        "image_url": public_url,
-                        "api_key": key,
-                    },
+        for engine, extra, img_param in ENGINE_CHAIN:
+            try:
+                params = {"engine": engine, img_param: public_url, "api_key": key, **extra}
+                async with httpx.AsyncClient(timeout=45, trust_env=False) as client:
+                    r = await client.get(
+                        "https://serpapi.com/search.json",
+                        params=params,
+                    )
+                    r.raise_for_status()
+                    data = r.json()
+                if "error" in data:
+                    _err = str(data["error"])
+                    # 无匹配结果：不是故障，继续尝试下一个引擎
+                    if ("hasn't returned any results" in _err or "no results" in _err.lower()):
+                        print(f"[reverse_image] {engine}({extra.get('type','')}) 无匹配，尝试下一引擎", flush=True)
+                        continue
+                    raise RuntimeError(f"SerpAPI 返回错误：{_err}")
+                items = (
+                    data.get("exact_matches")
+                    or data.get("visual_matches")
+                    or data.get("image_results")
+                    or data.get("inline_images")
+                    or []
                 )
-                r.raise_for_status()
-                data = r.json()
-            if "error" in data:
-                _err = str(data["error"])
-                if "hasn't returned any results" in _err or "no results" in _err.lower():
-                    # 正常空结果：Google 未收录/未找到该图匹配，非 key 故障，不触发轮换
-                    return {
-                        "results": [],
-                        "mode": "serpapi",
-                        "image_url": public_url,
-                        "warning": upload_note + " Google 反向识图未找到该图的匹配结果（可能为未收录图片，可尝试人工网页识图兜底）。",
-                    }
-                raise RuntimeError(f"SerpAPI 返回错误：{_err}")
-            results = []
-            items = data.get("image_results") or data.get("inline_images") or []
-            for item in items[:8]:
-                results.append({
-                    "engine": "SerpAPI Google",
-                    "matched_site": item.get("source", ""),
-                    "matched_title": item.get("title", ""),
-                    "published_date": "",
-                    "url": item.get("link", item.get("original", "")),
-                    "note": item.get("snippet", ""),
-                })
-            return {
-                "results": results,
-                "mode": "serpapi",
-                "image_url": public_url,
-                "warning": (
-                    upload_note if results else
-                    upload_note + " SerpAPI 未返回匹配结果，可尝试人工网页识图兜底。"
-                ),
-            }
-        except Exception as e:
-            last_err = e
-            print(f"[reverse_image] SerpAPI key({key[:8]}...) 调用失败：{e}，尝试下一个 key", flush=True)
-            continue
-    raise ReverseImageNotConfigured(f"SerpAPI 所有 key 均调用失败：{last_err}")
+                if not items:
+                    continue  # 空结果 → 下一引擎
+                results = []
+                for item in items[:8]:
+                    results.append({
+                        "engine": f"SerpAPI {engine}" + (f"({extra.get('type','')})" if extra else ""),
+                        "matched_site": item.get("source", ""),
+                        "matched_title": item.get("title", ""),
+                        "published_date": item.get("date", ""),
+                        "url": item.get("link", item.get("original", "")),
+                        "note": item.get("snippet", ""),
+                    })
+                return {
+                    "results": results,
+                    "mode": "serpapi",
+                    "image_url": public_url,
+                    "warning": upload_note,
+                }
+            except Exception as e:
+                last_err = e
+                print(f"[reverse_image] {engine}({extra.get('type','')}) key({key[:8]}...) 失败：{e}，尝试下一通道", flush=True)
+                continue
+    raise ReverseImageNotConfigured(f"SerpAPI 所有通道均未返回结果：{last_err}")
